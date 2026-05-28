@@ -24,8 +24,8 @@ class _BehaviorReportScreenState extends State<BehaviorReportScreen> {
   void initState() {
     super.initState();
     final state = AppStateManager();
-    _childName = state.children[state.selectedChildIndex.value]['name'];
-    _childGrade = state.children[state.selectedChildIndex.value]['grade'];
+    _childName = state.children.value[state.selectedChildIndex.value]['name'];
+    _childGrade = state.children.value[state.selectedChildIndex.value]['grade'];
   }
 
   @override
@@ -678,7 +678,7 @@ class _MonthlyReportContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -837,7 +837,7 @@ class _MonthlyWeekCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -863,7 +863,7 @@ class _MonthlyWeekCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
@@ -985,7 +985,7 @@ class _DailyReportContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -1051,7 +1051,7 @@ class _DailyReportContent extends StatelessWidget {
                 Container(
                   width: 200.w,
                   height: 2,
-                  color: const Color(0xFF1E293B).withOpacity(0.3),
+                  color: const Color(0xFF1E293B).withValues(alpha: 0.3),
                 ),
               ],
             ),
@@ -1240,7 +1240,7 @@ class _BehaviorItem extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
           decoration: BoxDecoration(
-            color: statusColor.withOpacity(0.1),
+            color: statusColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(4.r),
           ),
           child: Text(
@@ -1315,7 +1315,7 @@ class _EvaluationRow extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: Text(
@@ -1376,7 +1376,7 @@ class _WeeklyReportContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -1548,7 +1548,7 @@ class _WeeklyDayCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1573,7 +1573,7 @@ class _WeeklyDayCard extends StatelessWidget {
                 const Spacer(),
                 Icon(
                   negative == 'لا يوجد ملاحظات سلبية' ? Icons.star_rounded : Icons.trending_up_rounded,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   size: 20.sp,
                 ),
               ],
@@ -1758,7 +1758,7 @@ class _CircularIcon extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1851,7 +1851,7 @@ class _ReportTypeButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(30.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

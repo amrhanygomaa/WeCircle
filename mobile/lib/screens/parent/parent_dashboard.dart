@@ -238,44 +238,7 @@ class _HomeTab extends StatelessWidget {
   }
 }
 
-class _DashboardBanner extends StatelessWidget {
-  final Map<String, dynamic> selectedChild;
 
-  const _DashboardBanner({required this.selectedChild});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 70.h,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7367F0), Color(0xFF9E95F5)],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(40.r),
-          bottomRight: Radius.circular(40.r),
-        ),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            'ID: ${selectedChild['id']}',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _DashboardHeader extends StatelessWidget {
   // ويدجت ترويسة الصفحة (معزول)

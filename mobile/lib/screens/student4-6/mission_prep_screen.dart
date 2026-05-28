@@ -194,9 +194,9 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
       margin: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E3F).withOpacity(0.5),
+        color: const Color(0xFF1E1E3F).withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(25.r),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -226,7 +226,7 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
   }
 
   Widget _buildDivider() {
-    return Container(width: 1, height: 20.h, color: Colors.white.withOpacity(0.2));
+    return Container(width: 1, height: 20.h, color: Colors.white.withValues(alpha: 0.2));
   }
 
   Widget _buildWarningBar() {
@@ -234,9 +234,9 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
       margin: EdgeInsets.symmetric(horizontal: 24.w),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withOpacity(0.8),
+        color: const Color(0xFF0F172A).withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+        border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -261,10 +261,10 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
           height: 220.r,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.cyanAccent.withOpacity(0.3), width: 2),
+            border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.3), width: 2),
             boxShadow: [
               BoxShadow(
-                color: Colors.cyanAccent.withOpacity(0.1),
+                color: Colors.cyanAccent.withValues(alpha: 0.1),
                 blurRadius: 40,
                 spreadRadius: 10,
               ),
@@ -278,8 +278,8 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
             shape: BoxShape.circle,
             gradient: RadialGradient(
               colors: [
-                Colors.cyanAccent.withOpacity(0.4),
-                Colors.cyanAccent.withOpacity(0.1),
+                Colors.cyanAccent.withValues(alpha: 0.4),
+                Colors.cyanAccent.withValues(alpha: 0.1),
                 Colors.transparent,
               ],
             ),
@@ -323,19 +323,19 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.purple.withOpacity(0.4),
-                    Colors.purple.withOpacity(0.1),
+                    Colors.purple.withValues(alpha: 0.4),
+                    Colors.purple.withValues(alpha: 0.1),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(25.r),
                 border: Border.all(
-                  color: isSelected ? Colors.cyanAccent : Colors.white.withOpacity(0.1),
+                  color: isSelected ? Colors.cyanAccent : Colors.white.withValues(alpha: 0.1),
                   width: 2,
                 ),
                 boxShadow: isSelected ? [
-                  BoxShadow(color: Colors.cyanAccent.withOpacity(0.3), blurRadius: 10),
+                  BoxShadow(color: Colors.cyanAccent.withValues(alpha: 0.3), blurRadius: 10),
                 ] : [],
               ),
               child: Image.file(
@@ -378,7 +378,7 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
               width: random.nextDouble() * 2 + 0.5,
               height: random.nextDouble() * 2 + 0.5,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(random.nextDouble() * 0.7 + 0.3),
+                color: Colors.white.withValues(alpha: random.nextDouble() * 0.7 + 0.3),
                 shape: BoxShape.circle,
               ),
             ),

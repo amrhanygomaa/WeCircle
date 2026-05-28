@@ -14,17 +14,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../app_theme.dart';
 import '../../widgets/wesal_background.dart';
 
 class BehavioralConsultationScreen extends StatefulWidget {
   const BehavioralConsultationScreen({super.key});
 
   @override
-  State<BehavioralConsultationScreen> createState() => _BehavioralConsultationScreenState();
+  State<BehavioralConsultationScreen> createState() =>
+      _BehavioralConsultationScreenState();
 }
 
-class _BehavioralConsultationScreenState extends State<BehavioralConsultationScreen> {
+class _BehavioralConsultationScreenState
+    extends State<BehavioralConsultationScreen> {
   static const Color primaryBlue = Color(0xFF6366F1);
   static const Color primaryPurple = Color(0xFF9333EA);
 
@@ -37,12 +38,25 @@ class _BehavioralConsultationScreenState extends State<BehavioralConsultationScr
       children: [
         Icon(icon, size: 18.sp, color: primaryPurple),
         SizedBox(width: 10.w),
-        Text(label, style: TextStyle(fontFamily: 'Cairo', fontSize: 13.sp, color: Colors.grey[700], fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13.sp,
+            color: Colors.grey[700],
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         SizedBox(width: 8.w),
         Expanded(
           child: Text(
             value,
-            style: TextStyle(fontFamily: 'Cairo', fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black87),
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
           ),
         ),
       ],
@@ -122,7 +136,11 @@ class _BehavioralConsultationScreenState extends State<BehavioralConsultationScr
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.keyboard_arrow_right_rounded, color: primaryBlue, size: 32.sp),
+              icon: Icon(
+                Icons.keyboard_arrow_right_rounded,
+                color: primaryBlue,
+                size: 32.sp,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             title: Row(
@@ -140,7 +158,7 @@ class _BehavioralConsultationScreenState extends State<BehavioralConsultationScr
                       fontFamily: 'Cairo',
                       shadows: [
                         Shadow(
-                          color: primaryBlue.withOpacity(0.2),
+                          color: primaryBlue.withValues(alpha: 0.2),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
@@ -157,12 +175,25 @@ class _BehavioralConsultationScreenState extends State<BehavioralConsultationScr
                         builder: (context) => Directionality(
                           textDirection: TextDirection.rtl,
                           child: AlertDialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.r)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25.r),
+                            ),
                             title: Column(
                               children: [
-                                Icon(Icons.event_available_rounded, color: primaryBlue, size: 40.sp),
+                                Icon(
+                                  Icons.event_available_rounded,
+                                  color: primaryBlue,
+                                  size: 40.sp,
+                                ),
                                 SizedBox(height: 10.h),
-                                Text('تفاصيل حجزك', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold, color: primaryBlue)),
+                                Text(
+                                  'تفاصيل حجزك',
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontWeight: FontWeight.bold,
+                                    color: primaryBlue,
+                                  ),
+                                ),
                               ],
                             ),
                             content: Column(
@@ -174,17 +205,35 @@ class _BehavioralConsultationScreenState extends State<BehavioralConsultationScr
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(20.r),
                                     boxShadow: [
-                                      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.05),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
                                     ],
-                                    border: Border.all(color: primaryBlue.withOpacity(0.1)),
+                                    border: Border.all(
+                                      color: primaryBlue.withValues(alpha: 0.1),
+                                    ),
                                   ),
                                   child: Column(
                                     children: [
-                                      _buildDetailRow(Icons.person_pin_rounded, 'الطبيب:', _activeBooking!['doctor']!),
+                                      _buildDetailRow(
+                                        Icons.person_pin_rounded,
+                                        'الطبيب:',
+                                        _activeBooking!['doctor']!,
+                                      ),
                                       SizedBox(height: 15.h),
-                                      _buildDetailRow(Icons.calendar_month_rounded, 'اليوم:', _activeBooking!['day']!),
+                                      _buildDetailRow(
+                                        Icons.calendar_month_rounded,
+                                        'اليوم:',
+                                        _activeBooking!['day']!,
+                                      ),
                                       SizedBox(height: 15.h),
-                                      _buildDetailRow(Icons.access_time_filled_rounded, 'الموعد:', '${_activeBooking!['period']} (${_activeBooking!['time']})'),
+                                      _buildDetailRow(
+                                        Icons.access_time_filled_rounded,
+                                        'الموعد:',
+                                        '${_activeBooking!['period']} (${_activeBooking!['time']})',
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -192,10 +241,16 @@ class _BehavioralConsultationScreenState extends State<BehavioralConsultationScr
                                 Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(colors: [primaryBlue, primaryPurple]),
+                                    gradient: const LinearGradient(
+                                      colors: [primaryBlue, primaryPurple],
+                                    ),
                                     borderRadius: BorderRadius.circular(15.r),
                                     boxShadow: [
-                                      BoxShadow(color: primaryBlue.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+                                      BoxShadow(
+                                        color: primaryBlue.withValues(alpha: 0.3),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 6),
+                                      ),
                                     ],
                                   ),
                                   child: ElevatedButton(
@@ -203,10 +258,24 @@ class _BehavioralConsultationScreenState extends State<BehavioralConsultationScr
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.transparent,
                                       shadowColor: Colors.transparent,
-                                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 12.h,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          15.r,
+                                        ),
+                                      ),
                                     ),
-                                    child: Text('إغلاق', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14.sp)),
+                                    child: Text(
+                                      'إغلاق',
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        fontSize: 14.sp,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -216,27 +285,37 @@ class _BehavioralConsultationScreenState extends State<BehavioralConsultationScr
                       );
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 18.w,
+                        vertical: 8.h,
+                      ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [primaryBlue, primaryPurple.withOpacity(0.8)],
+                          colors: [primaryBlue, primaryPurple.withValues(alpha: 0.8)],
                           begin: Alignment.topRight,
                           end: Alignment.bottomLeft,
                         ),
                         borderRadius: BorderRadius.circular(30.r),
                         boxShadow: [
                           BoxShadow(
-                            color: primaryPurple.withOpacity(0.2),
+                            color: primaryPurple.withValues(alpha: 0.2),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
                         ],
-                        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1.5,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.check_circle_rounded, color: Colors.white, size: 16.sp),
+                          Icon(
+                            Icons.check_circle_rounded,
+                            color: Colors.white,
+                            size: 16.sp,
+                          ),
                           SizedBox(width: 8.w),
                           Text(
                             'حجز مؤكد',
@@ -300,7 +379,7 @@ class _DoctorCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: primaryBlue.withOpacity(0.08),
+            color: primaryBlue.withValues(alpha: 0.08),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
@@ -315,10 +394,16 @@ class _DoctorCard extends StatelessWidget {
                 width: 50.r,
                 height: 50.r,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [primaryBlue, primaryPurple]),
+                  gradient: LinearGradient(
+                    colors: [primaryBlue, primaryPurple],
+                  ),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.person_pin_rounded, color: Colors.white, size: 28.sp),
+                child: Icon(
+                  Icons.person_pin_rounded,
+                  color: Colors.white,
+                  size: 28.sp,
+                ),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -349,18 +434,20 @@ class _DoctorCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12.h),
-          Divider(color: Colors.grey.withOpacity(0.1)),
+          Divider(color: Colors.grey.withValues(alpha: 0.1)),
           SizedBox(height: 8.h),
           _buildInfoRow(Icons.history_rounded, doctor['experience']!),
           SizedBox(height: 6.h),
           _buildInfoRow(Icons.access_time_rounded, doctor['availability']!),
           SizedBox(height: 16.h),
-          
+
           Column(
             children: [
               Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [primaryBlue, primaryPurple]),
+                  gradient: LinearGradient(
+                    colors: [primaryBlue, primaryPurple],
+                  ),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: ElevatedButton(
@@ -369,15 +456,29 @@ class _DoctorCard extends StatelessWidget {
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
                     minimumSize: Size(double.infinity, 42.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                     elevation: 0,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.phone_in_talk_rounded, size: 16.sp, color: Colors.white),
+                      Icon(
+                        Icons.phone_in_talk_rounded,
+                        size: 16.sp,
+                        color: Colors.white,
+                      ),
                       SizedBox(width: 8.w),
-                      Text('اتصال هاتفي', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: Colors.white)),
+                      Text(
+                        'اتصال هاتفي',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Cairo',
+                          color: Colors.white,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -391,14 +492,28 @@ class _DoctorCard extends StatelessWidget {
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: primaryBlue, width: 1.5),
                         minimumSize: Size(double.infinity, 42.h),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.chat_bubble_outline_rounded, size: 16.sp, color: primaryBlue),
+                          Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 16.sp,
+                            color: primaryBlue,
+                          ),
                           SizedBox(width: 8.w),
-                          Text('دردشة', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: primaryBlue)),
+                          Text(
+                            'دردشة',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Cairo',
+                              color: primaryBlue,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -410,14 +525,28 @@ class _DoctorCard extends StatelessWidget {
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: primaryPurple, width: 1.5),
                         minimumSize: Size(double.infinity, 42.h),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.calendar_month_rounded, size: 16.sp, color: primaryPurple),
+                          Icon(
+                            Icons.calendar_month_rounded,
+                            size: 16.sp,
+                            color: primaryPurple,
+                          ),
                           SizedBox(width: 8.w),
-                          Text('حجز موعد', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: primaryPurple)),
+                          Text(
+                            'حجز موعد',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Cairo',
+                              color: primaryPurple,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -439,7 +568,12 @@ class _DoctorCard extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(fontSize: 12.sp, color: const Color(0xFF475569), fontFamily: 'Cairo', fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: const Color(0xFF475569),
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -476,8 +610,22 @@ class _DoctorChatScreenState extends State<DoctorChatScreen> {
               gradient: LinearGradient(colors: [primaryBlue, primaryPurple]),
             ),
           ),
-          title: Text(widget.doctorName, style: TextStyle(fontFamily: 'Cairo', fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)),
-          leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white), onPressed: () => Navigator.pop(context)),
+          title: Text(
+            widget.doctorName,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
         body: Column(
           children: [
@@ -489,18 +637,32 @@ class _DoctorChatScreenState extends State<DoctorChatScreen> {
                 itemBuilder: (context, index) {
                   final msg = _messages[index];
                   return Align(
-                    alignment: msg['isMe'] ? Alignment.centerLeft : Alignment.centerRight,
+                    alignment: msg['isMe']
+                        ? Alignment.centerLeft
+                        : Alignment.centerRight,
                     child: Container(
                       margin: EdgeInsets.only(bottom: 12.h),
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 10.h,
+                      ),
                       decoration: BoxDecoration(
-                        gradient: msg['isMe'] ? const LinearGradient(colors: [primaryBlue, primaryPurple]) : null,
+                        gradient: msg['isMe']
+                            ? const LinearGradient(
+                                colors: [primaryBlue, primaryPurple],
+                              )
+                            : null,
                         color: msg['isMe'] ? null : Colors.grey[200],
                         borderRadius: BorderRadius.circular(15.r),
                       ),
                       child: Text(
                         msg['text'],
-                        style: TextStyle(color: msg['isMe'] ? Colors.white : Colors.black87, fontFamily: 'Cairo', fontSize: 14.sp, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: msg['isMe'] ? Colors.white : Colors.black87,
+                          fontFamily: 'Cairo',
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   );
@@ -515,11 +677,21 @@ class _DoctorChatScreenState extends State<DoctorChatScreen> {
                   Expanded(
                     child: TextField(
                       controller: _controller,
-                      style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w600,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'اكتب رسالتك هنا...',
-                        hintStyle: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp, fontWeight: FontWeight.w600),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.r), borderSide: BorderSide.none),
+                        hintStyle: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30.r),
+                          borderSide: BorderSide.none,
+                        ),
                         filled: true,
                         fillColor: Colors.grey[100],
                         contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -531,17 +703,25 @@ class _DoctorChatScreenState extends State<DoctorChatScreen> {
                     onTap: () {
                       if (_controller.text.isEmpty) return;
                       setState(() {
-                        _messages.insert(0, {'text': _controller.text, 'isMe': true});
+                        _messages.insert(0, {
+                          'text': _controller.text,
+                          'isMe': true,
+                        });
                         _controller.clear();
                       });
                     },
                     child: Container(
                       padding: EdgeInsets.all(12.r),
                       decoration: const BoxDecoration(
-                        gradient: LinearGradient(colors: [primaryBlue, primaryPurple]),
+                        gradient: LinearGradient(
+                          colors: [primaryBlue, primaryPurple],
+                        ),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.send_rounded, color: Colors.white),
+                      child: const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
@@ -567,11 +747,31 @@ class _DoctorBookingScreenState extends State<DoctorBookingScreen> {
   int _selectedDayIndex = 0;
   String? _selectedTime;
 
-  final List<String> _days = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
-  final List<String> _dates = ['20 مايو', '21 مايو', '22 مايو', '23 مايو', '24 مايو', '25 مايو'];
+  final List<String> _days = [
+    'السبت',
+    'الأحد',
+    'الاثنين',
+    'الثلاثاء',
+    'الأربعاء',
+    'الخميس',
+  ];
+  final List<String> _dates = [
+    '20 مايو',
+    '21 مايو',
+    '22 مايو',
+    '23 مايو',
+    '24 مايو',
+    '25 مايو',
+  ];
 
   final List<String> _morningSlots = ['09:00 ص', '10:00 ص', '11:00 ص'];
-  final List<String> _eveningSlots = ['04:00 م', '05:00 م', '06:00 م', '07:00 م', '08:00 م'];
+  final List<String> _eveningSlots = [
+    '04:00 م',
+    '05:00 م',
+    '06:00 م',
+    '07:00 م',
+    '08:00 م',
+  ];
 
   static const Color primaryBlue = Color(0xFF6366F1);
   static const Color primaryPurple = Color(0xFF9333EA);
@@ -588,8 +788,22 @@ class _DoctorBookingScreenState extends State<DoctorBookingScreen> {
               gradient: LinearGradient(colors: [primaryBlue, primaryPurple]),
             ),
           ),
-          title: Text('حجز موعد الاستشارة', style: TextStyle(fontFamily: 'Cairo', fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)),
-          leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white), onPressed: () => Navigator.pop(context)),
+          title: Text(
+            'حجز موعد الاستشارة',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
           elevation: 0,
         ),
         body: Column(
@@ -600,7 +814,15 @@ class _DoctorBookingScreenState extends State<DoctorBookingScreen> {
                 children: [
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Text('اختر اليوم المفضل:', style: TextStyle(fontFamily: 'Cairo', fontSize: 18.sp, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
+                    child: Text(
+                      'اختر اليوم المفضل:',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
                   ),
                   SizedBox(height: 16.h),
                   SizedBox(
@@ -612,18 +834,25 @@ class _DoctorBookingScreenState extends State<DoctorBookingScreen> {
                       itemBuilder: (context, index) {
                         bool isSelected = _selectedDayIndex == index;
                         return GestureDetector(
-                          onTap: () => setState(() => _selectedDayIndex = index),
+                          onTap: () =>
+                              setState(() => _selectedDayIndex = index),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
                             width: 75.w,
                             margin: EdgeInsets.symmetric(horizontal: 8.w),
                             decoration: BoxDecoration(
-                              gradient: isSelected ? const LinearGradient(colors: [primaryBlue, primaryPurple]) : null,
+                              gradient: isSelected
+                                  ? const LinearGradient(
+                                      colors: [primaryBlue, primaryPurple],
+                                    )
+                                  : null,
                               color: isSelected ? null : Colors.white,
                               borderRadius: BorderRadius.circular(20.r),
                               boxShadow: [
                                 BoxShadow(
-                                  color: isSelected ? primaryBlue.withOpacity(0.3) : Colors.black.withOpacity(0.03),
+                                  color: isSelected
+                                      ? primaryBlue.withValues(alpha: 0.3)
+                                      : Colors.black.withValues(alpha: 0.03),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),
@@ -632,9 +861,29 @@ class _DoctorBookingScreenState extends State<DoctorBookingScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(_days[index], style: TextStyle(fontFamily: 'Cairo', fontSize: 13.sp, color: isSelected ? Colors.white : const Color(0xFF1E293B), fontWeight: FontWeight.bold)),
+                                Text(
+                                  _days[index],
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 13.sp,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : const Color(0xFF1E293B),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 SizedBox(height: 4.h),
-                                Text(_dates[index], style: TextStyle(fontFamily: 'Cairo', fontSize: 11.sp, color: isSelected ? Colors.white.withOpacity(0.8) : const Color(0xFF64748B), fontWeight: FontWeight.w600)),
+                                Text(
+                                  _dates[index],
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 11.sp,
+                                    color: isSelected
+                                        ? Colors.white.withValues(alpha: 0.8)
+                                        : const Color(0xFF64748B),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -642,12 +891,20 @@ class _DoctorBookingScreenState extends State<DoctorBookingScreen> {
                       },
                     ),
                   ),
-                  
+
                   SizedBox(height: 32.h),
 
-                  _buildTimeSection('الفترة الصباحية', _morningSlots, Icons.wb_sunny_rounded),
+                  _buildTimeSection(
+                    'الفترة الصباحية',
+                    _morningSlots,
+                    Icons.wb_sunny_rounded,
+                  ),
                   SizedBox(height: 24.h),
-                  _buildTimeSection('الفترة المسائية', _eveningSlots, Icons.nights_stay_rounded),
+                  _buildTimeSection(
+                    'الفترة المسائية',
+                    _eveningSlots,
+                    Icons.nights_stay_rounded,
+                  ),
                 ],
               ),
             ),
@@ -657,96 +914,166 @@ class _DoctorBookingScreenState extends State<DoctorBookingScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
               ),
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: _selectedTime != null ? const LinearGradient(colors: [primaryBlue, primaryPurple]) : null,
+                  gradient: _selectedTime != null
+                      ? const LinearGradient(
+                          colors: [primaryBlue, primaryPurple],
+                        )
+                      : null,
                   color: _selectedTime == null ? Colors.grey[300] : null,
                   borderRadius: BorderRadius.circular(15.r),
                 ),
                 child: ElevatedButton(
-                  onPressed: _selectedTime == null ? null : () {
-                    String period = _morningSlots.contains(_selectedTime) ? "صباحية" : "مسائية";
-                    showDialog(
-                      context: context,
-                      builder: (context) => Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: AlertDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.r)),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(15.r),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.1),
-                                  shape: BoxShape.circle,
+                  onPressed: _selectedTime == null
+                      ? null
+                      : () {
+                          String period = _morningSlots.contains(_selectedTime)
+                              ? "صباحية"
+                              : "مسائية";
+                          showDialog(
+                            context: context,
+                            builder: (context) => Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25.r),
                                 ),
-                                child: Icon(Icons.check_circle_rounded, color: Colors.green, size: 50.sp),
-                              ),
-                              SizedBox(height: 20.h),
-                              Text(
-                                'تم تأكيد الحجز بنجاح',
-                                style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold, fontSize: 18.sp, color: primaryBlue),
-                              ),
-                              SizedBox(height: 16.h),
-                              Container(
-                                padding: EdgeInsets.all(16.r),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[50],
-                                  borderRadius: BorderRadius.circular(15.r),
-                                  border: Border.all(color: Colors.grey[200]!),
-                                ),
-                                child: Column(
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    _buildDialogRow(Icons.person_outline_rounded, 'الطبيب:', widget.doctorName),
-                                    SizedBox(height: 8.h),
-                                    _buildDialogRow(Icons.calendar_today_rounded, 'اليوم:', _days[_selectedDayIndex]),
-                                    SizedBox(height: 8.h),
-                                    _buildDialogRow(Icons.access_time_rounded, 'الموعد:', '$period ($_selectedTime)'),
+                                    Container(
+                                      padding: EdgeInsets.all(15.r),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.withValues(alpha: 0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.check_circle_rounded,
+                                        color: Colors.green,
+                                        size: 50.sp,
+                                      ),
+                                    ),
+                                    SizedBox(height: 20.h),
+                                    Text(
+                                      'تم تأكيد الحجز بنجاح',
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18.sp,
+                                        color: primaryBlue,
+                                      ),
+                                    ),
+                                    SizedBox(height: 16.h),
+                                    Container(
+                                      padding: EdgeInsets.all(16.r),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[50],
+                                        borderRadius: BorderRadius.circular(
+                                          15.r,
+                                        ),
+                                        border: Border.all(
+                                          color: Colors.grey[200]!,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          _buildDialogRow(
+                                            Icons.person_outline_rounded,
+                                            'الطبيب:',
+                                            widget.doctorName,
+                                          ),
+                                          SizedBox(height: 8.h),
+                                          _buildDialogRow(
+                                            Icons.calendar_today_rounded,
+                                            'اليوم:',
+                                            _days[_selectedDayIndex],
+                                          ),
+                                          SizedBox(height: 8.h),
+                                          _buildDialogRow(
+                                            Icons.access_time_rounded,
+                                            'الموعد:',
+                                            '$period ($_selectedTime)',
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 24.h),
+                                    Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [primaryBlue, primaryPurple],
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          12.r,
+                                        ),
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(
+                                            context,
+                                          ); // إغلاق الديالوج
+                                          Navigator.pop(context, {
+                                            'doctor': widget.doctorName,
+                                            'day': _days[_selectedDayIndex],
+                                            'time': _selectedTime!,
+                                            'period': period,
+                                          }); // العودة مع البيانات
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 12.h,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12.r,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'حسناً',
+                                          style: TextStyle(
+                                            fontFamily: 'Cairo',
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 24.h),
-                              Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(colors: [primaryBlue, primaryPurple]),
-                                  borderRadius: BorderRadius.circular(12.r),
-                                ),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(context); // إغلاق الديالوج
-                                    Navigator.pop(context, {
-                                      'doctor': widget.doctorName,
-                                      'day': _days[_selectedDayIndex],
-                                      'time': _selectedTime!,
-                                      'period': period
-                                    }); // العودة مع البيانات
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
-                                    padding: EdgeInsets.symmetric(vertical: 12.h),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                                  ),
-                                  child: Text('حسناً', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold, color: Colors.white)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+                            ),
+                          );
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
                     minimumSize: Size(double.infinity, 55.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.r),
+                    ),
                   ),
-                  child: Text('تأكيد الحجز', style: TextStyle(fontFamily: 'Cairo', fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+                  child: Text(
+                    'تأكيد الحجز',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -766,7 +1093,15 @@ class _DoctorBookingScreenState extends State<DoctorBookingScreen> {
             children: [
               Icon(icon, size: 20.sp, color: primaryPurple),
               SizedBox(width: 8.w),
-              Text(title, style: TextStyle(fontFamily: 'Cairo', fontSize: 16.sp, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
+              Text(
+                title,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1E293B),
+                ),
+              ),
             ],
           ),
         ),
@@ -782,15 +1117,30 @@ class _DoctorBookingScreenState extends State<DoctorBookingScreen> {
                 onTap: () => setState(() => _selectedTime = time),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 12.h,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected ? primaryBlue.withOpacity(0.1) : Colors.white,
-                    border: Border.all(color: isSelected ? primaryBlue : Colors.grey.withOpacity(0.2), width: 1.5),
+                    color: isSelected
+                        ? primaryBlue.withValues(alpha: 0.1)
+                        : Colors.white,
+                    border: Border.all(
+                      color: isSelected
+                          ? primaryBlue
+                          : Colors.grey.withValues(alpha: 0.2),
+                      width: 1.5,
+                    ),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
                     time,
-                    style: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp, color: isSelected ? primaryBlue : const Color(0xFF1E293B), fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 14.sp,
+                      color: isSelected ? primaryBlue : const Color(0xFF1E293B),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               );
@@ -806,12 +1156,25 @@ class _DoctorBookingScreenState extends State<DoctorBookingScreen> {
       children: [
         Icon(icon, size: 18.sp, color: const Color(0xFF64748B)),
         SizedBox(width: 8.w),
-        Text(label, style: TextStyle(fontFamily: 'Cairo', fontSize: 13.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13.sp,
+            color: const Color(0xFF64748B),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         SizedBox(width: 4.w),
         Expanded(
           child: Text(
             value,
-            style: TextStyle(fontFamily: 'Cairo', fontSize: 13.sp, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1E293B),
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),

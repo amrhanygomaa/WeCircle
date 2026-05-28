@@ -110,7 +110,7 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20.r),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15)],
+                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15)],
                           ),
                           child: Column(
                             children: [
@@ -166,9 +166,9 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
           duration: const Duration(milliseconds: 200),
           padding: EdgeInsets.symmetric(vertical: 12.h),
           decoration: BoxDecoration(
-            color: isSelected ? primaryPurple : Colors.white.withOpacity(0.9),
+            color: isSelected ? primaryPurple : Colors.white.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(16.r),
-            boxShadow: isSelected ? [BoxShadow(color: primaryPurple.withOpacity(0.3), blurRadius: 10)] : [],
+            boxShadow: isSelected ? [BoxShadow(color: primaryPurple.withValues(alpha: 0.3), blurRadius: 10)] : [],
           ),
           child: Column(
             children: [
@@ -304,7 +304,6 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
     return Column(
       children: [
         ...dailyEntries.asMap().entries.map((entry) {
-          int idx = entry.key;
           var data = entry.value;
           return Container(
             margin: EdgeInsets.only(bottom: 16.h),
@@ -434,7 +433,7 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
         decoration: BoxDecoration(
-          color: (isPos ? positiveColor : alertColor).withOpacity(0.1),
+          color: (isPos ? positiveColor : alertColor).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(6.r),
           border: Border.all(color: isPos ? positiveColor : alertColor),
         ),
@@ -462,7 +461,7 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -5))],
       ),
       child: Row(
         children: [
@@ -486,7 +485,7 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [BoxShadow(color: color.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6))],
+          boxShadow: [BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6))],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -559,7 +558,7 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 20)],
       ),
       child: Column(
         children: [
@@ -701,7 +700,7 @@ class _BehaviorItemPreview extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Text(title, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), fontFamily: 'Cairo')),
-          Container(padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h), decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(4.r)), child: Text(status, style: TextStyle(fontSize: 10.sp, color: color, fontWeight: FontWeight.bold, fontFamily: 'Cairo'))),
+          Container(padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h), decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4.r)), child: Text(status, style: TextStyle(fontSize: 10.sp, color: color, fontWeight: FontWeight.bold, fontFamily: 'Cairo'))),
         ]),
         SizedBox(height: 8.h),
         Text(desc, style: TextStyle(fontSize: 13.sp, color: Color(0xFF334155), fontFamily: 'Cairo', height: 1.5)),
@@ -754,7 +753,7 @@ class _MonthlyCardPreview extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Text(week, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), fontFamily: 'Cairo')),
-          Container(padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h), decoration: BoxDecoration(color: Color(0xFF4F46E5).withOpacity(0.1), borderRadius: BorderRadius.circular(20.r)), child: Text(imp, style: TextStyle(fontSize: 10.sp, color: Color(0xFF4F46E5), fontWeight: FontWeight.w900, fontFamily: 'Cairo'))),
+          Container(padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h), decoration: BoxDecoration(color: Color(0xFF4F46E5).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20.r)), child: Text(imp, style: TextStyle(fontSize: 10.sp, color: Color(0xFF4F46E5), fontWeight: FontWeight.w900, fontFamily: 'Cairo'))),
         ]),
         SizedBox(height: 12.h),
         if (pos.isNotEmpty) Padding(padding: EdgeInsets.only(bottom: 6.h), child: Text('• الإيجابيات: $pos', style: TextStyle(fontSize: 12.sp, color: Color(0xFF334155), fontFamily: 'Cairo'))),
