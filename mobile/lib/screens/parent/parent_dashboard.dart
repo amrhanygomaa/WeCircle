@@ -168,7 +168,7 @@ class _HomeTab extends StatelessWidget {
       builder: (context, childIdx, _) {
         // بناء الواجهة عند التغيير
         final selectedChild =
-            AppStateManager().children[childIdx]; // جلب بيانات الطفل المختار
+            AppStateManager().children.value[childIdx]; // جلب بيانات الطفل المختار
 
         return SingleChildScrollView(
           // تمكين التمرير
@@ -403,7 +403,7 @@ class _DashboardHeader extends StatelessWidget {
                   ),
                 ),
                 itemBuilder: (context) =>
-                    AppStateManager().children.asMap().entries.map((entry) {
+                    AppStateManager().children.value.asMap().entries.map((entry) {
                       final child = entry.value;
                       return PopupMenuItem<int>(
                         value: entry.key,

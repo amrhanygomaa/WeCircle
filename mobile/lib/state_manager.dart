@@ -1,12 +1,14 @@
 // مدير الحالة (State Manager) للتحكم في بيانات التطبيق العامة كحساب المستخدم واختيار الابن النشط
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'api_service.dart';
 
 class AppStateManager {
   static final AppStateManager _instance = AppStateManager._internal();
   factory AppStateManager() => _instance;
   AppStateManager._internal() {
     loadSettings();
+    loadChildrenFromAWS();
   }
 
   // Persistance Keys
@@ -135,55 +137,28 @@ class AppStateManager {
     }
   }
 
-  // Mock Children Data
-  final List<Map<String, dynamic>> children = [
-    {
-      'id': 'student_adham',
-      'name': 'أدهم',
-      'grade': 'الصف الخامس',
-      'image': 'https://i.pravatar.cc/150?u=adham',
-      'color': const Color(0xFF6366F1),
-      'attendance': '98%',
-      'homeworkCount': '3',
-      'gpa': 'A-',
-      'statusMessage': 'أدهم في المدرسة حالياً',
-      'arrivalTime': '07:52 ص',
-      'teachers': ['مدرس العربي', 'مدرس الانجلش', 'مدرس الرياضة'],
-    },
-    {
-      'id': 'student_kareem',
-      'name': 'كريم',
-      'grade': 'الصف الثالث - ب',
-      'image': 'https://i.pravatar.cc/150?u=kareem',
-      'color': const Color(0xFFEC4899),
-      'attendance': '94%',
-      'homeworkCount': '1',
-      'gpa': 'B+',
-      'statusMessage': 'كريم غادر المدرسة الآن',
-      'arrivalTime': '08:10 ص',
-      'teachers': ['مدرس العلوم', 'مدرس العربي'],
-    },
-    {
-      'id': 'student_mariam',
-      'name': 'مريم',
-      'grade': 'التمهيدي - أ',
-      'image': 'https://i.pravatar.cc/150?u=mariam',
-      'color': const Color(0xFF10B981),
-      'attendance': '100%',
-      'homeworkCount': '0',
-      'gpa': 'A+',
-      'statusMessage': 'مريم في الفصل حالياً',
-      'arrivalTime': '07:45 ص',
-      'teachers': ['أستاذة رنا', 'أستاذة أمل'],
-    },
-  ];
+  // Dynamic Children Data from AWS Backend
+  final ValueNotifier<List<Map<String, dynamic>>> children = ValueNotifier<List<Map<String, dynamic>>>([]);
+
+  Future<void> loadChildrenFromAWS() async {
+    try {
+      final fetchedChildren = await ApiService.fetchChildren();
+      if (fetchedChildren.isNotEmpty) {
+        children.value = fetchedChildren;
+      }
+    } catch (e) {
+      print("Failed to fetch children from AWS: $e");
+    }
+  }
 
   void setSelectedChild(int index) {
     selectedChildIndex.value = index;
   }
 
   void addChild(Map<String, dynamic> child) {
-    children.add(child);
+    final currentList = List<Map<String, dynamic>>.from(children.value);
+    currentList.add(child);
+    children.value = currentList;
   }
 
   void submitAdhamHomework() {
