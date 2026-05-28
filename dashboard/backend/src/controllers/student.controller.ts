@@ -405,7 +405,7 @@ export const studentMobileAiChat = asyncHandler(async (req: Request, res: Respon
   }
 
   const student = await prisma.student.findFirst({
-    where: { id: studentId, schoolId },
+    where: { id: studentId, schoolId: schoolId as string },
     select: { nameAr: true, points: true },
   });
 
