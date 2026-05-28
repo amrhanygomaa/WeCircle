@@ -3,9 +3,11 @@
 This project follows Domain-Driven Design (DDD) to keep the codebase modular, scalable, and friendly to AI agents.
 
 ## What is a Module?
+
 A module represents a specific business domain. It encapsulates everything related to that domain.
 
 ### Backend Module Structure (`dashboard/backend/src/modules/`)
+
 ```
 src/modules/student/
   ├── student.controller.ts  (Express handlers)
@@ -15,6 +17,7 @@ src/modules/student/
 ```
 
 ### Frontend Module Structure (`dashboard/frontend/src/modules/`)
+
 ```
 src/modules/student/
   ├── components/            (UI components specific to students)
@@ -24,7 +27,9 @@ src/modules/student/
 ```
 
 ## Migration Guide for AI Agents
+
 If you need to add a new feature (e.g. `Library`):
+
 1. Create `dashboard/backend/src/modules/library/`.
 2. Define the schema in `prisma/schema.prisma` and run `npx prisma generate`.
 3. Create `library.routes.ts` and `library.controller.ts`.

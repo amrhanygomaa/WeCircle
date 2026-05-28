@@ -1,13 +1,13 @@
-import axios from "axios";
+import axios, { InternalAxiosRequestConfig } from "axios";
 import { ENV } from "../config/env";
-import { supabase } from "../../lib/supabase"; // Note: supabase auth abstraction later
+import { supabase } from "../auth/supabase"; // Note: supabase auth abstraction later
 
 export const api = axios.create({
   baseURL: ENV.API_URL,
 });
 
 // Attach Supabase auth token and disable browser caching to keep data 100% fresh
-api.interceptors.request.use(async (config) => {
+api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   if (token) {
