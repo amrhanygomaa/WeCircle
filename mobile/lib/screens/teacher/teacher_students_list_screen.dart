@@ -13,7 +13,7 @@
 
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
-import '../../app_theme.dart'; // استيراد ثيم التطبيق الموحد
+import 'package:wesal/core/theme/app_theme.dart'; // استيراد ثيم التطبيق الموحد
 import 'teacher_attendance_screen.dart'; // استيراد شاشة تسجيل الحضور
 import 'teacher_behavior_report_screen.dart'; // استيراد شاشة تقارير السلوك
 

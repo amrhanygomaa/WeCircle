@@ -14,7 +14,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../state_manager.dart';
+import 'package:wesal/core/state/state_manager.dart';
 import '../../widgets/student1-3/animated_space_background.dart';
 import '../../widgets/student1-3/galaxy_header.dart';
 import '../../widgets/student1-3/hero_mission_card.dart';

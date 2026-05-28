@@ -13,7 +13,7 @@
 
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
-import '../../app_theme.dart'; // استيراد ثيم التطبيق
+import 'package:wesal/core/theme/app_theme.dart'; // استيراد ثيم التطبيق
 import '../../widgets/wesal_background.dart';
 import '../../services/responsive_helper.dart'; // استيراد مساعد الاستجابة
 import 'tip_detail_screen.dart'; // استيراد شاشة تفاصيل النصيحة

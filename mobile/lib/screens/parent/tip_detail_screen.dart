@@ -13,7 +13,7 @@
 
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
-import '../../app_theme.dart'; // استيراد ثيم التطبيق
+import 'package:wesal/core/theme/app_theme.dart'; // استيراد ثيم التطبيق
 import '../../widgets/wesal_background.dart';
 
 class TipDetailScreen extends StatelessWidget { // تعريف كلاس شاشة تفاصيل النصيحة كـ StatelessWidget

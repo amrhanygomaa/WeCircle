@@ -14,7 +14,7 @@
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية
 import 'package:flutter/services.dart'; // استيراد خدمات النظام (لوحة المفاتيح)
 import 'package:flutter_animate/flutter_animate.dart'; // استيراد مكتبة الحركات
-import '../state_manager.dart';
+import 'package:wesal/core/state/state_manager.dart';
 
 class LoginScreen extends StatefulWidget { // تعريف كلاس شاشة تسجيل الدخول
   const LoginScreen({super.key}); // مشيد الكلاس

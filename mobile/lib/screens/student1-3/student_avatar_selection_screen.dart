@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:math' as math;
-import '../../app_theme.dart';
-import '../../state_manager.dart';
+import 'package:wesal/core/theme/app_theme.dart';
+import 'package:wesal/core/state/state_manager.dart';
 import '../../widgets/student1-3/animated_space_background.dart';
 
 class StudentAvatarSelectionScreen extends StatefulWidget {

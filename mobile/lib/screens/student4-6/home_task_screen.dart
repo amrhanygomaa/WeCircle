@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../app_theme.dart';
+import 'package:wesal/core/theme/app_theme.dart';
 
 class HomeTaskScreen extends StatefulWidget {
   const HomeTaskScreen({super.key});

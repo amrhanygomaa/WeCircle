@@ -13,7 +13,7 @@
 
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
-import '../../app_theme.dart'; // استيراد ثيم التطبيق الموحد
+import 'package:wesal/core/theme/app_theme.dart'; // استيراد ثيم التطبيق الموحد
 import '../../services/responsive_helper.dart'; // استيراد مساعد استجابة الواجهة للأجهزة المختلفة
 
 class TeacherClassInsightsScreen extends StatelessWidget { // تعريف كلاس شاشة تحليل أداء الفصل كـ StatelessWidget

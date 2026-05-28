@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../state_manager.dart';
+import 'package:wesal/core/state/state_manager.dart';
 
 class GalaxySidebar extends StatefulWidget {
   final String studentName;

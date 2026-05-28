@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:ui';
 import 'package:flutter_animate/flutter_animate.dart';
-// import '../../app_theme.dart'; // Unused import removed
+// import 'package:wesal/core/theme/app_theme.dart'; // Unused import removed
 
 class GalaxyHeader extends StatelessWidget {
   final String studentName;

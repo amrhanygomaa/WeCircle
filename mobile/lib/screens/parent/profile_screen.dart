@@ -13,7 +13,7 @@
 
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
-import '../../state_manager.dart'; // استيراد مدير الحالة
+import 'package:wesal/core/state/state_manager.dart'; // استيراد مدير الحالة
 import '../../widgets/wesal_background.dart';
 
 class ProfileScreen extends StatefulWidget {

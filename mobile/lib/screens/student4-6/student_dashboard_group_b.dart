@@ -18,7 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
-import '../../state_manager.dart';
+import 'package:wesal/core/state/state_manager.dart';
 import '../../widgets/student1-3/galaxy_sidebar.dart';
 import 'hawk_eye_screen.dart';
 import 'gravity_balance_screen.dart';

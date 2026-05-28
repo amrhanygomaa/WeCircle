@@ -1,7 +1,7 @@
 // مدير الحالة (State Manager) للتحكم في بيانات التطبيق العامة كحساب المستخدم واختيار الابن النشط
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'api_service.dart';
+import 'package:wesal/core/api/api_service.dart';
 
 class AppStateManager {
   static final AppStateManager _instance = AppStateManager._internal();

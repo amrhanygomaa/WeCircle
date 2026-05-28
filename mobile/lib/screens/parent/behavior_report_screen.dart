@@ -4,7 +4,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-import '../../state_manager.dart';
+import 'package:wesal/core/state/state_manager.dart';
 import '../../widgets/wesal_background.dart';
 
 class BehaviorReportScreen extends StatefulWidget {

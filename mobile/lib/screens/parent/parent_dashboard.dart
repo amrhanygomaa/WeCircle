@@ -14,7 +14,7 @@
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
 import 'package:flutter/services.dart'; // استيراد مكتبة الهابتيك والخدمات
-import '../../state_manager.dart';
+import 'package:wesal/core/state/state_manager.dart';
 import 'messages_screen.dart'; // استيراد شاشة الرسائل
 import 'homework_screen.dart'; // استيراد شاشة الواجبات
 import 'schedule_screen.dart'; // استيراد شاشة الجدول الدراسي

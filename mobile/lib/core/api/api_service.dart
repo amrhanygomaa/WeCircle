@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'core/config/api_config.dart';
+import 'package:wesal/core/config/api_config.dart';
 
 class ApiService {
   static Future<List<Map<String, dynamic>>> fetchChildren() async {

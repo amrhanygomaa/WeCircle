@@ -14,7 +14,7 @@
 // شاشة عرض تفاصيل حضور وغياب وتأخير الطالب، بالإضافة للجدول الزمني
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة أحجام الشاشة
-import '../app_theme.dart'; // استيراد ثيم التطبيق
+import 'package:wesal/core/theme/app_theme.dart'; // استيراد ثيم التطبيق
 import '../widgets/wesal_background.dart';
 
 class AttendanceScreen extends StatefulWidget { // تعريف كلاس شاشة الحضور

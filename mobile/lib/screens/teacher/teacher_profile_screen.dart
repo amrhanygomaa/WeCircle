@@ -13,8 +13,8 @@
 
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
-import '../../app_theme.dart'; // استيراد ثيم التطبيق الموحد
-import '../../state_manager.dart'; // استيراد مدير حالة التطبيق
+import 'package:wesal/core/theme/app_theme.dart'; // استيراد ثيم التطبيق الموحد
+import 'package:wesal/core/state/state_manager.dart'; // استيراد مدير حالة التطبيق
 
 class TeacherProfileScreen extends StatefulWidget { // تعريف كلاس شاشة الملف الشخصي للمعلم كـ StatefulWidget
   const TeacherProfileScreen({super.key}); // مشيد الكلاس
