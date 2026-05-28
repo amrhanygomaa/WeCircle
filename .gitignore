@@ -1,0 +1,120 @@
+# ===========================================
+# WeCircle - Root .gitignore
+# ===========================================
+
+# ============================================
+# Environment Files (NEVER commit secrets!)
+# ============================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# ============================================
+# OS Generated Files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================
+# IDE & Editor Files
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ============================================
+# FLUTTER / DART (mobile/)
+# ============================================
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/.pub-cache/
+mobile/.pub/
+mobile/build/
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/macos/Pods/
+mobile/macos/.symlinks/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/key.properties
+mobile/android/app/debug.keystore
+mobile/android/app/release.keystore
+mobile/*.jks
+mobile/coverage/
+mobile/doc/api/
+mobile/.metadata
+
+# ============================================
+# NODE.JS (dashboard/backend & dashboard/frontend)
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Build outputs
+dashboard/backend/dist/
+dashboard/frontend/dist/
+dashboard/frontend/.next/
+dashboard/frontend/out/
+dashboard/frontend/build/
+dashboard/frontend/tsconfig.tsbuildinfo
+
+# Cache
+.npm
+.eslintcache
+.cache
+.parcel-cache
+
+# ============================================
+# Prisma
+# ============================================
+dashboard/backend/prisma/migrations/.gitkeep
+
+# ============================================
+# Old/Legacy Folders (replaced by organized structure)
+# ============================================
+wesal app/
+wesal dashboard/
+
+# ============================================
+# Temporary / Debug Files
+# ============================================
+scratch/
+device_sessions.json
+analysis_output.txt
+analyze_*.txt
+add_comments.py
+clean.bat
+clean.ps1
+clean_project.bat
+CLEANUP_GUIDE.md
+TODO.md
+
+# ============================================
+# Localization folders (Arabic names)
+# ============================================
+تخرج/
+
+# ============================================
+# MACOSX artifacts
+# ============================================
+__MACOSX/

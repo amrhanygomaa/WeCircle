@@ -1,0 +1,9 @@
+﻿node_modules/
+dist/
+.env
+*.log
+scratch/
+device_sessions.json
+check_prisma.ts
+backfill-student-credentials.ts
+.DS_Store
