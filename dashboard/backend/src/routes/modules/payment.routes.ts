@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { getPayments, createPayment } from "../../controllers/payment.controller";
-import { requireAuth } from "../../middlewares/auth";
-import { tenantScope } from "../../middlewares/tenantScope";
-import { roleGuard } from "../../middlewares/roleGuard";
+import { requireAuth } from "../../core/http/middlewares/auth";
+import { tenantScope } from "../../core/http/middlewares/tenantScope";
+import { roleGuard } from "../../core/http/middlewares/roleGuard";
 import { Role } from "@prisma/client";
 
 const router = Router();

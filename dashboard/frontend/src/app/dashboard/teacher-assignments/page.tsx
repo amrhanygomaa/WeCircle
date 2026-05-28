@@ -3,8 +3,8 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, GraduationCap, BookOpen, School, Search, User, ChevronDown } from "lucide-react";
-import { api } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
+import { api } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
 
 export default function TeacherAssignmentsPage() {
   const { t, isAr } = useTranslation();

@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
 import { Role } from "@prisma/client";
 import { z } from "zod";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ValidationError, NotFoundError, ConflictError } from "../utils/AppError";
-import { getSessionsForTeacher, revokeSessionForTeacher, revokeAllSessionsForTeacher } from "../utils/sessionStore";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { ValidationError, NotFoundError, ConflictError } from "../core/utils/AppError";
+import { getSessionsForTeacher, revokeSessionForTeacher, revokeAllSessionsForTeacher } from "../core/utils/sessionStore";
 import { getIO } from "../config/websocket";
 import crypto from "crypto";
 

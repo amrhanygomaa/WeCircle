@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { BusStatus } from "@prisma/client";
 import { prisma } from "../config/prisma";
 import { z } from "zod";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ValidationError, NotFoundError } from "../utils/AppError";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { ValidationError, NotFoundError } from "../core/utils/AppError";
+import { requireSid } from "../core/utils/tenant";
 import { getIO } from "../config/websocket";
 
 export const getBuses = asyncHandler(async (req: Request, res: Response) => {

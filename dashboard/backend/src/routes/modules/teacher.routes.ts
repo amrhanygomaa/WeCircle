@@ -19,10 +19,10 @@ import {
   linkTeacherSocialAccount,
   unlinkTeacherSocialAccount
 } from "../../controllers/teacher.controller";
-import { requireAuth } from "../../middlewares/auth";
-import { requireMobileAuth } from "../../middlewares/mobileAuth";
-import { tenantScope } from "../../middlewares/tenantScope";
-import { roleGuard } from "../../middlewares/roleGuard";
+import { requireAuth } from "../../core/http/middlewares/auth";
+import { requireMobileAuth } from "../../core/http/middlewares/mobileAuth";
+import { tenantScope } from "../../core/http/middlewares/tenantScope";
+import { roleGuard } from "../../core/http/middlewares/roleGuard";
 import { Role } from "@prisma/client";
 
 const router = Router();

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
 import { z } from "zod";
-import { asyncHandler } from "../utils/asyncHandler";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { requireSid } from "../core/utils/tenant";
 import { FeeType } from "@prisma/client";
 
 /** GET /api/fee-structures - List all fee rules for the school */

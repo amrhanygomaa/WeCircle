@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, X, User, Trash2 } from "lucide-react";
-import { api } from "@/lib/api";
-import { useTranslation, type TranslationKey } from "@/lib/i18n";
+import { api } from "@/core/api/apiClient";
+import { useTranslation, type TranslationKey } from "@/core/i18n/i18n";
 
 const labelStyle = { display: "block", fontSize: "14px", fontWeight: 600, color: "var(--glass-text-secondary)", marginBottom: "8px" };
 const inputStyle = { width: "100%", padding: "12px", background: "rgba(0,0,0,0.02)", border: "1px solid var(--glass-border)", borderRadius: "10px", color: "var(--glass-text-primary)", fontSize: "14px", transition: "0.2s" };

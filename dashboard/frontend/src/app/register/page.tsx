@@ -8,14 +8,14 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User, ShieldCheck, Check, X, AlertCircle, CheckCircle2 } from "lucide-react";
 
-import { api, extractApiError } from "@/lib/api";
-import { supabase } from "@/lib/supabase";
-import { useTranslation } from "@/lib/i18n";
-import { AuthShell } from "@/components/auth/AuthShell";
-import { GlassPasswordInput } from "@/components/auth/GlassPasswordInput";
-import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
-import { EmailAutocompleteInput } from "@/components/auth/EmailAutocompleteInput";
-import { PolicyModal } from "@/components/auth/PolicyModal";
+import { api, extractApiError } from "@/core/api/apiClient";
+import { supabase } from "@/core/auth/supabase";
+import { useTranslation } from "@/core/i18n/i18n";
+import { AuthShell } from "@/modules/auth/components/AuthShell";
+import { GlassPasswordInput } from "@/modules/auth/components/GlassPasswordInput";
+import { PasswordStrengthIndicator } from "@/modules/auth/components/PasswordStrengthIndicator";
+import { EmailAutocompleteInput } from "@/modules/auth/components/EmailAutocompleteInput";
+import { PolicyModal } from "@/modules/auth/components/PolicyModal";
 
 const latinRegex = /^[a-zA-Z0-9\s!@#$%^&*()_+={}\[\]:;"'<>,.?/\\|`~-]+$/;
 

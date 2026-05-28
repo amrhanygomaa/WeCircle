@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
-import { requireSid } from "../utils/tenant";
-import { NotFoundError, ValidationError } from "../utils/AppError";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { requireSid } from "../core/utils/tenant";
+import { NotFoundError, ValidationError } from "../core/utils/AppError";
 
 /** GET /api/archives - List all archived items */
 export const getArchives = asyncHandler(async (req: Request, res: Response) => {

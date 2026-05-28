@@ -3,9 +3,9 @@
 import React, { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
-import { api, extractApiError } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { Modal } from "@/components/ui/Modal";
+import { api, extractApiError } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { Modal } from "@/shared/ui/Modal";
 
 const PREDEFINED_SUBJECTS = [
   { label: "اللغة العربية", value: "اللغة العربية" },

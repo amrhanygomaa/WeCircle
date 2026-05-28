@@ -23,10 +23,10 @@ import {
   Heart,
   UserCheck
 } from "lucide-react";
-import { api } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { Modal } from "@/components/ui/Modal";
-import SupervisorWizard from "@/components/dashboard/SupervisorWizard";
+import { api } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { Modal } from "@/shared/ui/Modal";
+import SupervisorWizard from "@/modules/dashboard/components/SupervisorWizard";
 
 const DetailItem = ({ icon, label, value, color }: { icon?: any, label: string, value: any, color?: string }) => (
   <div className="detail-item-box">

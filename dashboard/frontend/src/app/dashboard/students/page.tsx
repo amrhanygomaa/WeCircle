@@ -22,8 +22,8 @@ import {
   LayoutDashboard
 } from "lucide-react";
 import Link from "next/link";
-import { api } from "@/lib/api";
-import { useTranslation, type TranslationKey } from "@/lib/i18n";
+import { api } from "@/core/api/apiClient";
+import { useTranslation, type TranslationKey } from "@/core/i18n/i18n";
 
 export default function StudentPage() {
   const { t, isAr } = useTranslation();

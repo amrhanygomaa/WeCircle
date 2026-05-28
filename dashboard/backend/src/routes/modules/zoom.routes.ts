@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { auth } from "../../middlewares/auth";
+import { auth } from "../../core/http/middlewares/auth";
 import { createZoomMeeting, listZoomMeetings, deleteZoomMeeting } from "../../controllers/zoom.controller";
 
 const router = Router();

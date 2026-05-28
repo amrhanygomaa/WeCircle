@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
 import { z } from "zod";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ValidationError, NotFoundError } from "../utils/AppError";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { ValidationError, NotFoundError } from "../core/utils/AppError";
 
 /** Require schoolId — throws if missing */
 function requireSid(req: Request): string {

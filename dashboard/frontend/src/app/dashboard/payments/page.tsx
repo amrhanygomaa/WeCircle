@@ -14,8 +14,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
 } from "recharts";
-import { api } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
+import { api } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
 import { DashboardOverview } from "@/types/overview";
 import styles from "./PaymentsPage.module.css";
 

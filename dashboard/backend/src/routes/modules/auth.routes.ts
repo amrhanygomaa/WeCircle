@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { login, register, checkSchoolId, checkSchoolName, checkSchoolEmail, getMe, handleWebhook, mobileLogin, mobileSocialLogin, changeMobilePassword } from "../../controllers/auth.controller";
-import { requireAuth } from "../../middlewares/auth";
-import { requireMobileAuth } from "../../middlewares/mobileAuth";
+import { requireAuth } from "../../core/http/middlewares/auth";
+import { requireMobileAuth } from "../../core/http/middlewares/mobileAuth";
 
 const router = Router();
 

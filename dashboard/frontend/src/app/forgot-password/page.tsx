@@ -7,10 +7,10 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Globe } from "lucide-react";
 
-import { useTranslation } from "@/lib/i18n";
-import { AuthShell } from "@/components/auth/AuthShell";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { api } from "@/lib/api";
+import { useTranslation } from "@/core/i18n/i18n";
+import { AuthShell } from "@/modules/auth/components/AuthShell";
+import { supabase, isSupabaseConfigured } from "@/core/auth/supabase";
+import { api } from "@/core/api/apiClient";
 
 const forgotSchema = z.object({
   email: z.string().email()

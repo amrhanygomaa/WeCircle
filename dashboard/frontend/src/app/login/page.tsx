@@ -8,12 +8,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, AlertCircle } from "lucide-react";
 
-import { api, extractApiError } from "@/lib/api";
-import { supabase } from "@/lib/supabase";
-import { useTranslation } from "@/lib/i18n";
-import { AuthShell } from "@/components/auth/AuthShell";
-import { GlassPasswordInput } from "@/components/auth/GlassPasswordInput";
-import { useAuth } from "@/components/shared/AuthProvider";
+import { api, extractApiError } from "@/core/api/apiClient";
+import { supabase } from "@/core/auth/supabase";
+import { useTranslation } from "@/core/i18n/i18n";
+import { AuthShell } from "@/modules/auth/components/AuthShell";
+import { GlassPasswordInput } from "@/modules/auth/components/GlassPasswordInput";
+import { useAuth } from "@/shared/components/AuthProvider";
 
 const loginSchema = z.object({
   email: z.string().email(),

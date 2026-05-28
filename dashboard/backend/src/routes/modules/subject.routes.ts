@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { getSubjects, createSubject, deleteSubject, bulkCreateSubjects } from "../../controllers/subject.controller";
-import { requireAuth } from "../../middlewares/auth";
-import { tenantScope } from "../../middlewares/tenantScope";
+import { requireAuth } from "../../core/http/middlewares/auth";
+import { tenantScope } from "../../core/http/middlewares/tenantScope";
 
 const router = Router();
 

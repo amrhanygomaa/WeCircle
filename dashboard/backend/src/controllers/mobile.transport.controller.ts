@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
 import { BusAttendanceStatus, NotificationType, NotificationChannel } from "@prisma/client";
 import { z } from "zod";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ValidationError, NotFoundError } from "../utils/AppError";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { ValidationError, NotFoundError } from "../core/utils/AppError";
 import { getIO } from "../config/websocket";
 import crypto from "crypto";
 

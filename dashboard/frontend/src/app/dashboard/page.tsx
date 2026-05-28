@@ -1,6 +1,6 @@
 "use client";
 
-import { PremiumAnalyticsHome } from "@/components/dashboard/PremiumAnalyticsHome";
+import { PremiumAnalyticsHome } from "@/modules/dashboard/components/PremiumAnalyticsHome";
 
 export default function DashboardPage() {
   return <PremiumAnalyticsHome />;

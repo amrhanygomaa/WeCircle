@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import axios from "axios";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { requireSid } from "../core/utils/tenant";
 import { getIO } from "../config/websocket";
 
 export const getAIChatHistory = asyncHandler(async (req: Request, res: Response) => {

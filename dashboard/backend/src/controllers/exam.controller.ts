@@ -2,9 +2,9 @@ import type { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
-import { NotFoundError } from "../utils/AppError";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { NotFoundError } from "../core/utils/AppError";
+import { requireSid } from "../core/utils/tenant";
 import { getIO } from "../config/websocket";
 import { createNotification } from "./notification.controller";
 

@@ -27,10 +27,10 @@ import {
    Globe,
    Award
 } from "lucide-react";
-import { api, extractApiError } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { Modal } from "@/components/ui/Modal";
-import { useAuth } from "@/components/shared/AuthProvider";
+import { api, extractApiError } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { Modal } from "@/shared/ui/Modal";
+import { useAuth } from "@/shared/components/AuthProvider";
 
 export default function ReportsPage() {
    const { user } = useAuth();

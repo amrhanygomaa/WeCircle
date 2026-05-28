@@ -1,11 +1,11 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../core/utils/asyncHandler";
 import crypto from "crypto";
-import { NotFoundError, ValidationError, ConflictError } from "../utils/AppError";
-import { requireSid } from "../utils/tenant";
-import { getSessionsForParent, revokeSession, revokeAllSessionsForParent } from "../utils/sessionStore";
+import { NotFoundError, ValidationError, ConflictError } from "../core/utils/AppError";
+import { requireSid } from "../core/utils/tenant";
+import { getSessionsForParent, revokeSession, revokeAllSessionsForParent } from "../core/utils/sessionStore";
 
 export const listParents = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);

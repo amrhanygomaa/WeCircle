@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
 import { z } from "zod";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ValidationError, NotFoundError } from "../utils/AppError";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { ValidationError, NotFoundError } from "../core/utils/AppError";
 import crypto from "crypto";
 
 /** Convert null schoolId to undefined for Prisma compatibility */

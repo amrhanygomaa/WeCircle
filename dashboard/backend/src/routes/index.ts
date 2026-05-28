@@ -1,5 +1,5 @@
 import { Router } from "express";
-import studentRoutes from "./modules/student.routes";
+import studentRoutes from "../modules/student/student.routes";
 import teacherRoutes from "./modules/teacher.routes";
 import classRoutes from "./modules/class.routes";
 import attendanceRoutes from "./modules/attendance.routes";

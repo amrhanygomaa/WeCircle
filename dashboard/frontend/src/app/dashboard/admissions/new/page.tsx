@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { AdmissionWizard } from "@/components/dashboard/AdmissionWizard";
-import { useTranslation } from "@/lib/i18n";
-import { BackButton } from "@/components/ui/BackButton";
+import { AdmissionWizard } from "@/modules/dashboard/components/AdmissionWizard";
+import { useTranslation } from "@/core/i18n/i18n";
+import { BackButton } from "@/shared/ui/BackButton";
 
 export default function NewAdmissionPage() {
   const { t } = useTranslation();

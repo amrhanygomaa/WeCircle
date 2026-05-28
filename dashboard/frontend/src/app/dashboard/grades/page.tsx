@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, GraduationCap, Wand2, Trash2, CheckCircle2 } from "lucide-react";
-import { api } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { Modal } from "@/components/ui/Modal";
+import { api } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { Modal } from "@/shared/ui/Modal";
 
 export default function GradesPage() {
   const { t, isAr } = useTranslation();

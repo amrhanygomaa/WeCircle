@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../core/utils/asyncHandler";
 import { z } from "zod";
 import { getIO } from "../config/websocket";
-import { ValidationError, NotFoundError } from "../utils/AppError";
+import { ValidationError, NotFoundError } from "../core/utils/AppError";
 
 const sid = (req: Request) => {
   if (!req.schoolId) throw new ValidationError("School context required");

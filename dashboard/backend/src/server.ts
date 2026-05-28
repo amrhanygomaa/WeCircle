@@ -4,7 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { createServer } from "http";
 import { env } from "./config/env";
-import { errorHandler } from "./middlewares/errorHandler";
+import { errorHandler } from "./core/http/middlewares/errorHandler";
 import { initWebSocket } from "./config/websocket";
 import { startOverdueChecker } from "./cron/checkOverdueInvoices";
 import routes from "./routes";

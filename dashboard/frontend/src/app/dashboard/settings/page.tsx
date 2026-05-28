@@ -3,8 +3,8 @@
 import { useMemo, useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, extractApiError } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
+import { api, extractApiError } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
 import {
   Settings,
   Calendar,
@@ -23,8 +23,8 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/components/shared/AuthProvider";
+import { supabase } from "@/core/auth/supabase";
+import { useAuth } from "@/shared/components/AuthProvider";
 import { LinkIcon, Unlink } from "lucide-react";
 
 // ─── OAuth Provider SVG Icons ──────────────────────────────────

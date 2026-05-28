@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { FeeType, PaymentMethod, InvoiceStatus } from "@prisma/client";
 import { prisma } from "../config/prisma";
 import { z } from "zod";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ValidationError, NotFoundError } from "../utils/AppError";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { ValidationError, NotFoundError } from "../core/utils/AppError";
+import { requireSid } from "../core/utils/tenant";
 
 /** GET /api/invoices — List all invoices for the school */
 export const getInvoices = asyncHandler(async (req: Request, res: Response) => {

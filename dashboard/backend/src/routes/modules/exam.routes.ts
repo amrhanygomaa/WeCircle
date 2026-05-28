@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { requireAuth } from "../../middlewares/auth";
-import { requireMobileAuth } from "../../middlewares/mobileAuth";
-import { tenantScope } from "../../middlewares/tenantScope";
+import { requireAuth } from "../../core/http/middlewares/auth";
+import { requireMobileAuth } from "../../core/http/middlewares/mobileAuth";
+import { tenantScope } from "../../core/http/middlewares/tenantScope";
 import {
   createExam,
   deleteExam,

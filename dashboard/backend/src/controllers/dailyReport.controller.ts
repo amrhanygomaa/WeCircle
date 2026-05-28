@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { requireSid } from "../core/utils/tenant";
 import { getIO } from "../config/websocket";
 
 export const createDailyReport = asyncHandler(async (req: Request, res: Response) => {

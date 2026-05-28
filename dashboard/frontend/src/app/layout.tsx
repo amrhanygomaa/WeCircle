@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import QueryProvider from "@/components/shared/QueryProvider";
-import { AuthProvider } from "@/components/shared/AuthProvider";
+import QueryProvider from "@/shared/components/QueryProvider";
+import { AuthProvider } from "@/shared/components/AuthProvider";
 
-import { DirManager } from "@/components/shared/DirManager";
+import { DirManager } from "@/shared/components/DirManager";
 
 export const metadata: Metadata = {
   title: "School Management",

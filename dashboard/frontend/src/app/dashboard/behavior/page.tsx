@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation } from "@/core/i18n/i18n";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CalendarDays, CalendarRange, ClipboardList, Info, Star, User } from "lucide-react";
-import { api } from "@/lib/api";
-import { useAuth } from "@/components/shared/AuthProvider";
-import { getSocket } from "@/lib/socket";
+import { api } from "@/core/api/apiClient";
+import { useAuth } from "@/shared/components/AuthProvider";
+import { getSocket } from "@/core/realtime/socketClient";
 
 type ReportPeriod = "daily" | "weekly" | "monthly";
 

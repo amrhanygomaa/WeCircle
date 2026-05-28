@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../core/utils/asyncHandler";
 import { Role } from "@prisma/client";
 
 /** Dashboard stats & charts aggregated from multiple tables */

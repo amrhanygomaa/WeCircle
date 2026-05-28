@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireAuth } from "../../middlewares/auth";
+import { requireAuth } from "../../core/http/middlewares/auth";
 import {
   getDriverDashboard,
   getSupervisorDashboard,

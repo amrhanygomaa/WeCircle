@@ -3,9 +3,9 @@ import { prisma } from "../config/prisma";
 import { Role } from "@prisma/client";
 import { z, ZodError } from "zod";
 import crypto from "crypto";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ValidationError, NotFoundError } from "../utils/AppError";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { ValidationError, NotFoundError } from "../core/utils/AppError";
+import { requireSid } from "../core/utils/tenant";
 
 /** List all drivers */
 export const getDrivers = asyncHandler(async (req: Request, res: Response) => {

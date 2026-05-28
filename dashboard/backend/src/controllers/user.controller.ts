@@ -2,9 +2,9 @@ import type { Request, Response } from "express";
 import { Role } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ForbiddenError, NotFoundError } from "../utils/AppError";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { ForbiddenError, NotFoundError } from "../core/utils/AppError";
+import { requireSid } from "../core/utils/tenant";
 
 export const listUsers = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);

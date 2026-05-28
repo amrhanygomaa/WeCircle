@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { useTranslation, type TranslationKey } from "@/lib/i18n";
+import { api } from "@/core/api/apiClient";
+import { useTranslation, type TranslationKey } from "@/core/i18n/i18n";
 import { CheckCircle2, XCircle, Clock, FileText } from "lucide-react";
 
 export default function AttendancePage() {

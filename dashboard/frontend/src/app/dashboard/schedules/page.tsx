@@ -6,8 +6,8 @@ import {
   ChevronLeft, ChevronRight, X, Check,
   CalendarDays, Loader2
 } from "lucide-react";
-import { useTranslation } from "@/lib/i18n";
-import styles from "@/components/dashboard/PremiumAnalyticsHome.module.css";
+import { useTranslation } from "@/core/i18n/i18n";
+import styles from "@/modules/dashboard/components/PremiumAnalyticsHome.module.css";
 import pageStyles from "./SchedulesPage.module.css";
 
 interface ScheduleEvent {
@@ -28,7 +28,7 @@ interface ScheduleEvent {
 const INITIAL_EVENTS: ScheduleEvent[] = [];
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { api } from "@/core/api/apiClient";
 
 export default function SchedulesPage() {
   const { t, isAr } = useTranslation();

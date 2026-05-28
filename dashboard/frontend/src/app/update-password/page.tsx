@@ -8,11 +8,11 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
-import { supabase } from "@/lib/supabase";
-import { useTranslation } from "@/lib/i18n";
-import { AuthShell } from "@/components/auth/AuthShell";
-import { GlassPasswordInput } from "@/components/auth/GlassPasswordInput";
-import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
+import { supabase } from "@/core/auth/supabase";
+import { useTranslation } from "@/core/i18n/i18n";
+import { AuthShell } from "@/modules/auth/components/AuthShell";
+import { GlassPasswordInput } from "@/modules/auth/components/GlassPasswordInput";
+import { PasswordStrengthIndicator } from "@/modules/auth/components/PasswordStrengthIndicator";
 
 const updatePasswordSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),

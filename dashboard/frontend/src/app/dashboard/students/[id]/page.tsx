@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Modal } from "@/components/ui/Modal";
+import { Modal } from "@/shared/ui/Modal";
 import { Send, Clock, Calendar, FileText, BookOpen, ChevronLeft, ChevronRight, Mail, MessageSquare, CreditCard, Users, AlertCircle, Settings, Thermometer, Briefcase, Activity, Bus, Utensils, Home, School, Shirt, Plus, PackagePlus, CalendarCheck } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie } from "recharts";
-import { api } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
+import { api } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
 import styles from "./StudentDashboard.module.css";
 
 export default function StudentDashboard() {

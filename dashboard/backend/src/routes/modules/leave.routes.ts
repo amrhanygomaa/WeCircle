@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as leaveController from "../../controllers/leave.controller";
-import { auth } from "../../middlewares/auth";
+import { auth } from "../../core/http/middlewares/auth";
 
 const router = Router();
 

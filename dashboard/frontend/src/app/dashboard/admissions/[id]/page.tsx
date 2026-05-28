@@ -7,9 +7,9 @@ import {
   User, Users, FileText, CheckCircle2, XCircle, Clock, RefreshCw,
   UserPlus, Pencil
 } from "lucide-react";
-import { api } from "@/lib/api";
-import { useTranslation, type TranslationKey } from "@/lib/i18n";
-import { BackButton } from "@/components/ui/BackButton";
+import { api } from "@/core/api/apiClient";
+import { useTranslation, type TranslationKey } from "@/core/i18n/i18n";
+import { BackButton } from "@/shared/ui/BackButton";
 
 export default function AdmissionDetailsPage() {
   const { id } = useParams();

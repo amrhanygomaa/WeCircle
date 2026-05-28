@@ -15,8 +15,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:wesal/app_theme.dart';
-import 'package:wesal/state_manager.dart';
+import 'package:wesal/core/theme/app_theme.dart';
+import 'package:wesal/core/state/state_manager.dart';
 import 'package:wesal/screens/splash_screen.dart';
 import 'package:wesal/screens/login_screen.dart';
 import 'package:wesal/screens/onboarding_screen.dart';

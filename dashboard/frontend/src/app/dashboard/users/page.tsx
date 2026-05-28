@@ -3,9 +3,9 @@
 import React, { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, X, Search, Shield, Mail, User as UserIcon, MoreHorizontal, CheckCircle2 } from "lucide-react";
-import { api, extractApiError } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { useAuth } from "@/components/shared/AuthProvider";
+import { api, extractApiError } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { useAuth } from "@/shared/components/AuthProvider";
 
 const ROLE_COLORS: Record<string, { bg: string, text: string }> = {
   SUPER_ADMIN: { bg: "rgba(239, 68, 68, 0.1)", text: "#ef4444" },

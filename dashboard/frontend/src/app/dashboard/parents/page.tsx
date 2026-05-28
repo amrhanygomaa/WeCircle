@@ -3,9 +3,9 @@
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { api, extractApiError } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { Modal } from "@/components/ui/Modal";
+import { api, extractApiError } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { Modal } from "@/shared/ui/Modal";
 import { 
   Users, 
   Search, 

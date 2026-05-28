@@ -5,17 +5,17 @@ import { supabaseAdmin } from "../config/supabase";
 import { env } from "../config/env";
 import { Role } from "@prisma/client";
 import { z } from "zod";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../core/utils/asyncHandler";
 import { getIO } from "../config/websocket";
 import crypto from "crypto";
 import axios from "axios";
-import { addSession, revokeAllSessionsForParent, revokeAllSessionsForTeacher } from "../utils/sessionStore";
+import { addSession, revokeAllSessionsForParent, revokeAllSessionsForTeacher } from "../core/utils/sessionStore";
 import {
   AuthenticationError,
   ConflictError,
   ValidationError,
   NotFoundError
-} from "../utils/AppError";
+} from "../core/utils/AppError";
 
 /* ── Validation Schemas ── */
 

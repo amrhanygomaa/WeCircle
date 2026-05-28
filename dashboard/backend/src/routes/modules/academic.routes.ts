@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { auth } from "../../middlewares/auth";
-import { tenantScope } from "../../middlewares/tenantScope";
+import { auth } from "../../core/http/middlewares/auth";
+import { tenantScope } from "../../core/http/middlewares/tenantScope";
 import {
   getAcademicYears,
   createAcademicYear,

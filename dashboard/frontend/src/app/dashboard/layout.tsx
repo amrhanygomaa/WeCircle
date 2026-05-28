@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient, useIsFetching } from "@tanstack/react-query";
-import { getSocket } from "@/lib/socket";
+import { getSocket } from "@/core/realtime/socketClient";
 import type { LucideIcon } from "lucide-react";
 import {
   GraduationCap,
@@ -46,11 +46,11 @@ import {
   FileText,
   CalendarClock
 } from "lucide-react";
-import { useTranslation, type TranslationKey } from "@/lib/i18n";
-import { useAuth } from "@/components/shared/AuthProvider";
-import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-import { ThemeToggle, useDashboardTheme } from "@/components/ui/ThemeToggle";
-import { supabase } from "@/lib/supabase";
+import { useTranslation, type TranslationKey } from "@/core/i18n/i18n";
+import { useAuth } from "@/shared/components/AuthProvider";
+import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher";
+import { ThemeToggle, useDashboardTheme } from "@/shared/ui/ThemeToggle";
+import { supabase } from "@/core/auth/supabase";
 import Lottie from "lottie-react";
 import aiAnimation from "@/assets/AI assistant animation.json";
 
@@ -182,7 +182,7 @@ function roleBadgeLabel(role?: string) {
   return role.replace(/_/g, " ");
 }
 
-import { AIChatAssistant } from "@/components/dashboard/AIChatAssistant";
+import { AIChatAssistant } from "@/modules/dashboard/components/AIChatAssistant";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { t, isAr } = useTranslation();

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { chatWithAI, getAIChatHistory, getAIChatSessions, deleteAIChatSession, checkAIPasswordStatus, setAIPassword, verifyAIPassword } from "../../controllers/ai.controller";
-import { requireAuth } from "../../middlewares/auth";
+import { requireAuth } from "../../core/http/middlewares/auth";
 
 const router = Router();
 

@@ -17,9 +17,9 @@ import {
   Target,
   Clock
 } from "lucide-react";
-import { api } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { Modal } from "@/components/ui/Modal";
+import { api } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { Modal } from "@/shared/ui/Modal";
 
 const AUDIENCE_CONFIG: Record<string, { label: string, labelAr: string, color: string, bg: string }> = {
   all: { label: "Whole School", labelAr: "الكل", color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },

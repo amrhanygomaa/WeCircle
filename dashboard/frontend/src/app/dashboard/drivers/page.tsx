@@ -26,10 +26,10 @@ import {
   Heart,
   UserCheck
 } from "lucide-react";
-import { api } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { Modal } from "@/components/ui/Modal";
-import DriverWizard from "@/components/dashboard/DriverWizard";
+import { api } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { Modal } from "@/shared/ui/Modal";
+import DriverWizard from "@/modules/dashboard/components/DriverWizard";
 
 
 const DetailItem = ({ icon, label, value, color }: { icon?: any, label: string, value: any, color?: string }) => (

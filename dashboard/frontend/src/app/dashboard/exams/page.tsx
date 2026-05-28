@@ -19,10 +19,10 @@ import {
   MoreVertical,
   ExternalLink
 } from "lucide-react";
-import { api, extractApiError } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { Modal } from "@/components/ui/Modal";
-import { supabase } from "@/lib/supabase";
+import { api, extractApiError } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { Modal } from "@/shared/ui/Modal";
+import { supabase } from "@/core/auth/supabase";
 
 export default function ExamsPage() {
   const { t, isAr } = useTranslation();

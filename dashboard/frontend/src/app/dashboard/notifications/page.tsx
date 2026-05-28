@@ -6,10 +6,10 @@ import {
   Bell, Check, Send, AlertCircle, BookOpen, Wallet, Bus, 
   MessageSquare, Info, History, Filter, User, Mail, Calendar, Sparkles, Trash2
 } from "lucide-react";
-import { api, extractApiError } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { useAuth } from "@/components/shared/AuthProvider";
-import { Modal } from "@/components/ui/Modal";
+import { api, extractApiError } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { useAuth } from "@/shared/components/AuthProvider";
+import { Modal } from "@/shared/ui/Modal";
 
 const TYPE_CONFIG: Record<string, { icon: any, color: string, bg: string }> = {
   GENERAL: { icon: Info, color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },

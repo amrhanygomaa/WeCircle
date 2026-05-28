@@ -17,10 +17,10 @@ import {
   Loader2,
   Plus
 } from "lucide-react";
-import { api } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import { getSocket } from "@/lib/socket";
-import { useAuth } from "@/components/shared/AuthProvider";
+import { api } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import { getSocket } from "@/core/realtime/socketClient";
+import { useAuth } from "@/shared/components/AuthProvider";
 
 export default function MessagesPage() {
   const { t, isAr } = useTranslation();

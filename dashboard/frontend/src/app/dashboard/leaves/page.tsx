@@ -6,9 +6,9 @@ import {
   ChevronLeft, ChevronRight, Clock, Trash2
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
-import styles from "@/components/dashboard/PremiumAnalyticsHome.module.css";
+import { api } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
+import styles from "@/modules/dashboard/components/PremiumAnalyticsHome.module.css";
 import pageStyles from "./LeavesPage.module.css";
 
 export default function LeavesPage() {

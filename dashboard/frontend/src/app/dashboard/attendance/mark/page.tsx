@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { useTranslation, type TranslationKey } from "@/lib/i18n";
+import { api } from "@/core/api/apiClient";
+import { useTranslation, type TranslationKey } from "@/core/i18n/i18n";
 import { 
   UserCheck, 
   Users, 

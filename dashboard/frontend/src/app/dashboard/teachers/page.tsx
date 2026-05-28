@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, X, User as UserIcon, Mail, Briefcase, Award, MapPin, Phone, Settings, Trash2 } from "lucide-react";
-import { api } from "@/lib/api";
-import { useTranslation, type TranslationKey } from "@/lib/i18n";
-import TeacherWizard from "@/components/dashboard/TeacherWizard";
-import TeacherProfileModal from "@/components/dashboard/TeacherProfileModal";
+import { api } from "@/core/api/apiClient";
+import { useTranslation, type TranslationKey } from "@/core/i18n/i18n";
+import TeacherWizard from "@/modules/dashboard/components/TeacherWizard";
+import TeacherProfileModal from "@/modules/dashboard/components/TeacherProfileModal";
 
 const modalOverlayStyle: React.CSSProperties = { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15, 23, 42, 0.4)", backdropFilter: "blur(4px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" };
 const modalContentStyle: React.CSSProperties = { width: "100%", maxWidth: "800px", background: "var(--glass-bg)", borderRadius: "24px", padding: "40px", maxHeight: "95vh", overflowY: "auto", border: "1px solid var(--glass-border)", boxShadow: "0 20px 40px rgba(0,0,0,0.1)" };

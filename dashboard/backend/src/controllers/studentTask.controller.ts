@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { requireSid } from "../core/utils/tenant";
 import { getIO } from "../config/websocket";
 import { createNotification } from "./notification.controller";
-import { NotFoundError } from "../utils/AppError";
+import { NotFoundError } from "../core/utils/AppError";
 
 export const createStudentTask = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);

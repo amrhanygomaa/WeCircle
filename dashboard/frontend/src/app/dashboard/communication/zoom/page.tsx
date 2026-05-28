@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { api, extractApiError } from "@/lib/api";
-import { useTranslation } from "@/lib/i18n";
+import { api, extractApiError } from "@/core/api/apiClient";
+import { useTranslation } from "@/core/i18n/i18n";
 import { 
   Video, 
   Users, 

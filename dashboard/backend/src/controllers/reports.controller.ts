@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { requireSid } from "../core/utils/tenant";
 
 export const getReportsOverview = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);

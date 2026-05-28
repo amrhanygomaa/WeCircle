@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as scheduleController from "../../controllers/schedule.controller";
-import { auth } from "../../middlewares/auth";
+import { auth } from "../../core/http/middlewares/auth";
 
 const router = Router();
 

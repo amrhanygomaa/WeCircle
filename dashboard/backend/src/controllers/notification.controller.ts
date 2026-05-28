@@ -2,9 +2,9 @@ import type { Request, Response } from "express";
 import { NotificationChannel, NotificationType, PaymentMethod, type Role } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../config/prisma";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ForbiddenError } from "../utils/AppError";
-import { requireSid } from "../utils/tenant";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { ForbiddenError } from "../core/utils/AppError";
+import { requireSid } from "../core/utils/tenant";
 import { getIO } from "../config/websocket";
 
 async function getRealUserId(req: Request): Promise<string | null> {
