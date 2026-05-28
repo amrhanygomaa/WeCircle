@@ -1,0 +1,59 @@
+version: 0.2
+# ╔══════════════════════════════════════════════════════════════╗
+# ║         WeCircle — AWS CodeBuild Specification              ║
+# ║  Builds Docker images → pushes to ECR → updates ECS        ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: "us-east-1"
+    BACKEND_REPO_NAME: "wecircle-backend"
+    FRONTEND_REPO_NAME: "wecircle-frontend"
+  parameter-store:
+    FRONTEND_URL: "/wecircle/FRONTEND_URL"
+    SUPABASE_URL: "/wecircle/SUPABASE_URL"
+    SUPABASE_ANON_KEY: "/wecircle/SUPABASE_ANON_KEY"
+
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - ECR_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_URI
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-7)
+      - echo "Image tag: $IMAGE_TAG"
+
+  build:
+    commands:
+      - echo "Building Backend image..."
+      - docker build -t $BACKEND_REPO_NAME:$IMAGE_TAG ./dashboard/backend
+      - docker tag $BACKEND_REPO_NAME:$IMAGE_TAG $ECR_URI/$BACKEND_REPO_NAME:$IMAGE_TAG
+      - docker tag $BACKEND_REPO_NAME:$IMAGE_TAG $ECR_URI/$BACKEND_REPO_NAME:latest
+
+      - echo "Building Frontend image..."
+      - docker build 
+          --build-arg NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL
+          --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+          --build-arg NEXT_PUBLIC_API_URL=$FRONTEND_URL/api
+          -t $FRONTEND_REPO_NAME:$IMAGE_TAG ./dashboard/frontend
+      - docker tag $FRONTEND_REPO_NAME:$IMAGE_TAG $ECR_URI/$FRONTEND_REPO_NAME:$IMAGE_TAG
+      - docker tag $FRONTEND_REPO_NAME:$IMAGE_TAG $ECR_URI/$FRONTEND_REPO_NAME:latest
+
+  post_build:
+    commands:
+      - echo "Pushing images to ECR..."
+      - docker push $ECR_URI/$BACKEND_REPO_NAME:$IMAGE_TAG
+      - docker push $ECR_URI/$BACKEND_REPO_NAME:latest
+      - docker push $ECR_URI/$FRONTEND_REPO_NAME:$IMAGE_TAG
+      - docker push $ECR_URI/$FRONTEND_REPO_NAME:latest
+
+      - echo "Updating ECS services..."
+      - aws ecs update-service --cluster wecircle-cluster --service wecircle-backend --force-new-deployment
+      - aws ecs update-service --cluster wecircle-cluster --service wecircle-frontend --force-new-deployment
+
+      - echo "Build completed successfully!"
+
+artifacts:
+  files:
+    - infra/aws/ecs-task-definition.json

@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+*.log
+scratch/
+device_sessions.json
+.DS_Store
+README.md
+.git

@@ -85,6 +85,22 @@ dashboard/frontend/tsconfig.tsbuildinfo
 .parcel-cache
 
 # ============================================
+# Docker
+# ============================================
+.docker/
+docker-compose.override.yml
+
+# ============================================
+# AWS / Infrastructure
+# ============================================
+# Never commit real AWS credentials
+infra/aws/*.tfstate
+infra/aws/*.tfstate.backup
+infra/aws/.terraform/
+*.pem
+*.p12
+
+# ============================================
 # Prisma
 # ============================================
 dashboard/backend/prisma/migrations/.gitkeep

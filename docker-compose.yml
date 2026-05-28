@@ -1,0 +1,69 @@
+version: "3.9"
+
+# ╔══════════════════════════════════════════════════════════════╗
+# ║        WeCircle — Local Development Docker Compose          ║
+# ║  Usage: docker-compose up --build                          ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+services:
+  # ── Backend (Node.js/Express) ─────────────────────────────────
+  backend:
+    build:
+      context: ./dashboard/backend
+      dockerfile: Dockerfile
+      target: builder        # Use builder stage for dev (includes devDeps)
+    container_name: wecircle-backend
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+      - FRONTEND_URL=http://localhost:3000
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL}
+    volumes:
+      - ./dashboard/backend/src:/app/src   # Hot-reload in dev
+      - ./dashboard/backend/prisma:/app/prisma
+    command: npm run dev
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5001/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - wecircle-network
+
+  # ── Frontend (Next.js) ─────────────────────────────────────────
+  frontend:
+    build:
+      context: ./dashboard/frontend
+      dockerfile: Dockerfile
+      target: builder
+    container_name: wecircle-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_API_URL=http://localhost:5001/api
+    volumes:
+      - ./dashboard/frontend/src:/app/src
+      - ./dashboard/frontend/public:/app/public
+    command: npm run dev
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - wecircle-network
+
+networks:
+  wecircle-network:
+    driver: bridge
