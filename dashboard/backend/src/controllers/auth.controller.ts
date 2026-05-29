@@ -25,11 +25,12 @@ const loginSchema = z.object({
 });
 
 const registerSchema = z.object({
-  name: z.string().min(2, "School name must be at least 2 characters."),
+  fullName: z.string().min(2, "Full name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
-  schoolId: z.string().min(3, "School ID must be at least 3 characters.")
+  phone: z.string().optional()
 });
+
 
 /* ── POST /auth/login ── */
 export const login = asyncHandler(async (req: Request, res: Response) => {
@@ -112,31 +113,9 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
 /* ── POST /auth/register ── */
 export const register = asyncHandler(async (req: Request, res: Response) => {
-  const { name, email, password, schoolId } = registerSchema.parse(req.body);
+  const { fullName, email, phone } = registerSchema.parse(req.body);
 
-  // Step 1: Check if School ID (code) already exists
-  const existingSchool = await prisma.school.findUnique({
-    where: { code: schoolId }
-  });
-  if (existingSchool) {
-    throw new ConflictError(
-      "This School ID is already registered. Each school must have a unique ID.",
-      "schoolId"
-    );
-  }
-
-  // Step 2: Check if School Name already exists
-  const existingName = await prisma.school.findUnique({
-    where: { name }
-  });
-  if (existingName) {
-    throw new ConflictError(
-      "This Institution Name is already registered.",
-      "name"
-    );
-  }
-
-  // Step 3: Check if email already exists (User email)
+  // Check if email already exists
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
     throw new ConflictError(
@@ -145,98 +124,39 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
-  // Step 4: Check if School email already exists (if different from user email)
-  const existingSchoolEmail = await prisma.school.findUnique({ where: { email } });
-  if (existingSchoolEmail) {
-    throw new ConflictError(
-      "A school with this email is already registered.",
-      "email"
-    );
-  }
-
-  // Step 3: Create Supabase auth user
-  const { error: signUpError } = await supabaseAdmin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: {
-      full_name: name,
-      school_id: schoolId
-    }
-  });
-
-  if (signUpError) {
-    throw new ValidationError(signUpError.message);
-  }
-
-  // Step 4: Determine role (SUPER_ADMIN if email matches)
-  const role = email.toLowerCase() === env.superAdminEmail.toLowerCase()
-    ? Role.SUPER_ADMIN
-    : Role.ADMIN;
-
-  // Step 5: Create School + User in a transaction
+  // Create User + Parent in a transaction
   const result = await prisma.$transaction(async (tx) => {
-    const school = await tx.school.create({
-      data: {
-        code: schoolId,
-        name: name,
-        email: email
-      }
-    });
-
     const user = await tx.user.create({
       data: {
         email,
-        fullName: name,
-        role,
-        schoolId: role === Role.SUPER_ADMIN ? null : school.id
+        fullName,
+        role: Role.PARENT,
+        schoolId: null
       }
     });
 
-    return { school, user };
-  });
+    const parent = await tx.parent.create({
+      data: {
+        userId: user.id,
+        phone,
+        email,
+        schoolId: null
+      }
+    });
 
-  // Step 6: Sign in the user to get a session
-  const { data: sessionData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (signInError) {
-    throw new AuthenticationError("Failed to initialize session after registration.");
-  }
-
-  // Step 7: Update currentSessionId for the user (Now that transaction is committed)
-  const accessToken = sessionData?.session?.access_token;
-  const decoded = accessToken ? jwt.decode(accessToken) as any : null;
-  const sessionId = decoded?.session_id;
-
-  await prisma.user.update({
-    where: { id: result.user.id },
-    data: { currentSessionId: (sessionId as string) || null }
-  });
-
-  // Step 8: Emit live signals
-  getIO().to(`user:${result.user.id}`).emit("SESSION_TERMINATED", {
-    message: "Session re-initialized."
+    return { user, parent };
   });
 
   res.status(201).json({
     success: true,
+    message: "Parent registered and synced successfully",
     data: {
       user: {
         id: result.user.id,
         email: result.user.email,
         fullName: result.user.fullName,
-        role: result.user.role,
-        schoolId: result.user.schoolId
-      },
-      school: {
-        id: result.school.id,
-        code: result.school.code,
-        name: result.school.name
-      },
-      session: sessionData?.session || null
+        role: result.user.role
+      }
     }
   });
 });
