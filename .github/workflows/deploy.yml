@@ -28,7 +28,7 @@ jobs:
           NEXT_PUBLIC_API_URL: https://api.wecircle.helpers-tech.com/api
           NEXT_PUBLIC_AWS_REGION: us-east-1
           NEXT_PUBLIC_COGNITO_USER_POOL_ID: us-east-1_IvG7IexJJ
-          NEXT_PUBLIC_COGNITO_CLIENT_ID: 15u4nsqj3fnt3tnh83c2pjs9ic
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: 2meppogljnsldj9iivqf6d1p02
 
       - name: Configure SSH Key
         run: |
