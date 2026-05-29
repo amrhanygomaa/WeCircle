@@ -80,24 +80,40 @@ export default function LoginPage() {
         Pool: userPool,
       });
 
-      cognitoUser.authenticateUser(authenticationDetails, {
-        onSuccess: async (result) => {
-          // Tell our auth provider to load profile data based on this token
-          await refreshProfile();
-          router.push("/dashboard");
-        },
-        onFailure: (err: any) => {
-          setIsLoading(false);
-          if (err.code === "UserNotConfirmedException") {
-            router.push(`/verify?email=${encodeURIComponent(values.email)}`);
-          } else {
-            setGeneralError(err.message || "Invalid credentials");
+      // Wrap callback-based Cognito auth in a Promise so we can properly await it
+      await new Promise<void>((resolve, reject) => {
+        cognitoUser.authenticateUser(authenticationDetails, {
+          onSuccess: async () => {
+            try {
+              // Load profile data from backend using the new Cognito token
+              await refreshProfile();
+              resolve();
+            } catch (profileErr) {
+              reject(profileErr);
+            }
+          },
+          onFailure: (err: any) => {
+            reject(err);
+          },
+          newPasswordRequired: () => {
+            // Handle this edge case gracefully
+            reject(new Error("NEW_PASSWORD_REQUIRED"));
           }
-        }
+        });
       });
-    } catch (err: unknown) {
-      setGeneralError("An error occurred during sign in.");
+
+      // Only navigate after profile is successfully loaded
+      router.push("/dashboard");
+
+    } catch (err: any) {
       setIsLoading(false);
+      if (err.code === "UserNotConfirmedException") {
+        router.push(`/verify?email=${encodeURIComponent(values.email)}`);
+      } else if (err.message === "NEW_PASSWORD_REQUIRED") {
+        setGeneralError("You must set a new password. Please contact support.");
+      } else {
+        setGeneralError(err.message || "An error occurred during sign in.");
+      }
     }
   });
 
