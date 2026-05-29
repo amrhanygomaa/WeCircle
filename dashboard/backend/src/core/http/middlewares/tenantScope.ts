@@ -1,4 +1,4 @@
-﻿import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { ForbiddenError } from "../../utils/AppError";
 
 /**
@@ -17,9 +17,11 @@ export function tenantScope(req: Request, _res: Response, next: NextFunction): v
     throw new ForbiddenError("Authentication required before tenant scoping.");
   }
 
-  // SUPER_ADMIN can see everything â€” schoolId stays null
+  // SUPER_ADMIN can see everything — but if they have a schoolId or pass one in headers/query, use it
   if (user.role === "SUPER_ADMIN") {
-    req.schoolId = null; // null = all schools
+    const headerSchoolId = req.headers["x-school-id"] as string;
+    const querySchoolId = req.query.schoolId as string;
+    req.schoolId = headerSchoolId || querySchoolId || user.schoolId || null;
     return next();
   }
 
