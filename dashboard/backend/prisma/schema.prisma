@@ -247,15 +247,15 @@ model School {
   conversations  Conversation[]
   archives       Archive[]
   leaveRequests  LeaveRequest[]
-  calendarEvents CalendarEvent[]
-  expenses       Expense[]
-  aiChatMessages AiChatMessage[]
-  BusSupervisor  BusSupervisor[]
-  BusAttendance  BusAttendance[]
-
-  BehaviorReport BehaviorReport[]
-  DailyReport    DailyReport[]
-  StudentTask    StudentTask[]
+  calendarEvents    CalendarEvent[]
+  expenses          Expense[]
+  aiChatMessages    AiChatMessage[]
+  BusSupervisor     BusSupervisor[]
+  BusAttendance     BusAttendance[]
+  BehaviorReport    BehaviorReport[]
+  DailyReport       DailyReport[]
+  StudentTask       StudentTask[]
+  studentGameProgress StudentGameProgress[]
 }
 
 model User {
@@ -279,6 +279,7 @@ model User {
   // Activity
   activityLogs   ActivityLog[]
   aiChatMessages AiChatMessage[]
+  notifications  Notification[]
 
   @@index([schoolId])
   @@index([email, schoolId])
@@ -306,7 +307,7 @@ model Expense {
   id          String   @id @default(uuid())
   schoolId    String
   title       String
-  amount      Decimal
+  amount      Decimal  @db.Decimal(12, 2)
   category    String   @default("GENERAL")
   description String?
   date        DateTime @default(now())
@@ -608,7 +609,7 @@ model ApplicationFee {
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   feeType       FeeType
-  amount        Decimal
+  amount        Decimal       @db.Decimal(12, 2)
   paymentStatus PaymentStatus @default(PENDING)
   receiptNumber String?
   notes         String?
@@ -713,8 +714,9 @@ model Student {
   guardian      Parent?         @relation("GuardianStudents", fields: [guardianId], references: [id])
   BusAttendance BusAttendance[]
 
-  BehaviorReport BehaviorReport[]
+  BehaviorReport  BehaviorReport[]
   taskCompletions StudentTaskCompletion[]
+  gameProgress    StudentGameProgress[]
 
   @@index([schoolId])
   @@index([classId])
@@ -756,7 +758,7 @@ model Teacher {
   experienceYears Int?
   appointmentDate DateTime?
   contractType    ContractType?
-  salary          Decimal?
+  salary          Decimal?      @db.Decimal(12, 2)
   bankAccount     String?
   status          TeacherStatus @default(ACTIVE)
 
@@ -982,6 +984,7 @@ model Attendance {
   @@index([schoolId])
   @@index([studentId, date])
   @@index([teacherId, date])
+  @@index([schoolId, classId, date])
 }
 
 // ============================================================
@@ -997,7 +1000,7 @@ model FeeStructure {
 
   name      String
   feeType   FeeType
-  amount    Decimal
+  amount    Decimal  @db.Decimal(12, 2)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1016,10 +1019,10 @@ model Invoice {
   studentId     String
 
   feeType     FeeType
-  totalAmount Decimal
-  discount    Decimal       @default(0)
-  paid        Decimal       @default(0)
-  remaining   Decimal       @default(0)
+  totalAmount Decimal       @db.Decimal(12, 2)
+  discount    Decimal       @default(0) @db.Decimal(12, 2)
+  paid        Decimal       @default(0) @db.Decimal(12, 2)
+  remaining   Decimal       @default(0) @db.Decimal(12, 2)
   dueDate     DateTime?
   status      InvoiceStatus @default(UNPAID)
   paymentPlan PaymentPlan   @default(FULL)
@@ -1034,6 +1037,7 @@ model Invoice {
 
   @@index([schoolId])
   @@index([studentId])
+  @@index([schoolId, status, dueDate])
 }
 
 model Payment {
@@ -1042,7 +1046,7 @@ model Payment {
   studentId String
   invoiceId String?
 
-  amount        Decimal
+  amount        Decimal        @db.Decimal(12, 2)
   feeType       FeeType?
   paymentMethod PaymentMethod?
   receiptNumber String?
@@ -1115,7 +1119,7 @@ model Driver {
   // Professional
   contractType    String?
   appointmentDate DateTime?
-  salary          Decimal?
+  salary          Decimal?  @db.Decimal(12, 2)
   workingHours    String?
   assignedRoute   String?
   status          String?   @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
@@ -1163,7 +1167,7 @@ model StudentBus {
 
   pickupPoint  String?
   dropoffPoint String?
-  fees         Decimal?
+  fees         Decimal? @db.Decimal(12, 2)
   active       Boolean  @default(true)
 
   student Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -1207,7 +1211,8 @@ model Notification {
   sentAt      DateTime            @default(now())
   readAt      DateTime?
 
-  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school    School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  recipient User?  @relation(fields: [recipientId], references: [id], onDelete: SetNull)
 
   @@index([schoolId])
   @@index([recipientId])
@@ -1294,13 +1299,16 @@ model Conversation {
   schoolId       String
   participant1Id String
   participant2Id String
+  // Deterministic pair key: min(p1,p2) + ":" + max(p1,p2) — set on create to prevent duplicates.
+  // Replaces the order-sensitive @@unique([participant1Id, participant2Id]) once backfilled.
+  pairKey        String?  @unique
   lastMessageAt  DateTime @default(now())
   createdAt      DateTime @default(now())
 
   school   School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   messages Message[]
 
-  @@unique([participant1Id, participant2Id])
+  @@index([participant1Id, participant2Id])
   @@index([schoolId])
 }
 
@@ -1313,8 +1321,11 @@ model Message {
   createdAt      DateTime  @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  // senderId is a polymorphic entity ID (User.id, Parent.id, or Teacher.id depending on role).
+  // A typed FK is deferred to Phase 3 when chat is consolidated under User identity.
 
   @@index([conversationId])
+  @@index([senderId])
 }
 
 model Archive {
@@ -1517,14 +1528,38 @@ model StudentTask {
 }
 
 model StudentTaskCompletion {
-  id           String    @id @default(uuid())
-  taskId       String
-  studentId    String
-  completedAt  DateTime  @default(now())
+  id          String   @id @default(uuid())
+  taskId      String
+  studentId   String
+  completedAt DateTime @default(now())
 
-  task         StudentTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  task    StudentTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  student Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, studentId])
+  @@index([studentId])
+}
+
+// ============================================================
+// GAMIFICATION — تقدم الألعاب التعليمية
+// ============================================================
+
+// Per-student, per-game progress. Replaces the flat game1Lvl…game5Lvl columns on Student.
+// Old columns are kept until a data migration populates this table (Phase 3).
+model StudentGameProgress {
+  id         String    @id @default(uuid())
+  schoolId   String
+  studentId  String
+  gameId     Int       // 1–5 — maps to the five gamified learning games
+  level      Int       @default(1)
+  points     Int       @default(0)
+  unlockedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+
+  school  School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, gameId])
+  @@index([schoolId])
   @@index([studentId])
 }

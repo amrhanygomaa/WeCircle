@@ -321,13 +321,15 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
     currentUserId = teacherId;
   }
 
-  console.log('🔍 [createConversation] Current User ID:', currentUserId, 'Recipient:', payload.recipientId);
+  const [p1, p2] = [currentUserId, payload.recipientId].sort();
+  const pairKey = `${p1}:${p2}`;
 
-  // Check if conversation already exists
+  // Upsert: find by deterministic pairKey or fall back to legacy OR query for pre-migration rows
   const existingConversation = await prisma.conversation.findFirst({
     where: {
       schoolId,
       OR: [
+        { pairKey },
         { participant1Id: currentUserId, participant2Id: payload.recipientId },
         { participant1Id: payload.recipientId, participant2Id: currentUserId },
       ],
@@ -335,16 +337,15 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
   });
 
   if (existingConversation) {
-    console.log('✅ [createConversation] Conversation already exists');
     return res.json({ success: true, data: existingConversation });
   }
 
-  // Create new conversation
   const conversation = await prisma.conversation.create({
     data: {
       schoolId,
-      participant1Id: currentUserId,
-      participant2Id: payload.recipientId,
+      participant1Id: p1,
+      participant2Id: p2,
+      pairKey,
     },
   });
 

@@ -162,23 +162,18 @@ export const sendMessage = asyncHandler(async (req: Request, res: Response) => {
     
     if (senderEntityId === receiverEntityId) throw new ValidationError("Cannot chat with yourself");
     
-    // Sort IDs to ensure unique pair identification
-    const participants = [senderEntityId, receiverEntityId].sort();
-    const p1 = participants[0];
-    const p2 = participants[1];
+    // Sort IDs so pairKey is deterministic regardless of who initiates
+    const [p1, p2] = [senderEntityId, receiverEntityId].sort();
+    const pairKey = `${p1}:${p2}`;
 
     const conv = await prisma.conversation.upsert({
-      where: { 
-        participant1Id_participant2Id: { 
-          participant1Id: p1, 
-          participant2Id: p2 
-        } 
-      },
+      where: { pairKey },
       update: { lastMessageAt: new Date() },
       create: {
         schoolId,
         participant1Id: p1,
         participant2Id: p2,
+        pairKey,
         lastMessageAt: new Date()
       }
     });
