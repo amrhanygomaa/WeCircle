@@ -11,9 +11,14 @@
 تنظيم عملية الدخول والتأكد إن كل واحد رايح للمكان الصح اللي يخصه في التطبيق.
 */
 
+import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية
 import 'package:flutter/services.dart'; // استيراد خدمات النظام (لوحة المفاتيح)
 import 'package:flutter_animate/flutter_animate.dart'; // استيراد مكتبة الحركات
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wesal/core/config/api_config.dart';
 import 'package:wesal/core/state/state_manager.dart';
 
 class LoginScreen extends StatefulWidget { // تعريف كلاس شاشة تسجيل الدخول
@@ -69,39 +74,100 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
     super.dispose();
   }
 
-  void _handleLogin() async { // دالة معالجة عملية تسجيل الدخول
-    final idVal = _idController.text.trim(); // جلب قيمة الهوية
-    final passVal = _passController.text.trim(); // جلب قيمة كلمة المرور
+  void _handleLogin() async {
+    final idVal = _idController.text.trim();
+    final passVal = _passController.text.trim();
 
-    setState(() { // تحديث الواجهة لعرض الأخطاء إن وجدت
+    setState(() {
       _idError = idVal.isEmpty ? 'رقم الهوية مطلوب' : null;
       _passError = passVal.isEmpty ? 'كلمة المرور مطلوبة' : null;
     });
 
-    if (_idError != null || _passError != null) return; // التوقف إذا وجد خطأ
+    if (_idError != null || _passError != null) return;
 
-    setState(() => _isLoading = true); // تفعيل حالة التحميل
-    await Future.delayed(const Duration(seconds: 2)); // محاكاة لعملية الاتصال بالخادم
+    setState(() => _isLoading = true);
 
-    if (!mounted) return; // التأكد من أن الشاشة لا تزال موجودة
-    setState(() => _isLoading = false); // إيقاف حالة التحميل
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiConfig.getBaseUrl()}/auth/mobile/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'loginId': idVal, 'password': passVal}),
+      ).timeout(const Duration(seconds: 15));
 
-    switch (_role) { // التوجيه للشاشة المناسبة حسب الدور المختارة
-      case 'parent':
-        Navigator.pushReplacementNamed(context, '/parent_dashboard');
-        break;
-      case 'student':
-        AppStateManager().selectedGradeLevel.value = _gradeRange;
-        Navigator.pushReplacementNamed(context, '/student_avatar_selection');
-        break;
-      case 'teacher':
-        Navigator.pushReplacementNamed(context, '/teacher_dashboard');
-        break;
-      case 'driver':
-        Navigator.pushReplacementNamed(context, '/driver_dashboard');
-        break;
-      default:
-        Navigator.pushReplacementNamed(context, '/parent_dashboard');
+      if (!mounted) return;
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode != 200 || body['success'] != true) {
+        setState(() {
+          _idError = (body['message'] as String?) ?? 'بيانات الدخول غير صحيحة';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final data = body['data'] as Map<String, dynamic>;
+      final token = data['token'] as String;
+      final user = data['user'] as Map<String, dynamic>;
+      final role = ((user['role'] as String?) ?? 'parent').toLowerCase();
+
+      // Pick the role-specific entity ID used by chat and other authenticated calls.
+      final String entityId;
+      switch (role) {
+        case 'parent':
+          entityId = (user['parentId'] as String?) ?? (user['id'] as String? ?? '');
+          break;
+        case 'student':
+          entityId = (user['studentId'] as String?) ?? (user['id'] as String? ?? '');
+          break;
+        case 'teacher':
+          entityId = (user['teacherId'] as String?) ?? (user['id'] as String? ?? '');
+          break;
+        case 'driver':
+          entityId = (user['driverId'] as String?) ?? (user['id'] as String? ?? '');
+          break;
+        default:
+          entityId = (user['id'] as String?) ?? '';
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('mobile_token', token);
+      await prefs.setString('mobile_entity_id', entityId);
+      await prefs.setString('mobile_role', role);
+      await prefs.setString('mobile_user_id', (user['id'] as String?) ?? '');
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      switch (role) {
+        case 'parent':
+          Navigator.pushReplacementNamed(context, '/parent_dashboard');
+          break;
+        case 'student':
+          AppStateManager().selectedGradeLevel.value = _gradeRange;
+          Navigator.pushReplacementNamed(context, '/student_avatar_selection');
+          break;
+        case 'teacher':
+          Navigator.pushReplacementNamed(context, '/teacher_dashboard');
+          break;
+        case 'driver':
+          Navigator.pushReplacementNamed(context, '/driver_dashboard');
+          break;
+        default:
+          Navigator.pushReplacementNamed(context, '/parent_dashboard');
+      }
+    } on TimeoutException {
+      if (!mounted) return;
+      setState(() {
+        _idError = 'انتهت مهلة الاتصال بالخادم';
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _idError = 'خطأ في الاتصال بالخادم';
+        _isLoading = false;
+      });
     }
   }
 
