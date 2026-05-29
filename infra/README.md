@@ -3,27 +3,29 @@
 ## Architecture Overview
 
 ```
-                    ┌─────────────────────────────────────┐
-                    │           AWS Cloud                 │
-                    │                                     │
-  Users ──► Route53 ──► CloudFront ──► ALB               │
-                    │         │         │                 │
-                    │         │    ┌────┴──────────┐      │
-                    │         │    │  ECS Fargate  │      │
-                    │         │    │  ┌──────────┐ │      │
-                    │         │    │  │ Backend  │ │      │
-                    │         │    │  │  :5001   │ │      │
-                    │         │    │  └──────────┘ │      │
-                    │         │    │  ┌──────────┐ │      │
-                    │         │    │  │ Frontend │ │      │
-                    │         │    │  │  :3000   │ │      │
-                    │         │    │  └──────────┘ │      │
-                    │         │    └───────────────┘      │
-                    │         │                           │
-                    │    S3 (Assets)   Supabase (DB/Auth) │
-                    │    ECR (Images)  Secrets Manager    │
-                    └─────────────────────────────────────┘
+                    ┌──────────────────────────────────────────────┐
+                    │                  AWS Cloud                   │
+                    │                                              │
+  Users ──► Route53 ──► CloudFront (web) ──► S3 static export     │
+                    │                                              │
+  API ──► Route53 ──► ALB (sticky sessions for Socket.IO)         │
+                    │         │                                    │
+                    │    ┌────┴──────────┐                         │
+                    │    │  ECS Fargate  │                         │
+                    │    │  Backend :5001│                         │
+                    │    └──────┬────────┘                         │
+                    │           │                                  │
+                    │    ┌──────┴────────┬──────────┬──────────┐   │
+                    │  RDS Postgres  ElastiCache  S3 (assets)  │   │
+                    │  (Multi-AZ)    Redis        + CloudFront  │   │
+                    │                                           │   │
+                    │  Cognito (auth)  Secrets Manager          │   │
+                    │  EventBridge (cron)  ECR (images)         │   │
+                    └───────────────────────────────────────────┘
 ```
+
+> **Current state (2026-05-29):** single EC2 + pm2 deployment (not ECS). The above is the
+> **target architecture** to be provisioned via Terraform in Phase 4.
 
 ## 📁 Files in this directory
 
