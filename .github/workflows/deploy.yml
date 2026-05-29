@@ -1,149 +1,62 @@
-name: 🚀 WeCircle CI/CD — Deploy to AWS
+name: Production Deployment
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-env:
-  AWS_REGION: us-east-1
-  ECR_BACKEND_REPO: wecircle-backend
-  ECR_FRONTEND_REPO: wecircle-frontend
-  ECS_CLUSTER: wecircle-cluster
-  ECS_BACKEND_SERVICE: wecircle-backend-service
-  ECS_FRONTEND_SERVICE: wecircle-frontend-service
+    branches:
+      - main
 
 jobs:
-  # ── Job 1: Lint & Type-check ────────────────────────────────────
-  lint:
-    name: 🔍 Lint & Type Check
+  deploy:
+    name: Build & Deploy to EC2
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: [backend, frontend]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: dashboard/${{ matrix.project }}/package-lock.json
+          node-version: '20'
 
-      - name: Install dependencies
-        run: npm ci
-        working-directory: dashboard/${{ matrix.project }}
-
-      - name: Type check (backend)
-        if: matrix.project == 'backend'
-        run: npx tsc --noEmit
-        working-directory: dashboard/backend
-
-      - name: Lint (frontend)
-        if: matrix.project == 'frontend'
-        run: npm run lint
-        working-directory: dashboard/frontend
-
-  # ── Job 2: Build & Push Docker images to ECR ─────────────────────
-  build-and-push:
-    name: 🐳 Build & Push to ECR
-    needs: lint
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    outputs:
-      image-tag: ${{ steps.meta.outputs.tags }}
-      short-sha: ${{ steps.vars.outputs.sha_short }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set short SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build & Push Backend
+      - name: Build Frontend
+        run: |
+          cd dashboard/frontend
+          npm ci
+          npm run build
+          zip -r ../../frontend_build.zip .next public package.json package-lock.json next.config.mjs
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ steps.vars.outputs.sha_short }}
+          NEXT_PUBLIC_API_URL: https://api.wecircle.helpers-tech.com/api
+          NEXT_PUBLIC_AWS_REGION: us-east-1
+          NEXT_PUBLIC_COGNITO_USER_POOL_ID: us-east-1_IvG7IexJJ
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: 15u4nsqj3fnt3tnh83c2pjs9ic
+
+      - name: Configure SSH Key
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_BACKEND_REPO:$IMAGE_TAG \
-                       -t $ECR_REGISTRY/$ECR_BACKEND_REPO:latest \
-                       ./dashboard/backend
-          docker push $ECR_REGISTRY/$ECR_BACKEND_REPO:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_BACKEND_REPO:latest
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Build & Push Frontend
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ steps.vars.outputs.sha_short }}
+      - name: Deploy Frontend to EC2
         run: |
-          docker build \
-            --build-arg NEXT_PUBLIC_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }} \
-            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }} \
-            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.BACKEND_API_URL }} \
-            -t $ECR_REGISTRY/$ECR_FRONTEND_REPO:$IMAGE_TAG \
-            -t $ECR_REGISTRY/$ECR_FRONTEND_REPO:latest \
-            ./dashboard/frontend
-          docker push $ECR_REGISTRY/$ECR_FRONTEND_REPO:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_FRONTEND_REPO:latest
+          scp -i ~/.ssh/id_rsa frontend_build.zip ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/frontend_build.zip
+          ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} "cd /home/ec2-user/wecircle-frontend && unzip -o /home/ec2-user/frontend_build.zip && npm install --production --ignore-scripts && pm2 restart frontend || pm2 start npm --name frontend -- start"
 
-  # ── Job 3: Deploy to ECS ────────────────────────────────────────
-  deploy:
-    name: 🚢 Deploy to ECS Fargate
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Deploy Backend to EC2
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Deploy Backend to ECS
-        run: |
-          aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service $ECS_BACKEND_SERVICE \
-            --force-new-deployment \
-            --region $AWS_REGION
-
-      - name: Deploy Frontend to ECS
-        run: |
-          aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service $ECS_FRONTEND_SERVICE \
-            --force-new-deployment \
-            --region $AWS_REGION
-
-      - name: Wait for ECS deployment to stabilize
-        run: |
-          aws ecs wait services-stable \
-            --cluster $ECS_CLUSTER \
-            --services $ECS_BACKEND_SERVICE $ECS_FRONTEND_SERVICE \
-            --region $AWS_REGION
-          echo "✅ Deployment complete!"
-
-      - name: Notify on success
-        if: success()
-        run: echo "🎉 WeCircle deployed to AWS ECS successfully! Commit ${{ needs.build-and-push.outputs.short-sha }}"
-
-      - name: Notify on failure
-        if: failure()
-        run: echo "❌ Deployment failed for commit ${{ needs.build-and-push.outputs.short-sha }}"
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /opt/wecircle
+            sudo chown -R ec2-user:ec2-user /opt/wecircle
+            git pull origin main
+            
+            cd dashboard/backend
+            npm ci --only=production=false
+            npx prisma generate
+            npm run build
+            
+            pm2 restart backend || pm2 start dist/server.js --name backend
+            pm2 save
