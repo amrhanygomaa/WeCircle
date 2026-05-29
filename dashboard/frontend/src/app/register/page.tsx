@@ -47,7 +47,7 @@ export default function RegisterPage() {
     try {
       const attributeList = [
         new CognitoUserAttribute({ Name: 'email', Value: values.email }),
-        new CognitoUserAttribute({ Name: 'role', Value: 'PARENT' }), // Default for self-signup
+        new CognitoUserAttribute({ Name: 'custom:role', Value: 'PARENT' }), // Default for self-signup
       ];
 
       userPool.signUp(values.email, values.password, attributeList, [], async (err, result) => {
@@ -80,12 +80,12 @@ export default function RegisterPage() {
   });
 
   return (
-    <AuthShell variant="register" title={t('' as any)} subtitle={t('' as any)}>
+    <AuthShell variant="register" title={t('auth_register_title' as any)} subtitle={t('auth_register_subtitle' as any)}>
       <div style={{ position: "relative" }}>
         
         <form onSubmit={onSubmit}>
           <div className="glass-input-group">
-            <label>{t('' as any)}</label>
+            <label>{t('field_name' as any)}</label>
             <div className="glass-input-wrapper">
               <User className="glass-input-icon" size={18} />
               <input placeholder="John Doe" {...form.register("fullName")} />
@@ -99,7 +99,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="glass-input-group">
-            <label>{t('' as any)}</label>
+            <label>{t('field_email' as any)}</label>
             <div className="glass-input-wrapper">
               <Mail className="glass-input-icon" size={18} />
               <input placeholder="name@email.com" {...form.register("email")} />
@@ -113,7 +113,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="glass-input-group">
-            <label>{t('' as any)} (Optional)</label>
+            <label>{t('field_phone' as any)} (Optional)</label>
             <div className="glass-input-wrapper">
               <Phone className="glass-input-icon" size={18} />
               <input placeholder="+1234567890" {...form.register("phone")} />
@@ -121,7 +121,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="glass-input-group">
-            <label>{t('' as any)}</label>
+            <label>{t('field_password' as any)}</label>
             <GlassPasswordInput placeholder="••••••••" {...form.register("password")}  />
             {form.formState.errors.password && (
               <div className="field-error-inline error-shake">
@@ -132,7 +132,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="glass-input-group" style={{ marginBottom: "24px" }}>
-            <label>{t('' as any)}</label>
+            <label>{t('field_confirm_password' as any)}</label>
             <GlassPasswordInput placeholder="••••••••" {...form.register("confirmPassword")}  />
             {form.formState.errors.confirmPassword && (
               <div className="field-error-inline error-shake">
@@ -146,12 +146,12 @@ export default function RegisterPage() {
           {successMsg && <p style={{ color: "#22c55e", marginBottom: "16px", fontSize: "14px", background: "rgba(34, 197, 94, 0.1)", padding: "12px", borderRadius: "8px", border: "1px solid rgba(34, 197, 94, 0.3)" }}>{successMsg}</p>}
           
           <button type="submit" className="btn-glass-primary" disabled={isLoading}>
-            {isLoading ? t('' as any) : t('' as any)}
+            {isLoading ? t('auth_btn_loading' as any) : t('auth_btn_register' as any)}
           </button>
         </form>
 
         <p className="auth-bottom" style={{ color: "rgba(255,255,255,0.5)", marginTop: "24px", textAlign: "center" }}>
-          {t('' as any)} <Link className="glass-link" href="/login" style={{ fontWeight: 700, color: "#fff" }}>{t('' as any)}</Link>
+          {t('auth_have_account' as any)} <Link className="glass-link" href="/login" style={{ fontWeight: 700, color: "#fff" }}>{t('nav_signin' as any)}</Link>
         </p>
       </div>
     </AuthShell>

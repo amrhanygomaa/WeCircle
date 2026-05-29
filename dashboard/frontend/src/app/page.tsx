@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -8,8 +8,8 @@ import {
   ArrowRight, ArrowLeft, ChevronRight, ChevronLeft, Menu, X
 } from "lucide-react";
 import { useTranslation, getLang } from "@/core/i18n/i18n";
-import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-import { StatCard } from "@/components/ui/StatCard";
+import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher";
+import { StatCard } from "@/shared/ui/StatCard";
 import { motion, Variants } from "framer-motion";
 
 export default function LandingPage() {

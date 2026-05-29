@@ -64,7 +64,7 @@ export default function AcademicYearsPage() {
     <div className="academic-module" dir={isAr ? "rtl" : "ltr"}>
       <div className="module-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
         <div>
-          <h2 style={{ fontSize: "28px", fontWeight: 800, color: "var(--glass-text-primary)" }}>{t('' as any)}</h2>
+          <h2 style={{ fontSize: "28px", fontWeight: 800, color: "var(--glass-text-primary)" }}>{t('dash_academic_years')}</h2>
           <p style={{ color: "var(--glass-text-secondary)" }}>{t('ay_desc' as any)}</p>
         </div>
         <button 

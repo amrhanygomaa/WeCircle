@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { env } from "../config/env";
-import { isSessionActive, updateSessionActivity } from "../core/utils/sessionStore";
+import { env } from "../../../config/env";
+import { isSessionActive, updateSessionActivity } from "../../utils/sessionStore";
 
 export interface MobileRequestUser {
   id: string; // AppCredential.id
@@ -60,3 +60,4 @@ export function requireMobileAuth(req: Request, res: Response, next: NextFunctio
     res.status(401).json({ success: false, message: "Unauthorized: Invalid or expired token" });
   }
 }
+

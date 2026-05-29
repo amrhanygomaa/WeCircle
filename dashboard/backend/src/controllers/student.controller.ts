@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+﻿import { Request, Response } from "express";
 import axios from "axios";
 import { prisma } from "../config/prisma";
 import { Role } from "@prisma/client";
 import { z } from "zod";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ValidationError } from "../utils/AppError";
+import { asyncHandler } from "../core/utils/asyncHandler";
+import { ValidationError } from "../core/utils/AppError";
 import { getIO } from "../config/websocket";
 import { clearDashboardCache } from "./dashboard.controller";
 import crypto from "crypto";
@@ -287,7 +287,7 @@ export const deleteStudent = asyncHandler(async (req: Request, res: Response) =>
   res.json({ success: true, message: "Student and related data have been archived and removed from active records." });
 });
 
-/* ── GET /api/students/mobile/game-state ── */
+/* â”€â”€ GET /api/students/mobile/game-state â”€â”€ */
 export const getMobileStudentGameState = asyncHandler(async (req: Request, res: Response) => {
   const studentId = (req as any).studentId;
 
@@ -326,7 +326,7 @@ export const getMobileStudentGameState = asyncHandler(async (req: Request, res: 
   });
 });
 
-/* ── POST /api/students/mobile/game-state ── */
+/* â”€â”€ POST /api/students/mobile/game-state â”€â”€ */
 export const updateMobileStudentGameState = asyncHandler(async (req: Request, res: Response) => {
   const studentId = (req as any).studentId;
 
@@ -381,7 +381,7 @@ export const updateMobileStudentGameState = asyncHandler(async (req: Request, re
   });
 });
 
-/* ── POST /api/students/mobile/ai-chat ── */
+/* â”€â”€ POST /api/students/mobile/ai-chat â”€â”€ */
 export const studentMobileAiChat = asyncHandler(async (req: Request, res: Response) => {
   const studentId = (req as any).studentId as string | undefined;
   const schoolId = req.schoolId;
@@ -414,17 +414,17 @@ export const studentMobileAiChat = asyncHandler(async (req: Request, res: Respon
   }
 
   const systemPrompt = `
-أنت "رفيق WeCircle الفضائي" — مساعد ذكي ودود للطلاب في المدارس المصرية (ابتدائي).
-تتحدث بالعربية الفصحى البسيطة مع لمسة مصرية خفيفة.
-اسم الطالب: ${student.nameAr ?? "بطل"}.
-نقاطه الحالية: ${student.points ?? 0}.
+Ø£Ù†Øª "Ø±ÙÙŠÙ‚ WeCircle Ø§Ù„ÙØ¶Ø§Ø¦ÙŠ" â€” Ù…Ø³Ø§Ø¹Ø¯ Ø°ÙƒÙŠ ÙˆØ¯ÙˆØ¯ Ù„Ù„Ø·Ù„Ø§Ø¨ ÙÙŠ Ø§Ù„Ù…Ø¯Ø§Ø±Ø³ Ø§Ù„Ù…ØµØ±ÙŠØ© (Ø§Ø¨ØªØ¯Ø§Ø¦ÙŠ).
+ØªØªØ­Ø¯Ø« Ø¨Ø§Ù„Ø¹Ø±Ø¨ÙŠØ© Ø§Ù„ÙØµØ­Ù‰ Ø§Ù„Ø¨Ø³ÙŠØ·Ø© Ù…Ø¹ Ù„Ù…Ø³Ø© Ù…ØµØ±ÙŠØ© Ø®ÙÙŠÙØ©.
+Ø§Ø³Ù… Ø§Ù„Ø·Ø§Ù„Ø¨: ${student.nameAr ?? "Ø¨Ø·Ù„"}.
+Ù†Ù‚Ø§Ø·Ù‡ Ø§Ù„Ø­Ø§Ù„ÙŠØ©: ${student.points ?? 0}.
 
-قواعد مهمة:
-- لا تناقش مواضيع غير مناسبة للأطفال.
-- شجّع الطالب على الصدق، اللطف، احترام المعلمين والأهل.
-- إذا ذكر مشكلة خطيرة أو خطراً، اطلب منه يخبر ولي أمره أو المعلم فوراً.
-- اجعل الردود قصيرة (3-6 جمل) مع إيموجي مناسبة 🚀.
-- لا تطلب بيانات شخصية حساسة.
+Ù‚ÙˆØ§Ø¹Ø¯ Ù…Ù‡Ù…Ø©:
+- Ù„Ø§ ØªÙ†Ø§Ù‚Ø´ Ù…ÙˆØ§Ø¶ÙŠØ¹ ØºÙŠØ± Ù…Ù†Ø§Ø³Ø¨Ø© Ù„Ù„Ø£Ø·ÙØ§Ù„.
+- Ø´Ø¬Ù‘Ø¹ Ø§Ù„Ø·Ø§Ù„Ø¨ Ø¹Ù„Ù‰ Ø§Ù„ØµØ¯Ù‚ØŒ Ø§Ù„Ù„Ø·ÙØŒ Ø§Ø­ØªØ±Ø§Ù… Ø§Ù„Ù…Ø¹Ù„Ù…ÙŠÙ† ÙˆØ§Ù„Ø£Ù‡Ù„.
+- Ø¥Ø°Ø§ Ø°ÙƒØ± Ù…Ø´ÙƒÙ„Ø© Ø®Ø·ÙŠØ±Ø© Ø£Ùˆ Ø®Ø·Ø±Ø§Ù‹ØŒ Ø§Ø·Ù„Ø¨ Ù…Ù†Ù‡ ÙŠØ®Ø¨Ø± ÙˆÙ„ÙŠ Ø£Ù…Ø±Ù‡ Ø£Ùˆ Ø§Ù„Ù…Ø¹Ù„Ù… ÙÙˆØ±Ø§Ù‹.
+- Ø§Ø¬Ø¹Ù„ Ø§Ù„Ø±Ø¯ÙˆØ¯ Ù‚ØµÙŠØ±Ø© (3-6 Ø¬Ù…Ù„) Ù…Ø¹ Ø¥ÙŠÙ…ÙˆØ¬ÙŠ Ù…Ù†Ø§Ø³Ø¨Ø© ðŸš€.
+- Ù„Ø§ ØªØ·Ù„Ø¨ Ø¨ÙŠØ§Ù†Ø§Øª Ø´Ø®ØµÙŠØ© Ø­Ø³Ø§Ø³Ø©.
 `.trim();
 
   const messages: { role: string; content: string }[] = [
@@ -443,8 +443,9 @@ export const studentMobileAiChat = asyncHandler(async (req: Request, res: Respon
   );
 
   const reply = response.data?.choices?.[0]?.message?.content?.trim()
-    || "أنا معاك يا بطل! جرّب تسألني تاني 🌟";
+    || "Ø£Ù†Ø§ Ù…Ø¹Ø§Ùƒ ÙŠØ§ Ø¨Ø·Ù„! Ø¬Ø±Ù‘Ø¨ ØªØ³Ø£Ù„Ù†ÙŠ ØªØ§Ù†ÙŠ ðŸŒŸ";
 
   res.json({ success: true, reply });
 });
+
 

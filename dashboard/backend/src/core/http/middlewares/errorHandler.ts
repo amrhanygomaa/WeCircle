@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { AppError } from "../core/utils/AppError";
+import { AppError } from "../../utils/AppError";
 import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
 
@@ -22,11 +22,11 @@ export function errorHandler(
 ): void {
   // ── Our custom AppError hierarchy ──
   if (err instanceof AppError) {
-    res.status(err.statusCode).json({
+    res.status((err as any).statusCode).json({
       success: false,
-      code: err.code,
+      code: (err as any).code,
       message: err.message,
-      ...(err.field && { field: err.field })
+      ...((err as any).field && { field: (err as any).field })
     });
     return;
   }
@@ -50,7 +50,7 @@ export function errorHandler(
 
   // ── Prisma unique constraint violation ──
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    if (err.code === "P2002") {
+    if ((err as any).code === "P2002") {
       const target = (err.meta?.target as string[]) || [];
       const fieldName = target[0] || "field";
       const friendlyNames: Record<string, string> = {
@@ -66,7 +66,7 @@ export function errorHandler(
       return;
     }
 
-    if (err.code === "P2025") {
+    if ((err as any).code === "P2025") {
       res.status(404).json({
         success: false,
         code: "NOT_FOUND",

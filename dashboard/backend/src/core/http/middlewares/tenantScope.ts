@@ -1,5 +1,5 @@
-import type { NextFunction, Request, Response } from "express";
-import { ForbiddenError } from "../core/utils/AppError";
+﻿import type { NextFunction, Request, Response } from "express";
+import { ForbiddenError } from "../../utils/AppError";
 
 /**
  * Tenant scoping middleware.
@@ -17,7 +17,7 @@ export function tenantScope(req: Request, _res: Response, next: NextFunction): v
     throw new ForbiddenError("Authentication required before tenant scoping.");
   }
 
-  // SUPER_ADMIN can see everything — schoolId stays null
+  // SUPER_ADMIN can see everything â€” schoolId stays null
   if (user.role === "SUPER_ADMIN") {
     req.schoolId = null; // null = all schools
     return next();
@@ -31,3 +31,4 @@ export function tenantScope(req: Request, _res: Response, next: NextFunction): v
   req.schoolId = user.schoolId;
   next();
 }
+

@@ -36,7 +36,7 @@ export default function AdmissionDetailsPage() {
       queryClient.invalidateQueries({ queryKey: ["admissions"] });
       setEditingSection(null);
     },
-    onError: (err: any) => alert(err.response?.data?.message || t('' as any))
+    onError: (err: any) => alert(err.response?.data?.message || t('/admissions/${id}' as any))
   });
 
   const convertMutation = useMutation({
@@ -95,14 +95,14 @@ export default function AdmissionDetailsPage() {
 
   const getStatusInfo = (status: string) => {
     const map: any = {
-      NEW: { label: t('' as any), color: "#f59e0b", icon: <Clock size={16} /> },
-      UNDER_REVIEW: { label: t('' as any), color: "#3b82f6", icon: <RefreshCw size={16} /> },
-      FINAL_ACCEPTED: { label: t('' as any), color: "#34d399", icon: <CheckCircle2 size={16} /> },
-      REJECTED: { label: t('' as any), color: "#f87171", icon: <XCircle size={16} /> },
-      CONVERTED: { label: t('' as any), color: "#10b981", icon: <CheckCircle2 size={16} /> },
-      DOCUMENTS_INCOMPLETE: { label: t('' as any), color: "#ef4444", icon: <XCircle size={16} /> },
-      PENDING_DECISION: { label: t('' as any), color: "#8b5cf6", icon: <Clock size={16} /> },
-      PRELIMINARY_ACCEPTED: { label: t('' as any), color: "#60a5fa", icon: <CheckCircle2 size={16} /> },
+      NEW: { label: t('stat_no_data' as any), color: "#f59e0b", icon: <Clock size={16} /> },
+      UNDER_REVIEW: { label: t('/admissions/${id}/convert' as any), color: "#3b82f6", icon: <RefreshCw size={16} /> },
+      FINAL_ACCEPTED: { label: t('status_new' as any), color: "#34d399", icon: <CheckCircle2 size={16} /> },
+      REJECTED: { label: t('status_under_review' as any), color: "#f87171", icon: <XCircle size={16} /> },
+      CONVERTED: { label: t('status_final_accepted' as any), color: "#10b981", icon: <CheckCircle2 size={16} /> },
+      DOCUMENTS_INCOMPLETE: { label: t('status_rejected' as any), color: "#ef4444", icon: <XCircle size={16} /> },
+      PENDING_DECISION: { label: t('status_converted' as any), color: "#8b5cf6", icon: <Clock size={16} /> },
+      PRELIMINARY_ACCEPTED: { label: t('status_doc_incomplete' as any), color: "#60a5fa", icon: <CheckCircle2 size={16} /> },
     };
     return map[status] || { label: status, color: "var(--dash-muted-strong)", icon: <Clock size={16} /> };
   };
@@ -118,20 +118,20 @@ export default function AdmissionDetailsPage() {
               {isAr ? app.childNameAr : (app.childNameEn || app.childNameAr)}
             </h2>
             <div style={{ display: "flex", gap: "10px", marginTop: "4px", fontSize: "14px", color: "var(--dash-muted-strong)" }}>
-              <span>{t('' as any)}: {app.applicationNo}</span><span>•</span>
-              <span>{t('' as any)}: {new Date(app.createdAt).toLocaleDateString()}</span>
+              <span>{t('status_pending_decision' as any)}: {app.applicationNo}</span><span>•</span>
+              <span>{t('status_preliminary_accepted' as any)}: {new Date(app.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
           {app.status === "FINAL_ACCEPTED" && !app.convertedStudentId && (
             <button className="btn primary" onClick={() => convertMutation.mutate()} disabled={convertMutation.isPending}>
-              <UserPlus size={18} /> {convertMutation.isPending ? t('' as any) : t('' as any)}
+              <UserPlus size={18} /> {convertMutation.isPending ? t('adm_label_id' as any) : t('adm_label_date' as any)}
             </button>
           )}
           {app.convertedStudentId && (
             <div style={{ background: "rgba(52,211,153,0.1)", color: "#34d399", padding: "10px 20px", borderRadius: "12px", border: "1px solid rgba(52,211,153,0.2)", fontSize: "14px", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
-              <CheckCircle2 size={18} /> {t('' as any)}
+              <CheckCircle2 size={18} /> {t('adm_btn_converting' as any)}
             </div>
           )}
         </div>
@@ -143,44 +143,44 @@ export default function AdmissionDetailsPage() {
           {/* ── Child Card ── */}
           <div className="card-glass">
             <h3 className="card-title" style={{ justifyContent: "space-between" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "12px" }}><User size={18} /> {t('' as any)}</span>
+              <span style={{ display: "flex", alignItems: "center", gap: "12px" }}><User size={18} /> {t('adm_btn_convert' as any)}</span>
               <button className="edit-section-btn" onClick={() => startEdit("child")}><Pencil size={14} /></button>
             </h3>
             {editingSection === "child" ? (
               <div className="info-grid">
-                {ef(t('' as any), "childNameAr")}
-                {ef(t('' as any), "childNameEn")}
-                {ef(t('' as any), "childNationalId")}
-                {ef(t('' as any), "childBloodType")}
+                {ef(t('status_converted' as any), "childNameAr")}
+                {ef(t('adm_section_basic' as any), "childNameEn")}
+                {ef(t('child' as any), "childNationalId")}
+                {ef(t('adm_label_name_ar' as any), "childBloodType")}
                 <div style={{ marginBottom: "12px" }}>
-                  <div style={{ fontSize: "12px", color: "var(--dash-muted-strong)", marginBottom: "4px" }}>{t('' as any)}</div>
+                  <div style={{ fontSize: "12px", color: "var(--dash-muted-strong)", marginBottom: "4px" }}>{t('adm_label_name_en' as any)}</div>
                   <select 
                     className="glass-input" 
                     value={editData.childGender || "MALE"} 
                     onChange={(e) => setEditData((prev: any) => ({ ...prev, childGender: e.target.value }))}
                     style={{ padding: "8px 12px", fontSize: "14px", height: "39px", width: "100%", background: "var(--glass-bg)", color: "var(--glass-text-primary)", border: "1px solid var(--glass-border)", borderRadius: "8px" }}
                   >
-                    <option value="MALE" style={{ background: "#1a1f2c", color: "#fff" }}>{t('' as any)}</option>
-                    <option value="FEMALE" style={{ background: "#1a1f2c", color: "#fff" }}>{t('' as any)}</option>
+                    <option value="MALE" style={{ background: "#1a1f2c", color: "#fff" }}>{t('adm_label_national_id' as any)}</option>
+                    <option value="FEMALE" style={{ background: "#1a1f2c", color: "#fff" }}>{t('adm_label_blood_type' as any)}</option>
                   </select>
                 </div>
-                {ef(t('' as any), "childAddress")}
+                {ef(t('adm_label_gender' as any), "childAddress")}
                 <div style={{ gridColumn: "1 / -1", display: "flex", gap: "8px", marginTop: "8px" }}>
-                  <button className="btn primary" onClick={saveEdit} disabled={updateMutation.isPending} style={{ padding: "8px 20px", fontSize: "13px" }}>{updateMutation.isPending ? t('' as any) : t('' as any)}</button>
-                  <button className="btn outline" onClick={() => setEditingSection(null)} style={{ padding: "8px 20px", fontSize: "13px" }}>{t('' as any)}</button>
+                  <button className="btn primary" onClick={saveEdit} disabled={updateMutation.isPending} style={{ padding: "8px 20px", fontSize: "13px" }}>{updateMutation.isPending ? t('adm_label_gender_m' as any) : t('adm_label_gender_f' as any)}</button>
+                  <button className="btn outline" onClick={() => setEditingSection(null)} style={{ padding: "8px 20px", fontSize: "13px" }}>{t('adm_label_address' as any)}</button>
                 </div>
               </div>
             ) : (
               <div className="info-grid">
-                <InfoItem label={t('' as any)} value={app.childNameAr} />
-                <InfoItem label={t('' as any)} value={app.childNameEn} />
-                <InfoItem label={t('' as any)} value={app.childNationalId} />
-                <InfoItem label={t('' as any)} value={new Date(app.childDob).toLocaleDateString()} />
-                <InfoItem label={t('' as any)} value={app.childGender === "MALE" ? t('' as any) : t('' as any)} />
-                <InfoItem label={t('' as any)} value={app.childNationality} />
-                <InfoItem label={t('' as any)} value={app.childReligion === "MUSLIM" ? t('' as any) : t('' as any)} />
-                <InfoItem label={t('' as any)} value={app.childBloodType} />
-                <div style={{ gridColumn: "1 / -1" }}><InfoItem label={t('' as any)} value={app.childAddress} /></div>
+                <InfoItem label={t('btn_submitting' as any)} value={app.childNameAr} />
+                <InfoItem label={t('adm_btn_save' as any)} value={app.childNameEn} />
+                <InfoItem label={t('adm_btn_cancel' as any)} value={app.childNationalId} />
+                <InfoItem label={t('adm_label_name_ar' as any)} value={new Date(app.childDob).toLocaleDateString()} />
+                <InfoItem label={t('adm_label_name_en' as any)} value={app.childGender === "MALE" ? t('adm_label_national_id' as any) : t('adm_label_dob' as any)} />
+                <InfoItem label={t('adm_label_gender' as any)} value={app.childNationality} />
+                <InfoItem label={t('adm_label_gender_m' as any)} value={app.childReligion === "MUSLIM" ? t('adm_label_gender_f' as any) : t('adm_label_nationality' as any)} />
+                <InfoItem label={t('adm_label_religion' as any)} value={app.childBloodType} />
+                <div style={{ gridColumn: "1 / -1" }}><InfoItem label={t('adm_opt_muslim' as any)} value={app.childAddress} /></div>
               </div>
             )}
           </div>
@@ -188,41 +188,41 @@ export default function AdmissionDetailsPage() {
           {/* ── Parents Card ── */}
           <div className="card-glass">
             <h3 className="card-title" style={{ justifyContent: "space-between" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "12px" }}><Users size={18} /> {t('' as any)}</span>
+              <span style={{ display: "flex", alignItems: "center", gap: "12px" }}><Users size={18} /> {t('adm_opt_christian' as any)}</span>
               <button className="edit-section-btn" onClick={() => startEdit("family")}><Pencil size={14} /></button>
             </h3>
             {editingSection === "family" ? (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px" }}>
                 <div>
-                  <h4 style={{ fontSize: "16px", marginBottom: "16px", color: "var(--primary-light)" }}>{t('' as any)}</h4>
-                  {ef(t('' as any), "fatherName")}
-                  {ef(t('' as any), "fatherPhone")}
-                  {ef(t('' as any), "fatherOccupation")}
+                  <h4 style={{ fontSize: "16px", marginBottom: "16px", color: "var(--primary-light)" }}>{t('adm_label_blood_type' as any)}</h4>
+                  {ef(t('adm_label_address' as any), "fatherName")}
+                  {ef(t('adm_section_parents' as any), "fatherPhone")}
+                  {ef(t('family' as any), "fatherOccupation")}
                 </div>
                 <div>
-                  <h4 style={{ fontSize: "16px", marginBottom: "16px", color: "var(--primary-light)" }}>{t('' as any)}</h4>
-                  {ef(t('' as any), "motherName")}
-                  {ef(t('' as any), "motherPhone")}
-                  {ef(t('' as any), "motherOccupation")}
+                  <h4 style={{ fontSize: "16px", marginBottom: "16px", color: "var(--primary-light)" }}>{t('adm_section_parents_father' as any)}</h4>
+                  {ef(t('adm_label_father_name' as any), "motherName")}
+                  {ef(t('adm_label_father_phone' as any), "motherPhone")}
+                  {ef(t('adm_label_father_job' as any), "motherOccupation")}
                 </div>
                 <div style={{ gridColumn: "1 / -1", display: "flex", gap: "8px" }}>
-                  <button className="btn primary" onClick={saveEdit} disabled={updateMutation.isPending} style={{ padding: "8px 20px", fontSize: "13px" }}>{updateMutation.isPending ? t('' as any) : t('' as any)}</button>
-                  <button className="btn outline" onClick={() => setEditingSection(null)} style={{ padding: "8px 20px", fontSize: "13px" }}>{t('' as any)}</button>
+                  <button className="btn primary" onClick={saveEdit} disabled={updateMutation.isPending} style={{ padding: "8px 20px", fontSize: "13px" }}>{updateMutation.isPending ? t('adm_section_parents_mother' as any) : t('adm_label_mother_name' as any)}</button>
+                  <button className="btn outline" onClick={() => setEditingSection(null)} style={{ padding: "8px 20px", fontSize: "13px" }}>{t('adm_label_mother_phone' as any)}</button>
                 </div>
               </div>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px" }}>
                 <div>
-                  <h4 style={{ fontSize: "16px", marginBottom: "16px", color: "var(--primary-light)" }}>{t('' as any)}</h4>
-                  <InfoStack label={t('' as any)} value={app.father?.fullName} />
-                  <InfoStack label={t('' as any)} value={app.father?.phone} />
-                  <InfoStack label={t('' as any)} value={app.father?.occupation} />
+                  <h4 style={{ fontSize: "16px", marginBottom: "16px", color: "var(--primary-light)" }}>{t('adm_label_mother_job' as any)}</h4>
+                  <InfoStack label={t('btn_submitting' as any)} value={app.father?.fullName} />
+                  <InfoStack label={t('adm_btn_save' as any)} value={app.father?.phone} />
+                  <InfoStack label={t('adm_btn_cancel' as any)} value={app.father?.occupation} />
                 </div>
                 <div>
-                  <h4 style={{ fontSize: "16px", marginBottom: "16px", color: "var(--primary-light)" }}>{t('' as any)}</h4>
-                  <InfoStack label={t('' as any)} value={app.mother?.fullName} />
-                  <InfoStack label={t('' as any)} value={app.mother?.phone} />
-                  <InfoStack label={t('' as any)} value={app.mother?.occupation} />
+                  <h4 style={{ fontSize: "16px", marginBottom: "16px", color: "var(--primary-light)" }}>{t('adm_section_parents_father' as any)}</h4>
+                  <InfoStack label={t('adm_label_father_name' as any)} value={app.mother?.fullName} />
+                  <InfoStack label={t('adm_label_phone' as any)} value={app.mother?.phone} />
+                  <InfoStack label={t('adm_label_job' as any)} value={app.mother?.occupation} />
                 </div>
               </div>
             )}
@@ -230,9 +230,9 @@ export default function AdmissionDetailsPage() {
 
           {/* ── Documents Card ── */}
           <div className="card-glass">
-            <h3 className="card-title"><span style={{ display: "flex", alignItems: "center", gap: "12px" }}><FileText size={18} /> {t('' as any)}</span></h3>
+            <h3 className="card-title"><span style={{ display: "flex", alignItems: "center", gap: "12px" }}><FileText size={18} /> {t('adm_section_parents_mother' as any)}</span></h3>
             {(!app.documents || app.documents.length === 0) && !app.childPhoto ? (
-              <p style={{ color: "var(--dash-muted-strong)", textAlign: "center", padding: "40px 0" }}>{t('' as any)}</p>
+              <p style={{ color: "var(--dash-muted-strong)", textAlign: "center", padding: "40px 0" }}>{t('adm_label_mother_name' as any)}</p>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "16px" }}>
                 {app.childPhoto && (
@@ -241,7 +241,7 @@ export default function AdmissionDetailsPage() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={app.childPhoto} alt="Student" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     </div>
-                    <span style={{ fontSize: "14px", fontWeight: 700, textAlign: "center" }}>{t('' as any)}</span>
+                    <span style={{ fontSize: "14px", fontWeight: 700, textAlign: "center" }}>{t('adm_label_phone' as any)}</span>
                   </a>
                 )}
                 {app.documents?.map((doc: any, i: number) => (
@@ -252,7 +252,7 @@ export default function AdmissionDetailsPage() {
                        doc.documentType === "FATHER_NATIONAL_ID_BACK" ? (isAr ? "بطاقة الأب (خلفي)" : "Father ID (Back)") :
                        doc.documentType === "MOTHER_NATIONAL_ID_FRONT" ? (isAr ? "بطاقة الأم (أمامي)" : "Mother ID (Front)") :
                        doc.documentType === "MOTHER_NATIONAL_ID_BACK" ? (isAr ? "بطاقة الأم (خلفي)" : "Mother ID (Back)") :
-                       doc.documentType === "BIRTH_CERTIFICATE" ? t('' as any) : doc.documentType}
+                       doc.documentType === "BIRTH_CERTIFICATE" ? t('adm_label_job' as any) : doc.documentType}
                     </span>
                   </a>
                 ))}
@@ -264,7 +264,7 @@ export default function AdmissionDetailsPage() {
         {/* ── Sidebar ── */}
         <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
           <div className="card-glass">
-            <h3 className="card-title">{t('' as any)}</h3>
+            <h3 className="card-title">{t('adm_label_docs' as any)}</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <StatusBtn active={app.status === "NEW"} onClick={() => statusMutation.mutate("NEW")} {...getStatusInfo("NEW")} />
               <StatusBtn active={app.status === "UNDER_REVIEW"} onClick={() => statusMutation.mutate("UNDER_REVIEW")} {...getStatusInfo("UNDER_REVIEW")} />
@@ -273,11 +273,11 @@ export default function AdmissionDetailsPage() {
             </div>
           </div>
           <div className="card-glass">
-            <h3 className="card-title">{t('' as any)}</h3>
+            <h3 className="card-title">{t('adm_msg_no_docs' as any)}</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <InfoStack label={t('' as any)} value={app.academicYear?.name} />
-              <InfoStack label={t('' as any)} value={app.grade?.name} />
-              <InfoStack label={t('' as any)} value={app.previousSchool || "—"} />
+              <InfoStack label={t('adm_doc_photo' as any)} value={app.academicYear?.name} />
+              <InfoStack label={t('adm_doc_birth' as any)} value={app.grade?.name} />
+              <InfoStack label={t('adm_label_status' as any)} value={app.previousSchool || "—"} />
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import { prisma } from "../config/prisma";
-import { env } from "../config/env";
+import { prisma } from "../../../config/prisma";
+import { env } from "../../../config/env";
 import jwt from "jsonwebtoken";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 
@@ -108,3 +108,4 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
 // Alias for convenience
 export const auth = requireAuth;
+

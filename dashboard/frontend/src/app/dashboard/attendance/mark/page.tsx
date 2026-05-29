@@ -24,7 +24,7 @@ export default function MarkAttendancePage() {
   
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<number>(1);
-  const [attendanceDate, setAttendanceDate] = useState<string>(new Date().toISOString().split('' as any)[0]);
+  const [attendanceDate, setAttendanceDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [studentStatuses, setStudentStatuses] = useState<Record<string, "PRESENT" | "ABSENT" | "LATE" | "EXCUSED">>({});
 
   // 1. Fetch School Settings
@@ -60,7 +60,7 @@ export default function MarkAttendancePage() {
     mutationFn: (payload: any) => api.post("/attendance/bulk", payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["attendance"] });
-      alert(t('' as any));
+      alert(t('sett_save_success'));
     }
   });
 
@@ -98,17 +98,17 @@ export default function MarkAttendancePage() {
       <div className="module-header" style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--glass-text-muted)", marginBottom: "8px", fontSize: "14px" }}>
-            <Link href="/dashboard/attendance" style={{ color: "inherit", textDecoration: "none" }}>{t('' as any)}</Link>
+            <Link href="/dashboard/attendance" style={{ color: "inherit", textDecoration: "none" }}>{t('dash_attendance')}</Link>
             <ArrowRight size={14} style={{ transform: isAr ? "rotate(180deg)" : "none" }} />
-            <span>{t('' as any)}</span>
+            <span>{t('attn_mark_title')}</span>
           </div>
-          <h2 style={{ fontSize: "32px", fontWeight: 900, letterSpacing: "-1px", color: "var(--glass-text-primary)" }}>{t('' as any)}</h2>
+          <h2 style={{ fontSize: "32px", fontWeight: 900, letterSpacing: "-1px", color: "var(--glass-text-primary)" }}>{t('attn_mark_title')}</h2>
         </div>
 
         <div style={{ display: "flex", gap: "12px" }}>
           <button onClick={() => handleMarkAll("PRESENT")} className="btn outline" style={{ color: "#10b981", borderColor: "rgba(16, 185, 129, 0.3)" }}>
             <CheckCircle size={18} />
-            {t('' as any)}
+            {t('attn_mark_all_present')}
           </button>
         </div>
       </div>
@@ -116,13 +116,13 @@ export default function MarkAttendancePage() {
       {/* Global Selectors Card */}
       <div className="card-glass" style={{ padding: "24px", marginBottom: "32px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px", alignItems: "flex-end" }}>
         <div>
-          <label style={labelStyle}>{t('' as any)}</label>
+          <label style={labelStyle}>{t('attn_select_class')}</label>
           <select 
             value={selectedClassId} 
             onChange={e => setSelectedClassId(e.target.value)}
             style={inputStyle}
           >
-            <option value="" style={{ color: "var(--glass-text-muted)" }}>-- {t('' as any)} --</option>
+            <option value="" style={{ color: "var(--glass-text-muted)" }}>-- {t('attn_select_class')} --</option>
             {classes?.map((c: any) => (
               <option key={c.id} value={c.id} style={{ color: "#000" }}>{c.name}</option>
             ))}
@@ -141,7 +141,7 @@ export default function MarkAttendancePage() {
 
         {settings?.attendanceMode === "PERIODIC" && (
           <div>
-            <label style={labelStyle}>{t('' as any)}</label>
+            <label style={labelStyle}>{t('attn_select_period')}</label>
             <div style={{ display: "flex", gap: "8px", overflowX: "auto", padding: "4px" }}>
               {Array.from({ length: settings.periodsPerDay || 8 }).map((_, i) => (
                 <button
@@ -162,7 +162,7 @@ export default function MarkAttendancePage() {
         <div className="card-glass" style={{ padding: "80px", textAlign: "center", color: "var(--glass-text-secondary)" }}>
           <Users size={64} style={{ marginBottom: "20px", opacity: 0.1, margin: "0 auto" }} />
           <h3 style={{ fontSize: "20px", fontWeight: 700, color: "var(--glass-text-primary)" }}>Select a Class</h3>
-          <p style={{ marginTop: "8px", opacity: 0.6 }}>{t('' as any)} to start marking attendance.</p>
+          <p style={{ marginTop: "8px", opacity: 0.6 }}>{t('attn_select_class')} to start marking attendance.</p>
         </div>
       ) : loadingStudents ? (
         <div style={{ textAlign: "center", padding: "80px" }}>
@@ -197,25 +197,25 @@ export default function MarkAttendancePage() {
                       <StatusBtn 
                         active={studentStatuses[s.id] === "PRESENT"} 
                         type="PRESENT" 
-                        label={t('' as any)}
+                        label={t('stat_present')}
                         onClick={() => handleStatusChange(s.id, "PRESENT")} 
                       />
                       <StatusBtn 
                         active={studentStatuses[s.id] === "ABSENT"} 
                         type="ABSENT" 
-                        label={t('' as any)}
+                        label={t('stat_absent')}
                         onClick={() => handleStatusChange(s.id, "ABSENT")} 
                       />
                       <StatusBtn 
                         active={studentStatuses[s.id] === "LATE"} 
                         type="LATE" 
-                        label={t('' as any)}
+                        label={t('stat_late')}
                         onClick={() => handleStatusChange(s.id, "LATE")} 
                       />
                       <StatusBtn 
                         active={studentStatuses[s.id] === "EXCUSED"} 
                         type="EXCUSED" 
-                        label={t('' as any)}
+                        label={t('stat_excused')}
                         onClick={() => handleStatusChange(s.id, "EXCUSED")} 
                       />
                     </div>
@@ -259,7 +259,7 @@ export default function MarkAttendancePage() {
             }}
           >
             <Bell size={20} />
-            {mutation.isPending ? "Syncing..." : t('' as any)}
+            {mutation.isPending ? "Syncing..." : t('attn_save_notify')}
           </button>
         </div>
       )}

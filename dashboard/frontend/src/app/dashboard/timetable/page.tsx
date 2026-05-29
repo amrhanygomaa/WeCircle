@@ -64,7 +64,7 @@ export default function TimetablePage() {
       setEditingSlot(null);
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || t('' as any));
+      alert(err.response?.data?.message || t('tt_conflict_msg'));
     }
   });
 
@@ -78,11 +78,11 @@ export default function TimetablePage() {
   const generateMutation = useMutation({
     mutationFn: () => api.post("/timetable/auto-generate", { classId: selectedClassId }),
     onSuccess: (res) => {
-      alert(res.data.message || t('' as any));
+      alert(res.data.message || t('tt_auto_success'));
       queryClient.invalidateQueries({ queryKey: ["timetable"] });
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || t('' as any));
+      alert(err.response?.data?.message || t('tt_auto_error'));
     }
   });
 
@@ -118,8 +118,8 @@ export default function TimetablePage() {
       {/* Header */}
       <div className="module-header" style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <h2 style={{ fontSize: "32px", fontWeight: 900, letterSpacing: "-1px", color: "var(--glass-text-primary)" }}>{t('' as any)}</h2>
-          <p style={{ color: "var(--glass-text-secondary)", marginTop: "4px" }}>{t('' as any)}</p>
+          <h2 style={{ fontSize: "32px", fontWeight: 900, letterSpacing: "-1px", color: "var(--glass-text-primary)" }}>{t('dash_timetable')}</h2>
+          <p style={{ color: "var(--glass-text-secondary)", marginTop: "4px" }}>{t('mod_timetable_desc')}</p>
         </div>
 
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
@@ -141,7 +141,7 @@ export default function TimetablePage() {
                onChange={e => setSelectedClassId(e.target.value)}
                style={{ background: "transparent", border: "none", color: "var(--glass-text-primary)", outline: "none", fontWeight: 600, fontSize: "14px", cursor: "pointer" }}
              >
-               <option value="" style={{ color: "#000" }}>{t('' as any)}...</option>
+               <option value="" style={{ color: "#000" }}>{t('attn_select_class')}...</option>
                {classes?.map((c: any) => <option key={c.id} value={c.id} style={{ color: "#000" }}>{c.name}</option>)}
              </select>
           </div>
@@ -187,7 +187,7 @@ export default function TimetablePage() {
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
                                 <span style={subjectTagStyle}>{slot.subject?.name || "No Subject"}</span>
                                 <button 
-                                  onClick={(e) => { e.stopPropagation(); if(confirm(t('' as any))) deleteMutation.mutate(slot.id); }}
+                                  onClick={(e) => { e.stopPropagation(); if(confirm(t('tt_delete_confirm'))) deleteMutation.mutate(slot.id); }}
                                   style={{ background: "transparent", border: "none", color: "rgba(0,0,0,0.3)", cursor: "pointer" }}
                                 >
                                   <Trash2 size={12} />
@@ -232,7 +232,7 @@ export default function TimetablePage() {
         <div style={modalOverlayStyle}>
            <div className="card-glass" style={modalContentStyle}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-                 <h3 style={{ fontSize: "20px", fontWeight: 700, color: "var(--glass-text-primary)" }}>{editingSlot?.id ? t('' as any) : t('' as any)}</h3>
+                 <h3 style={{ fontSize: "20px", fontWeight: 700, color: "var(--glass-text-primary)" }}>{editingSlot?.id ? t('tt_edit_slot') : t('tt_add_slot')}</h3>
                  <button onClick={() => setShowModal(false)} style={{ background: "transparent", border: "none", color: "var(--glass-text-primary)", cursor: "pointer" }}>
                     <X size={24} />
                  </button>
@@ -240,31 +240,31 @@ export default function TimetablePage() {
 
               <div style={{ display: "grid", gap: "24px" }}>
                  <div>
-                    <label style={labelStyle}>{t('' as any)}</label>
+                    <label style={labelStyle}>{t('tt_select_subject')}</label>
                     <select 
                       value={editingSlot?.subjectId || ""} 
                       onChange={e => setEditingSlot({...editingSlot, subjectId: e.target.value})}
                       style={inputStyle}
                     >
-                      <option value="" style={{ color: "#000" }}>-- {t('' as any)} --</option>
+                      <option value="" style={{ color: "#000" }}>-- {t('tt_select_subject')} --</option>
                       {subjects?.map((s: any) => <option key={s.id} value={s.id} style={{ color: "#000" }}>{s.name}</option>)}
                     </select>
                  </div>
 
                  <div>
-                    <label style={labelStyle}>{t('' as any)}</label>
+                    <label style={labelStyle}>{t('tt_select_teacher')}</label>
                     <select 
                       value={editingSlot?.teacherId || ""} 
                       onChange={e => setEditingSlot({...editingSlot, teacherId: e.target.value})}
                       style={inputStyle}
                     >
-                      <option value="" style={{ color: "#000" }}>-- {t('' as any)} --</option>
+                      <option value="" style={{ color: "#000" }}>-- {t('tt_select_teacher')} --</option>
                       {teachers?.map((t: any) => <option key={t.id} value={t.id} style={{ color: "#000" }}>{t.nameAr || t.user?.fullName}</option>)}
                     </select>
                  </div>
 
                  <div>
-                    <label style={labelStyle}>{t('' as any)}</label>
+                    <label style={labelStyle}>{t('tt_room_ph')}</label>
                     <input 
                       type="text" 
                       placeholder="e.g. Lab 1, Room 102"

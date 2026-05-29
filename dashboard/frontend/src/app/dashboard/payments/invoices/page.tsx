@@ -80,7 +80,7 @@ export default function InvoicesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       setIsBulkModalOpen(false);
-      alert(t('' as any));
+      alert(t('alert_bulk_success'));
     }
   });
 
@@ -89,7 +89,7 @@ export default function InvoicesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       setIsInvoiceModalOpen(false);
-      alert(t('' as any));
+      alert(t('alert_invoice_success'));
     }
   });
 
@@ -98,7 +98,7 @@ export default function InvoicesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       setIsPaymentModalOpen(false);
-      alert(t('' as any));
+      alert(t('alert_payment_success'));
     }
   });
 
@@ -232,10 +232,10 @@ export default function InvoicesPage() {
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
           <button className="btn outline" onClick={() => setIsBulkModalOpen(true)}>
-            <Zap size={18} /> {t('' as any)}
+            <Zap size={18} /> {t('btn_generate_bulk')}
           </button>
           <button className="btn primary" onClick={() => setIsInvoiceModalOpen(true)}>
-            <Plus size={18} /> {t('' as any)}
+            <Plus size={18} /> {t('btn_add_invoice')}
           </button>
         </div>
       </div>
@@ -368,7 +368,7 @@ export default function InvoicesPage() {
                   <div style={{ display: "flex", justifyContent: isAr ? "flex-start" : "flex-end", gap: "8px", alignItems: "center" }}>
                     <button className="btn-icon" onClick={() => handlePrint(inv)} title={isAr ? "طباعة" : "Print"}><Printer size={16} /></button>
                     {inv.status !== "PAID" && (
-                      <button className="btn-icon" onClick={() => { setSelectedInvoice(inv); setNewDeadline(inv.dueDate?.split('' as any)[0] || ""); setIsDeadlineModalOpen(true); }} title={isAr ? "تعديل التاريخ" : "Edit Deadline"}><Clock size={16} /></button>
+                      <button className="btn-icon" onClick={() => { setSelectedInvoice(inv); setNewDeadline(inv.dueDate?.split('T')[0] || ""); setIsDeadlineModalOpen(true); }} title={isAr ? "تعديل التاريخ" : "Edit Deadline"}><Clock size={16} /></button>
                     )}
                     {inv.status !== "PAID" && (
                       <button className="btn-icon" style={{ color: "#3b82f6" }} onClick={() => { setSelectedInvoice(inv); setIsDiscountModalOpen(true); }} title={isAr ? "تخفيض" : "Discount"}><Percent size={16} /></button>
@@ -396,25 +396,25 @@ export default function InvoicesPage() {
       <Modal
         isOpen={isBulkModalOpen}
         onClose={() => setIsBulkModalOpen(false)}
-        title={t('' as any)}
+        title={t('modal_bulk_title')}
         footer={
           <>
-            <button className="btn" onClick={() => setIsBulkModalOpen(false)}>{t('' as any)}</button>
-            <button className="btn primary" onClick={() => bulkMutation.mutate(bulkData)} disabled={bulkMutation.isPending}>{bulkMutation.isPending ? t('' as any) : t('' as any)}</button>
+            <button className="btn" onClick={() => setIsBulkModalOpen(false)}>{t('btn_cancel')}</button>
+            <button className="btn primary" onClick={() => bulkMutation.mutate(bulkData)} disabled={bulkMutation.isPending}>{bulkMutation.isPending ? t('btn_generating') : t('btn_start_bulk')}</button>
           </>
         }
       >
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('' as any)}</label>
-            <select style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--glass-input-bg)", border: "1px solid var(--glass-input-border)", color: "var(--glass-text-primary)" }} value={bulkData.gradeId} onChange={e => setBulkData({...bulkData, gradeId: e.target.value})}><option value="">{t('' as any)}</option>{grades?.map((g: any) => <option key={g.id} value={g.id} style={{color:'#000'}}>{isAr ? (g.nameAr || g.nameEn) : (g.nameEn || g.nameAr)}</option>)}</select>
+            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('field_grade')}</label>
+            <select style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--glass-input-bg)", border: "1px solid var(--glass-input-border)", color: "var(--glass-text-primary)" }} value={bulkData.gradeId} onChange={e => setBulkData({...bulkData, gradeId: e.target.value})}><option value="">{t('select_grade')}</option>{grades?.map((g: any) => <option key={g.id} value={g.id} style={{color:'#000'}}>{isAr ? (g.nameAr || g.nameEn) : (g.nameEn || g.nameAr)}</option>)}</select>
           </div>
           <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('' as any)}</label>
+            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('field_fee_type')}</label>
             <select style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--glass-input-bg)", border: "1px solid var(--glass-input-border)", color: "var(--glass-text-primary)" }} value={bulkData.feeType} onChange={e => setBulkData({...bulkData, feeType: e.target.value})}><option value="TUITION">Tuition</option><option value="BUS">Bus</option><option value="UNIFORM">Uniform</option><option value="BOOKS">Books</option></select>
           </div>
           <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('' as any)} (EGP)</label>
+            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('field_amount')} (EGP)</label>
             <input type="number" style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--glass-input-bg)", border: "1px solid var(--glass-input-border)", color: "var(--glass-text-primary)" }} value={bulkData.amount} onChange={e => setBulkData({...bulkData, amount: e.target.value})} />
           </div>
           <div>
@@ -428,25 +428,25 @@ export default function InvoicesPage() {
       <Modal
         isOpen={isInvoiceModalOpen}
         onClose={() => setIsInvoiceModalOpen(false)}
-        title={t('' as any)}
+        title={t('modal_invoice_title')}
         footer={
           <>
-            <button className="btn" onClick={() => setIsInvoiceModalOpen(false)}>{t('' as any)}</button>
-            <button className="btn primary" onClick={() => invoiceMutation.mutate(invoiceData)} disabled={invoiceMutation.isPending}>{invoiceMutation.isPending ? t('' as any) : t('' as any)}</button>
+            <button className="btn" onClick={() => setIsInvoiceModalOpen(false)}>{t('btn_cancel')}</button>
+            <button className="btn primary" onClick={() => invoiceMutation.mutate(invoiceData)} disabled={invoiceMutation.isPending}>{invoiceMutation.isPending ? t('btn_creating') : t('btn_create_invoice')}</button>
           </>
         }
       >
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('' as any)}</label>
-            <select style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--glass-input-bg)", border: "1px solid var(--glass-input-border)", color: "var(--glass-text-primary)" }} value={invoiceData.studentId} onChange={e => setInvoiceData({...invoiceData, studentId: e.target.value})}><option value="">{t('' as any)}</option>{students?.map((s: any) => <option key={s.id} value={s.id} style={{color:'#000'}}>{s.user?.fullName}</option>)}</select>
+            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('field_student')}</label>
+            <select style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--glass-input-bg)", border: "1px solid var(--glass-input-border)", color: "var(--glass-text-primary)" }} value={invoiceData.studentId} onChange={e => setInvoiceData({...invoiceData, studentId: e.target.value})}><option value="">{t('select_student')}</option>{students?.map((s: any) => <option key={s.id} value={s.id} style={{color:'#000'}}>{s.user?.fullName}</option>)}</select>
           </div>
           <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('' as any)}</label>
+            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('field_fee_type')}</label>
             <select style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--glass-input-bg)", border: "1px solid var(--glass-input-border)", color: "var(--glass-text-primary)" }} value={invoiceData.feeType} onChange={e => setInvoiceData({...invoiceData, feeType: e.target.value})}><option value="TUITION">Tuition</option><option value="BUS">Bus</option><option value="UNIFORM">Uniform</option><option value="BOOKS">Books</option></select>
           </div>
           <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('' as any)} (EGP)</label>
+            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>{t('field_amount')} (EGP)</label>
             <input type="number" style={{ width: "100%", padding: "12px", borderRadius: "10px", background: "var(--glass-input-bg)", border: "1px solid var(--glass-input-border)", color: "var(--glass-text-primary)" }} value={invoiceData.amount} onChange={e => setInvoiceData({...invoiceData, amount: e.target.value})} />
           </div>
           <div>
@@ -463,7 +463,7 @@ export default function InvoicesPage() {
         title={isAr ? "تطبيق تخفيض" : "Apply Discount"}
         footer={
           <>
-            <button className="btn" onClick={() => setIsDiscountModalOpen(false)}>{t('' as any)}</button>
+            <button className="btn" onClick={() => setIsDiscountModalOpen(false)}>{t('btn_cancel')}</button>
             <button 
               className="btn primary" 
               onClick={() => discountMutation.mutate(discountData.type === 'PERCENTAGE' ? { discountPercentage: discountData.value } : { discountAmount: discountData.value })} 
@@ -515,7 +515,7 @@ export default function InvoicesPage() {
         title={isAr ? "تسجيل مدفوعات" : "Record Payment"}
         footer={
           <>
-            <button className="btn" onClick={() => setIsPaymentModalOpen(false)}>{t('' as any)}</button>
+            <button className="btn" onClick={() => setIsPaymentModalOpen(false)}>{t('btn_cancel')}</button>
             <button className="btn primary" onClick={() => payMutation.mutate({ ...paymentData, amount: paymentData.paymentType === "FULL" ? selectedInvoice.remaining : paymentData.amount })} disabled={payMutation.isPending}>{payMutation.isPending ? (isAr ? "جاري التسجيل..." : "Recording...") : (isAr ? "تأكيد الدفع" : "Confirm Payment")}</button>
           </>
         }
@@ -576,7 +576,7 @@ export default function InvoicesPage() {
         title={isAr ? "تعديل تاريخ الاستحقاق" : "Adjust Deadline"}
         footer={
           <>
-            <button className="btn" onClick={() => setIsDeadlineModalOpen(false)}>{t('' as any)}</button>
+            <button className="btn" onClick={() => setIsDeadlineModalOpen(false)}>{t('btn_cancel')}</button>
             <button className="btn primary" onClick={() => deadlineMutation.mutate({ id: selectedInvoice.id, dueDate: newDeadline })} disabled={deadlineMutation.isPending}>{deadlineMutation.isPending ? (isAr ? "جاري التعديل..." : "Adjusting...") : (isAr ? "تحديث" : "Update")}</button>
           </>
         }

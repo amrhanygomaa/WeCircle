@@ -93,11 +93,15 @@ export default function DriverWizard({
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `drivers/${field}/${fileName}`;
 
-      await uploadToS3(file, filePath); const uploadError: any = null;
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const publicUrl = `https://wecircle-storage-1779996505705.s3.us-east-1.amazonaws.com/${filePath}`;
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
 
       setFormData({ ...formData, [field]: publicUrl });
     } catch (error: any) {

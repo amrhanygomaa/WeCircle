@@ -72,7 +72,7 @@ export const updateMySchool = asyncHandler(async (req: Request, res: Response) =
 
       // 3. Update Supabase Auth email (Syncing Login Identity)
       const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(
-        currentUser.supabaseId,
+        currentUser.cognitoId,
         { email: newEmail, email_confirm: true }
       );
       if (authUpdateError) {
@@ -107,4 +107,5 @@ export const updateMySchool = asyncHandler(async (req: Request, res: Response) =
   getIO().to(`school:${schoolId}`).emit("school:updated", school);
   res.json({ success: true, data: school });
 });
+
 

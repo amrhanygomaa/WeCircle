@@ -37,7 +37,7 @@ export default function AdmissionsPage() {
     mutationFn: (id: string) => api.delete(`/admissions/${id}`),
     onSuccess: () => {
       refetch();
-      alert(t('' as any) || (isAr ? "تم حذف الطلب بنجاح" : "Application deleted successfully"));
+      alert(t('adm_msg_deleted') || (isAr ? "تم حذف الطلب بنجاح" : "Application deleted successfully"));
     }
   });
 
@@ -49,14 +49,14 @@ export default function AdmissionsPage() {
 
   const getStatusBadge = (status: string) => {
     const map: any = {
-      NEW: { label: t('' as any), color: "#f59e0b", bg: "rgba(245, 158, 11, 0.1)" },
-      UNDER_REVIEW: { label: t('' as any), color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },
-      FINAL_ACCEPTED: { label: t('' as any), color: "#34d399", bg: "rgba(52, 211, 153, 0.1)" },
-      REJECTED: { label: t('' as any), color: "#f87171", bg: "rgba(248, 113, 113, 0.1)" },
-      CONVERTED: { label: t('' as any), color: "#10b981", bg: "rgba(16, 185, 129, 0.1)" },
-      DOCUMENTS_INCOMPLETE: { label: t('' as any), color: "#ef4444", bg: "rgba(239, 68, 68, 0.1)" },
-      PENDING_DECISION: { label: t('' as any), color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)" },
-      PRELIMINARY_ACCEPTED: { label: t('' as any), color: "#60a5fa", bg: "rgba(96, 165, 250, 0.1)" },
+      NEW: { label: t('status_new'), color: "#f59e0b", bg: "rgba(245, 158, 11, 0.1)" },
+      UNDER_REVIEW: { label: t('status_under_review'), color: "#3b82f6", bg: "rgba(59, 130, 246, 0.1)" },
+      FINAL_ACCEPTED: { label: t('status_final_accepted'), color: "#34d399", bg: "rgba(52, 211, 153, 0.1)" },
+      REJECTED: { label: t('status_rejected'), color: "#f87171", bg: "rgba(248, 113, 113, 0.1)" },
+      CONVERTED: { label: t('status_converted'), color: "#10b981", bg: "rgba(16, 185, 129, 0.1)" },
+      DOCUMENTS_INCOMPLETE: { label: t('status_doc_incomplete'), color: "#ef4444", bg: "rgba(239, 68, 68, 0.1)" },
+      PENDING_DECISION: { label: t('status_pending_decision'), color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)" },
+      PRELIMINARY_ACCEPTED: { label: t('status_preliminary_accepted'), color: "#60a5fa", bg: "rgba(96, 165, 250, 0.1)" },
     };
     const info = map[status] || { label: status, color: "var(--glass-text-secondary)", bg: "var(--glass-input-bg)" };
     return <span className="badge" style={{ background: info.bg, color: info.color, fontWeight: 700 }}>{info.label}</span>;
@@ -83,7 +83,7 @@ export default function AdmissionsPage() {
       {/* Header */}
       <div className="module-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "40px" }}>
         <div>
-          <h2 style={{ fontSize: "32px", fontWeight: 900, letterSpacing: "-1px", color: "var(--glass-text-primary)" }}>{t('' as any)}</h2>
+          <h2 style={{ fontSize: "32px", fontWeight: 900, letterSpacing: "-1px", color: "var(--glass-text-primary)" }}>{t('nav_group_admission')}</h2>
           <p style={{ color: "var(--glass-text-secondary)", marginTop: "4px" }}>
             {isAr ? "متابعة وإدارة طلبات التقديم الجديدة للطلاب للعام الدراسي الحالي." : "Monitor and manage new student applications for the current academic cycle."}
           </p>
@@ -98,7 +98,7 @@ export default function AdmissionsPage() {
           </button>
           <Link href="/dashboard/admissions/new">
             <button className="btn primary" style={{ borderRadius: "14px", padding: "14px 28px" }}>
-              <UserPlus size={20} /> {t('' as any)}
+              <UserPlus size={20} /> {t('btn_add_student')}
             </button>
           </Link>
         </div>
@@ -189,11 +189,11 @@ export default function AdmissionsPage() {
         <table className="premium-table">
           <thead>
             <tr>
-              <th style={{ textAlign: isAr ? "right" : "left" }}>{t('' as any)}</th>
+              <th style={{ textAlign: isAr ? "right" : "left" }}>{t('adm_label_id')}</th>
               <th style={{ textAlign: isAr ? "right" : "left" }}>{isAr ? "اسم الطالب" : "Student Name"}</th>
-              <th style={{ textAlign: isAr ? "right" : "left" }}>{t('' as any)}</th>
-              <th style={{ textAlign: isAr ? "right" : "left" }}>{t('' as any)}</th>
-              <th style={{ textAlign: isAr ? "right" : "left" }}>{t('' as any)}</th>
+              <th style={{ textAlign: isAr ? "right" : "left" }}>{t('adm_label_grade')}</th>
+              <th style={{ textAlign: isAr ? "right" : "left" }}>{t('adm_label_phone')}</th>
+              <th style={{ textAlign: isAr ? "right" : "left" }}>{t('adm_label_status')}</th>
               <th style={{ textAlign: isAr ? "right" : "left" }}>{isAr ? "التاريخ" : "Date"}</th>
               <th style={{ textAlign: isAr ? "left" : "right" }}>{isAr ? "إجراءات" : "Actions"}</th>
             </tr>

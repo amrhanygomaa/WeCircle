@@ -19,10 +19,10 @@ import {
   MoreVertical,
   ExternalLink
 } from "lucide-react";
-import { api, extractApiError } from "@/core/api/apiClient";
+import { api, extractApiError, uploadToS3 } from "@/core/api/apiClient";
 import { useTranslation } from "@/core/i18n/i18n";
 import { Modal } from "@/shared/ui/Modal";
-import { uploadToS3 } from "@/core/api/apiClient";
+
 
 export default function ExamsPage() {
   const { t, isAr } = useTranslation();
@@ -261,15 +261,9 @@ export default function ExamsPage() {
   const handleFileUpload = async (file: File) => {
     try {
       setUploading(true);
-      const fileExt = file.name.split('' as any).pop();
+      const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `results/${fileName}`;
-
-      // Upload via S3
-      await uploadToS3(file, filePath);
-
-      const publicUrl = `https://wecircle-storage-1779996505705.s3.us-east-1.amazonaws.com/${filePath}`;
-
+      const publicUrl = await uploadToS3(file, "results");
       setResultForm({ ...resultForm, fileUrl: publicUrl });
     } catch (e: any) {
       alert("Error uploading: " + e.message);
