@@ -486,16 +486,19 @@ export const mobileLogin = asyncHandler(async (req: Request, res: Response) => {
       // Fallback to default
     }
 
-    addSession({
+    await addSession({
       id: crypto.randomUUID(),
+      schoolId: credential.schoolId,
       parentId: credential.parentId || null,
       teacherId: credential.teacherId || null,
+      driverId: credential.driverId || null,
+      studentId: credential.studentId || null,
       credentialId: credential.id,
       deviceName,
       location,
       ipAddress,
       token,
-      isActive: true
+      isActive: true,
     });
   }
 
@@ -637,16 +640,19 @@ export const mobileSocialLogin = asyncHandler(async (req: Request, res: Response
       }
     } catch (_) {}
 
-    addSession({
+    await addSession({
       id: crypto.randomUUID(),
+      schoolId: credential.schoolId,
       parentId: credential.parentId || null,
       teacherId: credential.teacherId || null,
+      driverId: credential.driverId || null,
+      studentId: credential.studentId || null,
       credentialId: credential.id,
       deviceName,
       location,
       ipAddress,
       token,
-      isActive: true
+      isActive: true,
     });
   }
 
@@ -713,9 +719,9 @@ export const changeMobilePassword = asyncHandler(async (req: Request, res: Respo
 
   // 4. If parent or teacher, revoke sessions
   if (credential.parentId) {
-    revokeAllSessionsForParent(credential.parentId);
+    await revokeAllSessionsForParent(credential.parentId);
   } else if (credential.teacherId) {
-    revokeAllSessionsForTeacher(credential.teacherId);
+    await revokeAllSessionsForTeacher(credential.teacherId);
   }
 
   res.json({ success: true, message: "Password updated successfully." });

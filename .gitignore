@@ -121,7 +121,7 @@ wesal dashboard/
 # Temporary / Debug Files
 # ============================================
 scratch/
-device_sessions.json
+# device_sessions.json  — replaced by DeviceSession DB table (Phase 3)
 analysis_output.txt
 analyze_*.txt
 add_comments.py

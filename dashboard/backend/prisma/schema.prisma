@@ -256,6 +256,7 @@ model School {
   DailyReport       DailyReport[]
   StudentTask       StudentTask[]
   studentGameProgress StudentGameProgress[]
+  deviceSessions      DeviceSession[]
 }
 
 model User {
@@ -350,6 +351,8 @@ model AppCredential {
   appleId     String? @unique
   googleEmail String?
   appleEmail  String?
+
+  deviceSessions DeviceSession[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1562,4 +1565,36 @@ model StudentGameProgress {
   @@unique([studentId, gameId])
   @@index([schoolId])
   @@index([studentId])
+}
+
+// ============================================================
+// DEVICE SESSIONS — mobile app active logins
+// ============================================================
+
+// Replaces the file-based device_sessions.json.
+// Durable, multi-instance safe, queried by token for auth checks on every request.
+model DeviceSession {
+  id           String  @id @default(uuid())
+  credentialId String
+  schoolId     String
+  parentId     String?
+  teacherId    String?
+  driverId     String?
+  studentId    String?
+  token        String  @unique
+  deviceName   String  @default("")
+  location     String  @default("")
+  ipAddress    String  @default("")
+  isActive     Boolean @default(true)
+
+  createdAt    DateTime @default(now())
+  lastActiveAt DateTime @updatedAt
+
+  credential AppCredential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  school     School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([credentialId])
+  @@index([schoolId])
+  @@index([parentId])
+  @@index([teacherId])
 }

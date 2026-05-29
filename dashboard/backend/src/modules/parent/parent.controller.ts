@@ -558,7 +558,7 @@ export const getMobileParentDevices = asyncHandler(async (req: Request, res: Res
     throw new ValidationError("Unauthorized: Parent session not found.");
   }
 
-  const sessions = getSessionsForParent(parentId);
+  const sessions = await getSessionsForParent(parentId);
   const formatted = sessions.map((s) => ({
     id: s.id,
     deviceName: s.deviceName,
@@ -567,7 +567,7 @@ export const getMobileParentDevices = asyncHandler(async (req: Request, res: Res
     isActive: s.isActive,
     isCurrent: s.token === currentToken,
     createdAt: s.createdAt,
-    lastActiveAt: s.lastActiveAt
+    lastActiveAt: s.lastActiveAt,
   }));
 
   res.json({ success: true, data: formatted });
@@ -586,7 +586,7 @@ export const logoutMobileParentDevice = asyncHandler(async (req: Request, res: R
     })
     .parse(req.body);
 
-  const success = revokeSession(sessionId, parentId);
+  const success = await revokeSession(sessionId, parentId);
   if (!success) {
     throw new NotFoundError("Device session not found or unauthorized.");
   }
@@ -602,11 +602,10 @@ export const logoutAllOtherMobileDevices = asyncHandler(async (req: Request, res
     throw new ValidationError("Unauthorized: Parent session not found.");
   }
 
-  // Find current session ID
-  const sessions = getSessionsForParent(parentId);
+  const sessions = await getSessionsForParent(parentId);
   const currentSession = sessions.find((s) => s.token === currentToken);
 
-  revokeAllSessionsForParent(parentId, currentSession?.id);
+  await revokeAllSessionsForParent(parentId, currentSession?.id);
 
   res.json({ success: true, message: "Logged out from all other devices successfully." });
 });
@@ -646,8 +645,7 @@ export const changeMobileParentPassword = asyncHandler(async (req: Request, res:
     }
   });
 
-  // 4. Revoke all active sessions for this parent (force re-login on all devices)
-  revokeAllSessionsForParent(parentId);
+  await revokeAllSessionsForParent(parentId);
 
   res.json({ success: true, message: "Password updated successfully." });
 });

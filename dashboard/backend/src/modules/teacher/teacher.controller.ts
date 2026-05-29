@@ -758,7 +758,7 @@ export const changeMobileTeacherPassword = asyncHandler(async (req: Request, res
     }
   });
 
-  revokeAllSessionsForTeacher(teacherId);
+  await revokeAllSessionsForTeacher(teacherId);
 
   res.json({ success: true, message: "Password updated successfully." });
 });
@@ -771,7 +771,7 @@ export const getMobileTeacherDevices = asyncHandler(async (req: Request, res: Re
     throw new ValidationError("Unauthorized: Teacher session not found.");
   }
 
-  const sessions = getSessionsForTeacher(teacherId);
+  const sessions = await getSessionsForTeacher(teacherId);
   const formatted = sessions.map((s) => ({
     id: s.id,
     deviceName: s.deviceName,
@@ -780,7 +780,7 @@ export const getMobileTeacherDevices = asyncHandler(async (req: Request, res: Re
     isActive: s.isActive,
     isCurrent: s.token === currentToken,
     createdAt: s.createdAt,
-    lastActiveAt: s.lastActiveAt
+    lastActiveAt: s.lastActiveAt,
   }));
 
   res.json({ success: true, data: formatted });
@@ -799,7 +799,7 @@ export const logoutMobileTeacherDevice = asyncHandler(async (req: Request, res: 
     })
     .parse(req.body);
 
-  const success = revokeSessionForTeacher(sessionId, teacherId);
+  const success = await revokeSessionForTeacher(sessionId, teacherId);
   if (!success) {
     throw new NotFoundError("Device session not found or unauthorized.");
   }
@@ -815,10 +815,10 @@ export const logoutAllOtherTeacherDevices = asyncHandler(async (req: Request, re
     throw new ValidationError("Unauthorized: Teacher session not found.");
   }
 
-  const sessions = getSessionsForTeacher(teacherId);
+  const sessions = await getSessionsForTeacher(teacherId);
   const currentSession = sessions.find((s) => s.token === currentToken);
 
-  revokeAllSessionsForTeacher(teacherId, currentSession?.id);
+  await revokeAllSessionsForTeacher(teacherId, currentSession?.id);
 
   res.json({ success: true, message: "Logged out from all other devices successfully." });
 });
