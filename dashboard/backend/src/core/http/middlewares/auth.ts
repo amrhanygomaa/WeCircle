@@ -1,8 +1,14 @@
 import type { NextFunction, Request, Response } from "express";
-import { supabaseAdmin } from "../config/supabase";
 import { prisma } from "../config/prisma";
 import { env } from "../config/env";
 import jwt from "jsonwebtoken";
+import { CognitoJwtVerifier } from "aws-jwt-verify";
+
+const verifier = CognitoJwtVerifier.create({
+  userPoolId: env.cognitoUserPoolId || process.env.COGNITO_USER_POOL_ID || "",
+  tokenUse: "id",
+  clientId: env.cognitoClientId || process.env.COGNITO_CLIENT_ID || "",
+});
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
@@ -16,11 +22,11 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   try {
     try {
       // 1. Try to verify the token as a custom AppCredential JWT token first
-      const decoded = jwt.verify(token, env.supabaseJwtSecret) as any;
+      const decoded = jwt.verify(token, env.supabaseJwtSecret || "secret") as any;
       if (decoded && decoded.id) {
         req.user = {
           id: decoded.id,
-          supabaseId: "", // Custom credentials users do not have a Supabase native record
+          supabaseId: "", // Custom credentials users do not have a Cognito native record
           email: decoded.loginId || "",
           role: decoded.role,
           schoolId: decoded.schoolId || null
@@ -39,19 +45,20 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
         return;
       }
     } catch (jwtErr) {
-      // Not a valid custom JWT, fall through to Supabase token verification
+      // Not a valid custom JWT, fall through to Cognito token verification
     }
 
-    // 2. Fallback to Supabase User Token
-    const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(token);
-
-    if (authError || !authUser) {
-      console.error("Supabase Auth Error:", authError?.message);
+    // 2. Fallback to Cognito User Token
+    let cognitoPayload;
+    try {
+      cognitoPayload = await verifier.verify(token);
+    } catch (cognitoErr: any) {
+      console.error("Cognito Auth Error:", cognitoErr?.message);
       res.status(401).json({ success: false, message: "Unauthorized: Invalid or expired token" });
       return;
     }
 
-    const email = authUser.email;
+    const email = cognitoPayload.email as string;
     if (!email) {
       res.status(401).json({ success: false, message: "Invalid token: Email missing" });
       return;
@@ -75,7 +82,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
     req.user = {
       id: dbUser.id,
-      supabaseId: authUser.id,
+      supabaseId: cognitoPayload.sub,
       email,
       role: dbUser.role,
       schoolId: dbUser.schoolId

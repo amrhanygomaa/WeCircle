@@ -64,14 +64,14 @@ export default function LandingPage() {
           <h3>Edu<span>Control</span></h3>
         </div>
         <div className="nav-links">
-          <a href="#features">{t('nav_features')}</a>
-          <a href="#how">{t('nav_how')}</a>
-          <a href="#testimonials">{t('nav_testimonials')}</a>
+          <a href="#features">{t('' as any)}</a>
+          <a href="#how">{t('' as any)}</a>
+          <a href="#testimonials">{t('' as any)}</a>
         </div>
         <div className="nav-actions">
-          <Link href="/login" className="btn">{t('nav_signin')}</Link>
+          <Link href="/login" className="btn">{t('' as any)}</Link>
           <Link href="/register" className="btn primary">
-            {t('nav_get_started')} {isAr ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            {t('' as any)} {isAr ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </Link>
           <LanguageSwitcher />
         </div>
@@ -93,7 +93,7 @@ export default function LandingPage() {
           <div className="hero-content">
             <div className="hero-badge">
               <span className="dot" />
-              {t('land_hero_badge')}
+              {t('' as any)}
             </div>
 
             <h1 style={{ minHeight: isAr ? "120px" : "140px" }}>
@@ -110,28 +110,28 @@ export default function LandingPage() {
             </h1>
 
             <p style={{ marginTop: "16px" }}>
-              {t('land_hero_desc')}
+              {t('' as any)}
             </p>
             <div className="hero-actions">
               <Link href="/register" className="btn primary lg">
-                {t('land_hero_start')}  {isAr ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+                {t('' as any)}  {isAr ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
               </Link>
               <Link href="/login" className="btn outline lg">
-                {t('land_hero_view')}
+                {t('' as any)}
               </Link>
             </div>
             <div className="hero-stats">
               <div className="hero-stat">
                 <div className="number">250+</div>
-                <div className="label">{t('land_hero_schools')}</div>
+                <div className="label">{t('' as any)}</div>
               </div>
               <div className="hero-stat">
                 <div className="number">50K+</div>
-                <div className="label">{t('land_hero_students')}</div>
+                <div className="label">{t('' as any)}</div>
               </div>
               <div className="hero-stat">
                 <div className="number">99.9%</div>
-                <div className="label">{t('land_hero_uptime')}</div>
+                <div className="label">{t('' as any)}</div>
               </div>
             </div>
           </div>
@@ -157,7 +157,7 @@ export default function LandingPage() {
       {/* ── TRUSTED BY ── */}
       <section className="trusted-section">
         <div className="trusted-container">
-          <p>{t('land_trusted')}</p>
+          <p>{t('' as any)}</p>
           <div className="trusted-logos-wrapper">
             <div className="trusted-logos">
               {[...logos, ...logos].map((logo, index) => (
@@ -171,28 +171,28 @@ export default function LandingPage() {
       {/* ── STATS ── */}
       <section className="stats-section">
         <div className="stats-container">
-          <StatCard icon={<School size={24} color="#1d4ed8" />} end={250} suffix="+" label={t('land_hero_schools')} />
-          <StatCard icon={<Users size={24} color="#1d4ed8" />} end={50000} suffix="+" label={t('land_hero_students')} />
-          <StatCard icon={<TrendingUp size={24} color="#1d4ed8" />} end={40} suffix="%" label={t('land_hero_faster')} />
-          <StatCard icon={<Clock size={24} color="#1d4ed8" />} end={99} suffix=".9%" label={t('land_hero_uptime')} />
+          <StatCard icon={<School size={24} color="#1d4ed8" />} end={250} suffix="+" label={t('' as any)} />
+          <StatCard icon={<Users size={24} color="#1d4ed8" />} end={50000} suffix="+" label={t('' as any)} />
+          <StatCard icon={<TrendingUp size={24} color="#1d4ed8" />} end={40} suffix="%" label={t('' as any)} />
+          <StatCard icon={<Clock size={24} color="#1d4ed8" />} end={99} suffix=".9%" label={t('' as any)} />
         </div>
       </section>
 
       {/* ── FEATURES ── */}
       <section className="features-section" id="features">
         <div className="section-header">
-          <div className="section-label"><span className="line" /> {t('land_feat_label')} <span className="line" /></div>
-          <h2>{t('land_feat_title')}</h2>
-          <p>{t('land_feat_desc')}</p>
+          <div className="section-label"><span className="line" /> {t('' as any)} <span className="line" /></div>
+          <h2>{t('' as any)}</h2>
+          <p>{t('' as any)}</p>
         </div>
         <div className="features-grid">
           {[
-            { icon: <Users size={24} color="#1d4ed8" />, title: t('land_feat1_title'), desc: t('land_feat1_desc') },
-            { icon: <BookOpen size={24} color="#1d4ed8" />, title: t('land_feat2_title'), desc: t('land_feat2_desc') },
-            { icon: <CalendarCheck size={24} color="#1d4ed8" />, title: t('land_feat3_title'), desc: t('land_feat3_desc') },
-            { icon: <CreditCard size={24} color="#1d4ed8" />, title: t('land_feat4_title'), desc: t('land_feat4_desc') },
-            { icon: <BarChart3 size={24} color="#1d4ed8" />, title: t('land_feat5_title'), desc: t('land_feat5_desc') },
-            { icon: <ShieldCheck size={24} color="#1d4ed8" />, title: t('land_feat6_title'), desc: t('land_feat6_desc') },
+            { icon: <Users size={24} color="#1d4ed8" />, title: t('' as any), desc: t('' as any) },
+            { icon: <BookOpen size={24} color="#1d4ed8" />, title: t('' as any), desc: t('' as any) },
+            { icon: <CalendarCheck size={24} color="#1d4ed8" />, title: t('' as any), desc: t('' as any) },
+            { icon: <CreditCard size={24} color="#1d4ed8" />, title: t('' as any), desc: t('' as any) },
+            { icon: <BarChart3 size={24} color="#1d4ed8" />, title: t('' as any), desc: t('' as any) },
+            { icon: <ShieldCheck size={24} color="#1d4ed8" />, title: t('' as any), desc: t('' as any) },
           ].map((feature) => (
             <div className="feature-card" key={feature.title}>
               <div className="feature-icon">{feature.icon}</div>
@@ -207,25 +207,25 @@ export default function LandingPage() {
       <section className="how-section" id="how">
         <div className="how-container">
           <div className="section-header">
-            <div className="section-label"><span className="line" /> {t('land_how_label')} <span className="line" /></div>
-            <h2>{t('land_how_title')}</h2>
-            <p>{t('land_how_desc')}</p>
+            <div className="section-label"><span className="line" /> {t('' as any)} <span className="line" /></div>
+            <h2>{t('' as any)}</h2>
+            <p>{t('' as any)}</p>
           </div>
           <div className="how-grid">
             <div className="how-step">
               <div className="step-number">1</div>
-              <h3>{t('land_step1_title')}</h3>
-              <p>{t('land_step1_desc')}</p>
+              <h3>{t('' as any)}</h3>
+              <p>{t('' as any)}</p>
             </div>
             <div className="how-step">
               <div className="step-number">2</div>
-              <h3>{t('land_step2_title')}</h3>
-              <p>{t('land_step2_desc')}</p>
+              <h3>{t('' as any)}</h3>
+              <p>{t('' as any)}</p>
             </div>
             <div className="how-step">
               <div className="step-number">3</div>
-              <h3>{t('land_step3_title')}</h3>
-              <p>{t('land_step3_desc')}</p>
+              <h3>{t('' as any)}</h3>
+              <p>{t('' as any)}</p>
             </div>
           </div>
         </div>
@@ -234,31 +234,31 @@ export default function LandingPage() {
       {/* ── TESTIMONIALS ── */}
       <section className="testimonials-section" id="testimonials">
         <div className="section-header">
-          <div className="section-label"><span className="line" /> {t('nav_testimonials')} <span className="line" /></div>
-          <h2>{t('land_testi_title')}</h2>
-          <p>{t('land_testi_desc')}</p>
+          <div className="section-label"><span className="line" /> {t('' as any)} <span className="line" /></div>
+          <h2>{t('' as any)}</h2>
+          <p>{t('' as any)}</p>
         </div>
         <div className="testimonials-grid">
           {[
             {
               stars: 5,
-              quote: t('land_testi1_quote'),
+              quote: t('' as any),
               name: "Ahmed Hassan",
-              role: t('land_testi1_role'),
+              role: t('' as any),
               avatar: "A"
             },
             {
               stars: 5,
-              quote: t('land_testi2_quote'),
+              quote: t('' as any),
               name: "Sara Ibrahim",
-              role: t('land_testi2_role'),
+              role: t('' as any),
               avatar: "S"
             },
             {
               stars: 5,
-              quote: t('land_testi3_quote'),
+              quote: t('' as any),
               name: "Dr. Mona Khalil",
-              role: t('land_testi3_role'),
+              role: t('' as any),
               avatar: "M"
             }
           ].map((tItem) => (
@@ -284,13 +284,13 @@ export default function LandingPage() {
       {/* ── CTA ── */}
       <section className="cta-section">
         <div className="cta-container">
-          <h2>{t('land_cta_title')}</h2>
-          <p>{t('land_cta_desc')}</p>
+          <h2>{t('' as any)}</h2>
+          <p>{t('' as any)}</p>
           <div className="cta-actions">
             <Link href="/register" className="btn primary lg">
-              {t('land_cta_signup')} {isAr ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+              {t('' as any)} {isAr ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
             </Link>
-            <Link href="/login" className="btn outline lg">{t('nav_signin')}</Link>
+            <Link href="/login" className="btn outline lg">{t('' as any)}</Link>
           </div>
         </div>
       </section>
@@ -300,25 +300,25 @@ export default function LandingPage() {
         <div className="footer-container">
           <div className="footer-brand">
             <h3><School size={22} /> EduControl</h3>
-            <p>{t('footer_desc')}</p>
+            <p>{t('' as any)}</p>
           </div>
           <div className="footer-col">
-            <h4>{t('footer_product')}</h4>
-            <a href="#features">{t('nav_features')}</a>
-            <a href="#how">{t('nav_how')}</a>
-            <a href="#">{t('footer_pricing')}</a>
-            <a href="#">{t('footer_changelog')}</a>
+            <h4>{t('' as any)}</h4>
+            <a href="#features">{t('' as any)}</a>
+            <a href="#how">{t('' as any)}</a>
+            <a href="#">{t('' as any)}</a>
+            <a href="#">{t('' as any)}</a>
           </div>
           <div className="footer-col">
-            <h4>{t('footer_resources')}</h4>
-            <a href="#">{t('footer_docs')}</a>
-            <a href="#">{t('footer_help')}</a>
-            <a href="#">{t('footer_contact')}</a>
+            <h4>{t('' as any)}</h4>
+            <a href="#">{t('' as any)}</a>
+            <a href="#">{t('' as any)}</a>
+            <a href="#">{t('' as any)}</a>
           </div>
           <div className="footer-col">
-            <h4>{t('footer_legal')}</h4>
-            <a href="#">{t('footer_privacy')}</a>
-            <a href="#">{t('footer_terms')}</a>
+            <h4>{t('' as any)}</h4>
+            <a href="#">{t('' as any)}</a>
+            <a href="#">{t('' as any)}</a>
           </div>
         </div>
         <div className="footer-bottom">

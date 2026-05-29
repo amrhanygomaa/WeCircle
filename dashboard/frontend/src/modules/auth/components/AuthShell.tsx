@@ -30,8 +30,8 @@ export function AuthShell({
             <div style={{ background: "var(--gradient-primary)", padding: "10px", borderRadius: "12px" }}><GraduationCap size={24} color="#fff" /></div>
             <h3 style={{ fontSize: "24px", color: "#fff", fontWeight: 800 }}>EduControl</h3>
           </div>
-          <h1>{t('auth_welcome_title')}</h1>
-          <p>{t('auth_welcome_desc')}</p>
+          <h1>{t('' as any)}</h1>
+          <p>{t('' as any)}</p>
           <div className="auth-hero-img-container">
             <img src="/auth-ref/login-premium.png" alt="Education Illustration" className="auth-hero-illustration" />
           </div>

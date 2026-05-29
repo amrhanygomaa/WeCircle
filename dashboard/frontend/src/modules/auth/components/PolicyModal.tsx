@@ -13,20 +13,20 @@ export function PolicyModal({ isOpen, onClose, onAccept }: { isOpen: boolean; on
         <div className="modal-icon-header">
           <ShieldCheck size={40} color="var(--primary-light)" />
         </div>
-        <h2 style={{ textAlign: "center", marginBottom: "12px", fontSize: "24px", fontWeight: 800 }}>{t('policy_title')}</h2>
-        <p className="modal-intro">{t('policy_intro')}</p>
+        <h2 style={{ textAlign: "center", marginBottom: "12px", fontSize: "24px", fontWeight: 800 }}>{t('' as any)}</h2>
+        <p className="modal-intro">{t('' as any)}</p>
         <div className="policy-list">
           <div className="policy-item">
             <CheckCircle2 size={18} color="#10b981" style={{ flexShrink: 0 }} />
-            <span>{t('policy_item1')}</span>
+            <span>{t('' as any)}</span>
           </div>
           <div className="policy-item">
             <CheckCircle2 size={18} color="#10b981" style={{ flexShrink: 0 }} />
-            <span>{t('policy_item2')}</span>
+            <span>{t('' as any)}</span>
           </div>
           <div className="policy-item">
             <CheckCircle2 size={18} color="#10b981" style={{ flexShrink: 0 }} />
-            <span>{t('policy_item3')}</span>
+            <span>{t('' as any)}</span>
           </div>
         </div>
         <button 
@@ -37,7 +37,7 @@ export function PolicyModal({ isOpen, onClose, onAccept }: { isOpen: boolean; on
             onClose();
           }}
         >
-          {t('btn_close')}
+          {t('' as any)}
         </button>
       </div>
     </div>

@@ -277,7 +277,7 @@ export default function MessagesPage() {
                       let textContent = msg.content || '';
                       
                       if (isImage) {
-                        const contentParts = msg.content.split('\n');
+                        const contentParts = msg.content.split('' as any);
                         imageContent = contentParts[0].replace('IMAGE:', '');
                         textContent = contentParts.slice(1).join('\n');
                       }

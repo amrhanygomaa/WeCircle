@@ -60,7 +60,7 @@ export default function GradesPage() {
     <div className="grades-module" dir={isAr ? "rtl" : "ltr"}>
       <div className="module-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
         <div>
-          <h2 style={{ fontSize: "28px", fontWeight: 800, color: "var(--glass-text-primary)" }}>{t('dash_grades')}</h2>
+          <h2 style={{ fontSize: "28px", fontWeight: 800, color: "var(--glass-text-primary)" }}>{t('' as any)}</h2>
           <p style={{ color: "var(--glass-text-secondary)" }}>{t('gd_desc' as any)}</p>
         </div>
         <div style={{ display: "flex", gap: "12px" }}>

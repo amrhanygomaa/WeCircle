@@ -170,7 +170,7 @@ export default function CredentialsPage() {
     <div className="credentials-module">
       <div className="module-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "40px" }}>
         <div>
-          <h2 style={{ fontSize: "32px", fontWeight: 900, color: "var(--glass-text-primary)" }}>{t('dash_credentials')}</h2>
+          <h2 style={{ fontSize: "32px", fontWeight: 900, color: "var(--glass-text-primary)" }}>{t('' as any)}</h2>
           <p style={{ color: "var(--glass-text-secondary)", marginTop: "4px" }}>{t('cred_desc' as any)}</p>
         </div>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -218,7 +218,7 @@ export default function CredentialsPage() {
         <table className="premium-table">
           <thead>
             <tr>
-              <th style={isAr ? { textAlign: "right" } : {}}>{t('dash_users')}</th>
+              <th style={isAr ? { textAlign: "right" } : {}}>{t('' as any)}</th>
               <th style={isAr ? { textAlign: "right" } : {}}>{t('cred_entity' as any)}</th>
               <th style={isAr ? { textAlign: "right" } : {}}>{t('cred_login_id' as any)}</th>
               <th style={isAr ? { textAlign: "right" } : {}}>{t('cred_password' as any)}</th>

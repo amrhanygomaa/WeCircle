@@ -22,5 +22,9 @@ export const env = {
   supabaseServiceRoleKey: requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
   supabaseJwtSecret: requireEnv("SUPABASE_JWT_SECRET"),
   databaseUrl: requireEnv("DATABASE_URL"),
-  superAdminEmail: requireEnv("SUPER_ADMIN_EMAIL")
+  superAdminEmail: requireEnv("SUPER_ADMIN_EMAIL"),
+  cognitoUserPoolId: requireEnv("COGNITO_USER_POOL_ID", "local"),
+  cognitoClientId: requireEnv("COGNITO_CLIENT_ID", "local"),
+  awsRegion: requireEnv("AWS_REGION", "us-east-1"),
+  awsS3BucketName: requireEnv("AWS_S3_BUCKET_NAME", "local"),
 };

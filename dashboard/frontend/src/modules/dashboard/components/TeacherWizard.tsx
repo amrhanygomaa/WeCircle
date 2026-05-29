@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, X, User, Briefcase, FileText, CheckCircle, Upload, ChevronRight, ChevronLeft } from "lucide-react";
 import { useTranslation } from "@/core/i18n/i18n";
-import { supabase } from "@/core/auth/supabase";
+import { uploadToS3 } from "@/core/api/apiClient";
 
 const steps = [
   { id: 1, title: { ar: "البيانات الأساسية", en: "Basic Info" }, icon: User },
@@ -32,7 +32,7 @@ export default function TeacherWizard({
   const formatDate = (date: any) => {
     if (!date) return "";
     const d = new Date(date);
-    return d.toISOString().split('T')[0];
+    return d.toISOString().split('' as any)[0];
   };
 
   const [formData, setFormData] = useState<any>(() => {
@@ -62,19 +62,15 @@ export default function TeacherWizard({
   const handleFileUpload = async (field: string, file: File) => {
     try {
       setUploading(field);
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('' as any).pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `teachers/${field}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, file);
+      await uploadToS3(file, filePath); const uploadError: any = null;
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('documents')
-        .getPublicUrl(filePath);
+      const publicUrl = `https://wecircle-storage-1779996505705.s3.us-east-1.amazonaws.com/${filePath}`;
 
       setFormData({ ...formData, [field]: publicUrl });
     } catch (error: any) {

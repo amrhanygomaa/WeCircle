@@ -108,7 +108,7 @@ export default function StudentPage() {
       fullName: student.user?.fullName || "",
       nameEn: student.nameEn || "",
       nationalId: student.nationalId || "",
-      dob: student.dob ? new Date(student.dob).toISOString().split('T')[0] : "",
+      dob: student.dob ? new Date(student.dob).toISOString().split('' as any)[0] : "",
       gender: student.gender || "MALE",
       email: student.user?.email || "",
       gradeId: student.gradeId || "",

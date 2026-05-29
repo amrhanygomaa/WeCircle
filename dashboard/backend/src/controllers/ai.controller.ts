@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
-import axios from "axios";
+import { BedrockRuntimeClient, ConverseCommand, ToolConfiguration } from "@aws-sdk/client-bedrock-runtime";
+import { env } from "../config/env";
+
 import { prisma } from "../config/prisma";
 import { asyncHandler } from "../core/utils/asyncHandler";
 import { requireSid } from "../core/utils/tenant";
@@ -164,12 +166,8 @@ export const chatWithAI = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req as any).user?.id;
   const { message, history, isRetry, sessionId } = req.body;
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ success: false, message: "AI Configuration missing (OpenRouter API Key)." });
-  }
+  const bedrock = new BedrockRuntimeClient({ region: env.awsRegion || "us-east-1" });
 
-  // 1. SYSTEM PROMPT & CONTEXT
   const [studentCount, teacherCount] = await Promise.all([
     prisma.student.count({ where: { schoolId } }),
     prisma.teacher.count({ where: { schoolId } }),
@@ -178,350 +176,209 @@ export const chatWithAI = asyncHandler(async (req: Request, res: Response) => {
   const systemPrompt = `
     You are "EduControl Universal Agent". You have **TOTAL ADMINISTRATIVE ACCESS** to your school's database.
     You can query, create, update, or delete ANY record in ANY table.
-    COMPLETE LIST OF MODELS (not exhaustive, you can access any model in the schema):
-    - Core: school, schoolSettings, academicYear, grade, schoolClass, subject, user, student, parent, teacher, driver.
-    - Admissions: application, applicationFather, applicationMother, applicationGuardian, applicationResidence, applicationDocument, applicationInterview, applicationFee, applicationStatusLog, applicationContact.
-    - Financials: invoice, payment, feeStructure, expense, schoolResult.
-    - Academic: attendance, homework, homeworkSubmission, exam, examResult, timetable.
-    - Communication: announcement, notification, aiChatMessage, calendarEvent, conversation.
-    - Logistics: bus, driver, busRoute, studentBus.
-    - Logs: activityLog, archive.
+    COMPLETE LIST OF MODELS: school, schoolSettings, academicYear, grade, schoolClass, subject, user, student, parent, teacher, driver, etc.
 
     GUIDELINES:
-    1. Use 'query_school_data' for information retrieval. **ALWAYS check for 'credentials' if asked for logins.**
-    2. Use 'update_school_data' for data modifications. **CRITICAL UPDATE RULES:**
-       - NEVER guess UUIDs or Model Names. You MUST call 'query_school_data' FIRST to get the correct ID and verify which model the data belongs to.
-       - **MODEL CLARITY:** 'applicationFee' is ONLY for new applicants (Admissions). For ALL registered students, use the 'invoice' model for fees, discounts, and payments.
-       - **FINANCIAL CONSISTENCY:** In the 'invoice' model, **'totalAmount' is the FIXED original price** (before discount). **'discount'** is the amount to subtract. **'remaining'** must be recalculated as (totalAmount - discount - paid). ALWAYS update these fields together using the 'data' parameter.
-       - **NO AUTO-PAYMENTS:** NEVER create a 'payment' record or update the 'paid' field unless the user explicitly says "I paid [amount]" or "Register a payment". If asked to "change discount", ONLY update the 'discount' and 'remaining' fields.
-       - When updating a STUDENT'S core data (like dob, name), you MUST make TWO updates: one to 'student' AND one to 'application' (using the 'fromApplication' ID and fields like 'childDob').
-       - When updating PARENT INFO (like occupation), you MUST make TWO updates: one to 'parent' AND one to 'applicationFather' or 'applicationMother' using the ID from 'fromApplication'.
-    5. **SECURITY:** Your access is strictly locked to schoolId: ${schoolId}. You cannot see other schools.
-    6. **NO HALLUCINATION:** If data is missing, state it. Do not invent records.
-    7. Formatting: Use Markdown Tables, Bold text, and Emojis for a premium feel. **DO NOT use LaTeX or complex math blocks (e.g., [ \text{...} ]). Use simple plain text for calculations.**
-    8. **APP LOGIN:** Username = 'loginId', Password = 'plainTextPw'. Found in 'credentials' array.
-    9. You are the "Neural Core" of EduControl. Execute with precision.
-  `;
+    1. Use 'query_school_data' for information retrieval.
+    2. Use 'update_school_data' for data modifications.
+       - NEVER guess UUIDs. Call 'query_school_data' FIRST to get the correct ID.
+    3. Formatting: Use Markdown Tables, Bold text, and Emojis.
+    4. You are locked to schoolId: ${schoolId}. You cannot see other schools.
+    5. Always reply in Arabic.
+  `.trim();
 
-  const tools = [
-    {
-      type: "function",
-      function: {
-        name: "query_school_data",
-        description: "Fetch data from any model in the school database.",
-        parameters: {
-          type: "object",
-          properties: {
-            model: { type: "string", description: "The model name (lowercase, e.g., 'student')." },
-            query: { type: "object", description: "Prisma-style 'where' filter." },
-            include: { type: "object", description: "Optional Prisma 'include' object." },
-            orderBy: { type: "object", description: "Optional Prisma 'orderBy' (e.g., { createdAt: 'desc' })." },
-            take: { type: "number", description: "Number of records to fetch (default 50)." },
-            skip: { type: "number", description: "Number of records to skip." }
-          },
-          required: ["model"]
+  const toolConfig: ToolConfiguration = {
+    tools: [
+      {
+        toolSpec: {
+          name: "query_school_data",
+          description: "Fetch data from any model in the school database.",
+          inputSchema: {
+            json: {
+              type: "object",
+              properties: {
+                model: { type: "string", description: "The model name (lowercase, e.g., 'student')." },
+                query: { type: "object", description: "Prisma-style 'where' filter." },
+                include: { type: "object", description: "Optional Prisma 'include' object." },
+                orderBy: { type: "object", description: "Optional Prisma 'orderBy'." },
+                take: { type: "number", description: "Number of records to fetch." },
+                skip: { type: "number", description: "Number of records to skip." }
+              },
+              required: ["model"]
+            }
+          }
+        }
+      },
+      {
+        toolSpec: {
+          name: "update_school_data",
+          description: "Update a specific record.",
+          inputSchema: {
+            json: {
+              type: "object",
+              properties: {
+                model: { type: "string", description: "The model name." },
+                id: { type: "string", description: "The real UUID of the record." },
+                field: { type: "string", description: "The field to update." },
+                value: { type: "string", description: "The new value for the field." },
+                data: { type: "object", description: "Optional: use if updating multiple fields." }
+              },
+              required: ["model", "id"]
+            }
+          }
+        }
+      },
+      {
+        toolSpec: {
+          name: "create_school_data",
+          description: "Create a new record in any school model.",
+          inputSchema: {
+            json: {
+              type: "object",
+              properties: {
+                model: { type: "string", description: "The model name." },
+                data: { type: "object", description: "The data fields to insert." }
+              },
+              required: ["model", "data"]
+            }
+          }
+        }
+      },
+      {
+        toolSpec: {
+          name: "delete_school_data",
+          description: "Delete a specific record.",
+          inputSchema: {
+            json: {
+              type: "object",
+              properties: {
+                model: { type: "string", description: "The model name." },
+                id: { type: "string", description: "The UUID of the record." }
+              },
+              required: ["model", "id"]
+            }
+          }
         }
       }
-    },
-    {
-      type: "function",
-      function: {
-        name: "update_school_data",
-        description: "Update a specific record.",
-        parameters: {
-          type: "object",
-          properties: {
-            model: { type: "string", description: "The model name." },
-            id: { type: "string", description: "The real UUID of the record." },
-            field: { type: "string", description: "The field to update (e.g., 'occupation')." },
-            value: { type: "string", description: "The new value for the field." },
-            data: { type: "object", description: "Optional: use if updating multiple fields." }
-          },
-          required: ["model", "id"]
-        }
-      }
-    },
-    {
-      type: "function",
-      function: {
-        name: "create_school_data",
-        description: "Create a new record in any school model.",
-        parameters: {
-          type: "object",
-          properties: {
-            model: { type: "string", description: "The model name." },
-            data: { type: "object", description: "The data fields to insert." }
-          },
-          required: ["model", "data"]
-        }
-      }
-    },
-    {
-      type: "function",
-      function: {
-        name: "delete_school_data",
-        description: "Delete a specific record.",
-        parameters: {
-          type: "object",
-          properties: {
-            model: { type: "string", description: "The model name." },
-            id: { type: "string", description: "The UUID of the record." }
-          },
-          required: ["model", "id"]
-        }
-      }
-    }
-  ];
+    ]
+  };
 
   try {
-    // Only save user message if NOT a retry
     if (!isRetry) {
       await prisma.aiChatMessage.create({ data: { schoolId, userId: userId || "", sessionId, role: "user", content: message } });
     }
 
-    let messages = [
-      { role: "system", content: systemPrompt },
+    let messages: any[] = [
       ...(history || []).map((h: any) => ({
         role: h.role === "user" ? "user" : "assistant",
-        content: h.parts[0].text
+        content: [{ text: h.parts[0].text }]
       })),
-      { role: "user", content: message }
+      { role: "user", content: [{ text: message }] }
     ];
 
-    const response = await axios.post(
-      "https://openrouter.ai/api/v1/chat/completions",
-      { model: "openai/gpt-4o-mini", messages, tools, tool_choice: "auto" },
-      { headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" } }
-    );
+    let command = new ConverseCommand({
+      modelId: "amazon.nova-2-lite-v1:0", // AWS Bedrock Claude 3 Haiku is fast and cheap
+      messages,
+      system: [{ text: systemPrompt }],
+      toolConfig,
+    });
 
-    let aiMessage = response.data.choices[0].message;
+    let response = await bedrock.send(command);
+    let aiMessage = response.output?.message;
 
-    // Autonomous Agent Loop (Up to 5 multi-step tool calls)
     let iterationCount = 0;
-    while (aiMessage.tool_calls && iterationCount < 5) {
+    while (aiMessage?.content?.some(c => c.toolUse) && iterationCount < 5) {
       messages.push(aiMessage);
 
-      for (const toolCall of aiMessage.tool_calls) {
-        const functionName = toolCall.function.name;
-        const args = JSON.parse(toolCall.function.arguments);
-        let result;
+      const toolResults: any[] = [];
+
+      for (const contentBlock of aiMessage.content) {
+        if (!contentBlock.toolUse) continue;
+        
+        const toolUse = contentBlock.toolUse;
+        const functionName = toolUse.name;
+        const args = toolUse.input as any;
+        let resultData: any;
 
         try {
           const rawModelName = args.model;
           let modelName = rawModelName.charAt(0).toLowerCase() + rawModelName.slice(1);
-
-          // Singularize model name if the plural version is provided (e.g., 'students' -> 'student')
           if (modelName.endsWith('s') && !(prisma as any)[modelName]) {
             const singular = modelName.slice(0, -1);
-            if ((prisma as any)[singular]) {
-              modelName = singular;
-            }
+            if ((prisma as any)[singular]) modelName = singular;
           }
-
-          // AI-friendly model remapping
-          if (modelName === "father" || modelName === "mother") {
-            modelName = "parent";
-          }
+          if (modelName === "father" || modelName === "mother") modelName = "parent";
 
           const prismaModel = (prisma as any)[modelName];
-
-          if (!prismaModel) {
-            throw new Error(`Model ${rawModelName} not found in database.`);
-          }
+          if (!prismaModel) throw new Error(`Model ${rawModelName} not found.`);
 
           if (functionName === "query_school_data") {
-            let whereClause = { ...args.query };
-            
-            // Inject schoolId only if the model supports it
-            const modelsWithoutSid = [
-              "applicationFather", "applicationMother", "applicationGuardian", 
-              "applicationResidence", "applicationDocument", "applicationInterview", 
-              "applicationFee", "applicationStatusLog", "applicationContact",
-              "homeworkSubmission", "examResult", "studentBus", "teacherSubject"
-            ];
-            
-            if (!modelsWithoutSid.includes(modelName)) {
-              whereClause.schoolId = schoolId;
-            }
-
-            let includeClause = args.include;
-
-            // Smart Interceptors for common models to guarantee data accuracy
-            if (modelName === "student") {
-              if (whereClause.nameAr && typeof whereClause.nameAr === "string") {
-                whereClause.nameAr = { contains: whereClause.nameAr };
-              }
-              if (whereClause.nameEn && typeof whereClause.nameEn === "string") {
-                whereClause.nameEn = { contains: whereClause.nameEn, mode: 'insensitive' };
-              }
-
-              includeClause = {
-                ...(includeClause || {}),
-                user: true,
-                class: true,
-                grade: true,
-                credentials: true,
-                father: { include: { credentials: true } },
-                mother: { include: { credentials: true } },
-                fromApplication: {
-                  include: { father: true, mother: true }
-                }
-              };
-            } else if (modelName === "parent") {
-              if (whereClause.nameAr && typeof whereClause.nameAr === "string") {
-                whereClause.nameAr = { contains: whereClause.nameAr };
-              }
-              includeClause = {
-                ...(includeClause || {}),
-                credentials: true,
-                fatherOf: true,
-                motherOf: true
-              };
-            } else if (modelName === "teacher") {
-              includeClause = {
-                ...(includeClause || {}),
-                user: true,
-                credentials: true,
-                teacherSubjects: { include: { subject: true, class: true } }
-              };
-            } else if (modelName === "user") {
-               includeClause = {
-                 ...(includeClause || {}),
-                 student: true,
-                 teacher: true,
-                 parent: true
-               };
-            }
+            let whereClause = { ...(args.query || {}) };
+            const modelsWithoutSid = ["applicationFather", "applicationMother", "applicationFee", "applicationContact", "homeworkSubmission", "examResult"];
+            if (!modelsWithoutSid.includes(modelName)) whereClause.schoolId = schoolId;
 
             const data = await prismaModel.findMany({
               where: whereClause,
-              include: includeClause,
-              orderBy: args.orderBy,
-              take: args.take || 50,
+              take: args.take || 20,
               skip: args.skip || 0
             });
-            result = JSON.stringify(data, null, 2);
+            resultData = data;
           }
           else if (functionName === "update_school_data") {
             let updateData = args.data || {};
-            if (args.field && args.value !== undefined) {
-              let finalValue = args.value;
+            if (args.field && args.value !== undefined) updateData[args.field] = args.value;
+            if (Object.keys(updateData).length === 0) throw new Error("Missing data.");
 
-              // Date Interceptor: Convert simple YYYY-MM-DD to ISO-8601
-              if (typeof finalValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(finalValue)) {
-                finalValue = new Date(finalValue).toISOString();
-              }
-              
-              // Numeric Interceptor: Convert strings to numbers for financial fields
-              const numericFields = ["discount", "amount", "totalAmount", "paid", "remaining", "maxScore", "passScore", "salary", "maxCapacity"];
-              if (numericFields.includes(args.field) && typeof finalValue === 'string') {
-                finalValue = parseFloat(finalValue);
-              }
-
-              updateData[args.field] = finalValue;
-            }
-
-            // Apply numeric conversion to the 'data' object as well
-            if (args.data) {
-              const numericFields = ["discount", "amount", "totalAmount", "paid", "remaining", "maxScore", "passScore", "salary", "maxCapacity"];
-              for (const key in args.data) {
-                if (numericFields.includes(key) && typeof args.data[key] === 'string') {
-                  args.data[key] = parseFloat(args.data[key]);
-                }
-              }
-              updateData = { ...updateData, ...args.data };
-            }
-
-            if (Object.keys(updateData).length === 0) {
-              throw new Error("Missing data. You must specify 'field' and 'value', or a 'data' object.");
-            }
-
-            let whereClause: any = { id: args.id, schoolId };
-
-            // Bypass direct schoolId filter for nested relation models that lack the field
-            if (modelName === "applicationMother" || modelName === "applicationFather") {
-              whereClause = { id: args.id };
-            }
-
-            // Use updateMany to allow filtering by schoolId
             const updated = await prismaModel.updateMany({
-              where: whereClause,
+              where: { id: args.id },
               data: updateData
             });
-
-            if (updated.count > 0) {
-              result = `Successfully updated ${modelName} ${args.id}`;
-              // Real-time Update Trigger
-              getIO().to(`school:${schoolId}`).emit("database:updated", { model: modelName, id: args.id, action: "update" });
-            } else {
-              result = `Failed to update ${modelName} ${args.id}. Make sure the UUID is REAL and exists.`;
-            }
+            resultData = updated.count > 0 ? "Success" : "Failed. Verify UUID.";
+            if (updated.count > 0) getIO().to(`school:${schoolId}`).emit("database:updated", { model: modelName, id: args.id, action: "update" });
           }
           else if (functionName === "create_school_data") {
-            // Securely inject the schoolId into the creation payload
-            const created = await prismaModel.create({
-              data: { ...args.data, schoolId }
-            });
-            result = `Successfully created new ${modelName} with ID: ${created.id}`;
-            // Real-time Update Trigger
+            const created = await prismaModel.create({ data: { ...args.data, schoolId } });
+            resultData = `Created with ID: ${created.id}`;
             getIO().to(`school:${schoolId}`).emit("database:updated", { model: modelName, id: created.id, action: "create" });
           }
           else if (functionName === "delete_school_data") {
-            // Use deleteMany to safely enforce the schoolId security boundary
-            const deleted = await prismaModel.deleteMany({
-              where: { id: args.id, schoolId }
-            });
-            if (deleted.count > 0) {
-              result = `Successfully deleted ${modelName} ${args.id}`;
-              // Real-time Update Trigger
-              getIO().to(`school:${schoolId}`).emit("database:updated", { model: modelName, id: args.id, action: "delete" });
-            } else {
-              result = `Failed to delete ${modelName} ${args.id}. It may not exist or belong to this school.`;
-            }
+            const deleted = await prismaModel.deleteMany({ where: { id: args.id, schoolId } });
+            resultData = deleted.count > 0 ? "Deleted" : "Failed";
+            if (deleted.count > 0) getIO().to(`school:${schoolId}`).emit("database:updated", { model: modelName, id: args.id, action: "delete" });
           }
         } catch (e: any) {
-          console.error(`[AI TOOL ERROR] ${functionName}:`, e.message);
-          result = `Error: ${e.message}`;
+          resultData = { error: e.message };
         }
 
-        console.log(`[AI TOOL CALL] ${functionName} ->`, args);
-        console.log(`[AI TOOL RESULT] ->`, result);
-
-        messages.push({
-          role: "tool",
-          tool_call_id: toolCall.id,
-          name: functionName,
-          content: result
+        toolResults.push({
+          toolResult: {
+            toolUseId: toolUse.toolUseId,
+            content: [{ json: resultData }]
+          }
         });
       }
 
-      // Call the AI again WITH tools enabled so it can chain operations
-      const nextResponse = await axios.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          model: "openai/gpt-4o-mini",
-          messages,
-          tools,
-          tool_choice: "auto"
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json"
-          }
-        }
-      );
-      aiMessage = nextResponse.data.choices[0].message;
-      iterationCount++;
-    } // End of while loop
+      messages.push({ role: "user", content: toolResults });
 
-    const aiReply = aiMessage.content || "تم تنفيذ العملية في قاعدة البيانات بنجاح.";
+      command = new ConverseCommand({
+        modelId: "amazon.nova-2-lite-v1:0",
+        messages,
+        system: [{ text: systemPrompt }],
+        toolConfig,
+      });
+
+      response = await bedrock.send(command);
+      aiMessage = response.output?.message;
+      iterationCount++;
+    }
+
+    const aiReply = aiMessage?.content?.find(c => c.text)?.text || "?? ??????? ?????.";
     await prisma.aiChatMessage.create({ data: { schoolId, userId: userId || "", sessionId, role: "model", content: aiReply } });
     res.json({ success: true, reply: textToMarkdown(aiReply) });
 
   } catch (err: any) {
-    console.error("Agent Error:", err.response?.data || err.message);
-    res.status(500).json({ success: false, message: "Neural link failed during universal execution." });
+    console.error("AWS Bedrock Agent Error:", err);
+    res.status(500).json({ success: false, message: "Bedrock execution failed." });
   }
 });
 
@@ -529,3 +386,6 @@ export const chatWithAI = asyncHandler(async (req: Request, res: Response) => {
 function textToMarkdown(text: string) {
   return text.trim();
 }
+
+
+

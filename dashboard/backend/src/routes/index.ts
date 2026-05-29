@@ -7,6 +7,7 @@ import paymentRoutes from "./modules/payment.routes";
 import announcementRoutes from "./modules/announcement.routes";
 import dashboardRoutes from "./modules/dashboard.routes";
 import authRoutes from "./modules/auth.routes";
+import storageRoutes from "./modules/storage.routes";
 import admissionRoutes from "./modules/admission.routes";
 import academicRoutes from "./modules/academic.routes";
 import credentialRoutes from "./modules/credential.routes";
@@ -45,6 +46,7 @@ router.get("/health", (_req, res) => {
 
 // Auth & Webhooks
 router.use("/auth", authRoutes);
+router.use("/storage", storageRoutes);
 
 // Protected Dashboard Routes
 router.use("/dashboard", dashboardRoutes);
@@ -93,3 +95,4 @@ router.use("/ai", aiRoutes);
 router.use("/mobile/transport", mobileTransportRoutes);
 
 export default router;
+

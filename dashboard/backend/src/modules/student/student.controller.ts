@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import axios from "axios";
+import { BedrockRuntimeClient, ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
+import { env } from "../../config/env";
+
 import { prisma } from "../../config/prisma";
 import { Role } from "@prisma/client";
 import { z } from "zod";
@@ -447,4 +450,7 @@ export const studentMobileAiChat = asyncHandler(async (req: Request, res: Respon
 
   res.json({ success: true, reply });
 });
+
+
+
 

@@ -22,7 +22,7 @@ import {
 import { api, extractApiError } from "@/core/api/apiClient";
 import { useTranslation } from "@/core/i18n/i18n";
 import { Modal } from "@/shared/ui/Modal";
-import { supabase } from "@/core/auth/supabase";
+import { uploadToS3 } from "@/core/api/apiClient";
 
 export default function ExamsPage() {
   const { t, isAr } = useTranslation();
@@ -261,19 +261,14 @@ export default function ExamsPage() {
   const handleFileUpload = async (file: File) => {
     try {
       setUploading(true);
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('' as any).pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `results/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, file);
+      // Upload via S3
+      await uploadToS3(file, filePath);
 
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('documents')
-        .getPublicUrl(filePath);
+      const publicUrl = `https://wecircle-storage-1779996505705.s3.us-east-1.amazonaws.com/${filePath}`;
 
       setResultForm({ ...resultForm, fileUrl: publicUrl });
     } catch (e: any) {

@@ -1,17 +1,30 @@
 import axios, { InternalAxiosRequestConfig } from "axios";
 import { ENV } from "../config/env";
-import { supabase } from "../auth/supabase"; // Note: supabase auth abstraction later
+import { userPool } from "../auth/cognito";
 
 export const api = axios.create({
   baseURL: ENV.API_URL,
 });
 
-// Attach Supabase auth token and disable browser caching to keep data 100% fresh
+// Attach Cognito auth token and disable browser caching to keep data 100% fresh
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const cognitoUser = userPool.getCurrentUser();
+  if (cognitoUser) {
+    const token = await new Promise<string | null>((resolve) => {
+      cognitoUser.getSession((err: any, session: any) => {
+        if (err || !session.isValid()) {
+          resolve(null);
+        } else {
+          resolve(session.getIdToken().getJwtToken());
+        }
+      });
+    });
+
+    if (token) {
+      config.headers.Authorization = "Bearer "; // Remove quotes later
+      // Quick fix for quotes:
+      config.headers.Authorization = "Bearer " + token;
+    }
   }
 
   // Prevent browser caching on localhost during development/navigation
@@ -45,4 +58,11 @@ export function extractApiError(error: unknown): ApiError {
     code: "UNKNOWN",
     message: error instanceof Error ? error.message : "An unexpected error occurred."
   };
+}
+
+export async function uploadToS3(file: File, folder: string = "uploads"): Promise<string> {
+  const presignRes = await api.get('/storage/presign', { params: { fileName: file.name, fileType: file.type, folder } });
+  const { presignedUrl, publicUrl } = presignRes.data;
+  await axios.put(presignedUrl, file, { headers: { 'Content-Type': file.type } });
+  return publicUrl;
 }

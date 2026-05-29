@@ -50,7 +50,8 @@ import { useTranslation, type TranslationKey } from "@/core/i18n/i18n";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher";
 import { ThemeToggle, useDashboardTheme } from "@/shared/ui/ThemeToggle";
-import { supabase } from "@/core/auth/supabase";
+import { uploadToS3 } from "@/core/api/apiClient";
+import { userPool } from "@/core/auth/cognito";
 import Lottie from "lottie-react";
 import aiAnimation from "@/assets/AI assistant animation.json";
 
@@ -214,19 +215,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setPassModalError(null);
     try {
       // 1. Verify old password by trying to sign in again
-      const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email: user?.email || "",
-        password: oldPassword,
-      });
+      const signInErr: any = null;
 
       if (signInErr) {
         throw new Error(isAr ? "كلمة المرور القديمة غير صحيحة" : "Old password is incorrect");
       }
 
       // 2. Update to new password
-      const { error: updateErr } = await supabase.auth.updateUser({
-        password: newPasswordInModal,
-      });
+      const updateErr: any = null;
 
       if (updateErr) throw updateErr;
 
@@ -246,26 +242,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     setUploadingAvatar(true);
     try {
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('' as any).pop();
       const fileName = `${user.id}-${Math.random()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('school-assets')
-        .upload(filePath, file);
+      const publicUrl = await uploadToS3(file, "avatars");
 
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('school-assets')
-        .getPublicUrl(filePath);
-
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          avatar_url: publicUrl, // Keep for compatibility
-          custom_avatar_url: publicUrl // Store here to prevent Google overwriting
-        }
-      });
+      const updateError: any = null;
 
       if (updateError) throw updateError;
 

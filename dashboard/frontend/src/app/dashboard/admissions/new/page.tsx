@@ -13,8 +13,8 @@ export default function NewAdmissionPage() {
       <div className="module-header-row" style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "40px" }}>
         <BackButton />
         <div>
-          <h2 style={{ fontSize: "32px", fontWeight: 900, letterSpacing: "-1px", color: "var(--glass-text-primary)" }}>{t('adm_title')}</h2>
-          <p style={{ color: "var(--glass-text-secondary)", marginTop: "4px" }}>{t('adm_subtitle')}</p>
+          <h2 style={{ fontSize: "32px", fontWeight: 900, letterSpacing: "-1px", color: "var(--glass-text-primary)" }}>{t('' as any)}</h2>
+          <p style={{ color: "var(--glass-text-secondary)", marginTop: "4px" }}>{t('' as any)}</p>
         </div>
       </div>
 

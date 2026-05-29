@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, isSupabaseConfigured } from "@/core/auth/supabase";
+import { userPool, isCognitoConfigured } from "@/core/auth/cognito";
 import { api } from "@/core/api/apiClient";
 import { connectSocket, disconnectSocket } from "@/core/realtime/socketClient";
 
@@ -11,7 +11,7 @@ type AuthUser = { id: string; email: string | undefined; fullName: string; schoo
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
-  logout: (reason?: string) => Promise<void>;
+  logout: (reason?: string) => void;
   refreshProfile: () => Promise<void>;
 }
 
@@ -22,8 +22,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const logout = useCallback(async (reason?: string) => {
-    await supabase.auth.signOut();
+  const logout = useCallback((reason?: string) => {
+    const cognitoUser = userPool.getCurrentUser();
+    if (cognitoUser) {
+      cognitoUser.signOut();
+    }
     setUser(null);
     disconnectSocket();
     if (reason) alert(reason);
@@ -34,15 +37,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await api.get("/auth/me");
       if (data.success) {
-        const { data: { user: sbUser } } = await supabase.auth.getUser();
+        const cognitoUser = userPool.getCurrentUser();
+        let email = data.data.email;
+        if (cognitoUser) {
+          cognitoUser.getSession((err: any, session: any) => {
+            if (!err && session.isValid()) {
+              email = session.getIdToken().payload.email || data.data.email;
+            }
+          });
+        }
+        
         const userData: AuthUser = {
           id: data.data.id,
-          email: data.data.email,
+          email: email,
           fullName: data.data.fullName,
           schoolId: data.data.school?.id,
           role: data.data.role,
           school: data.data.school,
-          avatarUrl: sbUser?.user_metadata?.custom_avatar_url || sbUser?.user_metadata?.avatar_url
+          avatarUrl: undefined
         };
         setUser(userData);
         connectSocket(userData.schoolId || null, userData.role || "USER", userData.id);
@@ -58,33 +70,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) {
+    if (!isCognitoConfigured) {
       setLoading(false);
       return;
     }
 
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        fetchProfile();
-      } else {
-        setLoading(false);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        // Show global loading screen while we fetch the profile
-        setLoading(true);
-        fetchProfile();
-      } else if (event === "SIGNED_OUT") {
-        setUser(null);
-        setLoading(false);
-        disconnectSocket();
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    const cognitoUser = userPool.getCurrentUser();
+    if (cognitoUser) {
+      cognitoUser.getSession((err: any, session: any) => {
+        if (err || !session.isValid()) {
+          setLoading(false);
+        } else {
+          fetchProfile();
+        }
+      });
+    } else {
+      setLoading(false);
+    }
+    
+    // We don't have an auth state change listener in raw Cognito JS SDK like Supabase.
+    // Auth changes are triggered via login/logout calls manually.
   }, [fetchProfile]);
 
   return (

@@ -1,89 +1,110 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Globe } from "lucide-react";
+import { Mail, AlertCircle } from "lucide-react";
+import { CognitoUser } from "amazon-cognito-identity-js";
 
+import { userPool } from "@/core/auth/cognito";
 import { useTranslation } from "@/core/i18n/i18n";
 import { AuthShell } from "@/modules/auth/components/AuthShell";
-import { supabase, isSupabaseConfigured } from "@/core/auth/supabase";
-import { api } from "@/core/api/apiClient";
 
 const forgotSchema = z.object({
-  email: z.string().email()
+  email: z.string().email(),
 });
 
 export default function ForgotPasswordPage() {
-  const { t, isAr } = useTranslation();
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const form = useForm<z.infer<typeof forgotSchema>>({ resolver: zodResolver(forgotSchema) });
+  const { t } = useTranslation();
+  const router = useRouter();
+  
+  const [emailError, setEmailError] = useState("");
+  const [generalError, setGeneralError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = form.handleSubmit(async ({ email }) => {
-    setError("");
-    setSuccess("");
-    setIsSending(true);
+  const form = useForm<z.infer<typeof forgotSchema>>({
+    resolver: zodResolver(forgotSchema),
+    defaultValues: { email: "" }
+  });
+
+  const onSubmit = form.handleSubmit(async (values) => {
+    setEmailError("");
+    setGeneralError("");
+    setIsLoading(true);
+
     try {
-      if (!isSupabaseConfigured) {
-        setError("Supabase config error.");
-        return;
-      }
-
-      // Step 1: Check if the email exists in our database
-      const checkRes = await api.get(`/auth/check-school-email/${encodeURIComponent(email)}`);
-      // If 'available' is true, it means the email is NOT in the database (it's available for registration)
-      if (checkRes.data?.data?.available) {
-        setError(isAr ? "هذا البريد الإلكتروني غير مسجل لدينا. الرجاء التأكد من كتابته بشكل صحيح." : "This email is not registered. Please check and try again.");
-        return;
-      }
-
-      // Step 2: Send recovery link via Supabase
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/update-password`
+      const cognitoUser = new CognitoUser({
+        Username: values.email,
+        Pool: userPool,
       });
-      
-      if (resetError) {
-        setError(resetError.message);
-        return;
-      }
-      
-      setSuccess(t('auth_recovery_sent'));
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred");
-    } finally {
-      setIsSending(false);
+
+      cognitoUser.forgotPassword({
+        onSuccess: function (data) {
+          setSuccess(true);
+          setIsLoading(false);
+          // Redirect to a password reset confirm page in a real app, or ask for code here
+        },
+        onFailure: function (err) {
+          setGeneralError(err.message || "Failed to send reset email.");
+          setIsLoading(false);
+        },
+      });
+    } catch (err: unknown) {
+      setGeneralError("An unexpected error occurred.");
+      setIsLoading(false);
     }
   });
 
   return (
-    <AuthShell
-      variant="forgot"
-      title={t('auth_forgot_title')}
-      subtitle={t('auth_forgot_subtitle')}
-    >
-      <form onSubmit={onSubmit}>
-        <div className="glass-input-group">
-          <label>{t('field_email_recover')}</label>
-          <div className="glass-input-wrapper">
-            <Globe className="glass-input-icon" size={18} />
-            <input placeholder={t('field_email_recover_placeholder')} {...form.register("email")} />
+    <AuthShell variant="login" title={t('' as any)} subtitle={t('' as any)}>
+      <div style={{ position: "relative" }}>
+        {success ? (
+          <div className="glass-panel" style={{ padding: "24px", textAlign: "center" }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Mail size={28} />
+            </div>
+            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#fff", marginBottom: "8px" }}>
+              {t('auth_check_email' as any)}
+            </h3>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px", lineHeight: 1.5, marginBottom: "24px" }}>
+              {t('auth_check_email_desc' as any)}
+            </p>
+            <Link href="/login" className="btn-glass-secondary" style={{ display: "block", textDecoration: "none", textAlign: "center" }}>
+              {t('' as any)}
+            </Link>
           </div>
-        </div>
+        ) : (
+          <form onSubmit={onSubmit}>
+            <div className="glass-input-group" style={{ marginBottom: "32px" }}>
+              <label>{t('' as any)}</label>
+              <div className="glass-input-wrapper">
+                <Mail className="glass-input-icon" size={18} />
+                <input placeholder="name@email.com" {...form.register("email")} />
+              </div>
+              {form.formState.errors.email && (
+                <div className="field-error-inline error-shake">
+                  <AlertCircle size={14} />
+                  <span>{form.formState.errors.email.message}</span>
+                </div>
+              )}
+            </div>
 
-        {error && <p className="error error-shake" style={{ marginBottom: "16px" }}>{error}</p>}
-        {success && <p className="success" style={{ marginBottom: "16px" }}>{success}</p>}
-        <button type="submit" className={`btn-glass-primary ${isSending ? "btn-loading" : ""}`} disabled={isSending}>
-          {isSending ? (isAr ? "جاري الإرسال..." : "Sending...") : t('btn_send_link')}
-        </button>
-      </form>
+            {generalError && <p className="error error-shake" style={{ marginBottom: "16px" }}>{generalError}</p>}
+            
+            <button type="submit" className="btn-glass-primary" disabled={isLoading}>
+              {isLoading ? t('' as any) : t('' as any)}
+            </button>
 
-      <p className="auth-bottom" style={{ color: "rgba(255,255,255,0.5)", marginTop: "24px", textAlign: "center" }}>
-        {t('auth_regained_access')} <Link className="glass-link" href="/login" style={{ fontWeight: 700, color: "#fff" }}>{t('auth_return_login')}</Link>
-      </p>
+            <Link href="/login" className="btn-glass-secondary" style={{ display: "block", textDecoration: "none", textAlign: "center", marginTop: "16px" }}>
+              {t('' as any)}
+            </Link>
+          </form>
+        )}
+      </div>
     </AuthShell>
   );
 }

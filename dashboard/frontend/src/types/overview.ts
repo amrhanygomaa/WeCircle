@@ -101,6 +101,8 @@ export type DashboardOverview = {
   attendanceTrend30d: OverviewAttendancePoint[];
   monthlyRevenue: OverviewRevenuePoint[];
   feesCollectionTrend: Array<{ name: string; total: number; collected: number }>;
+  earningsTrend?: any[];
+  topSubjectsTrend?: any[];
   classSuccessVsFail: OverviewClassRates[];
 
   meta?: {

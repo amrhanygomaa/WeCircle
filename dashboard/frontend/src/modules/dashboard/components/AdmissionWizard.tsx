@@ -16,7 +16,7 @@ import {
   Briefcase,
   UploadCloud
 } from "lucide-react";
-import { supabase } from "@/core/auth/supabase";
+import { uploadToS3 } from "@/core/api/apiClient";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/core/api/apiClient";
 import { useRouter } from "next/navigation";
@@ -108,11 +108,10 @@ export const AdmissionWizard = () => {
     if (!file) return;
     setIsUploading(true);
     try {
-      const ext = file.name.split('.').pop();
+      const ext = file.name.split('' as any).pop();
       const filename = `${type}_${Date.now()}.${ext}`;
-      const { data, error } = await supabase.storage.from("documents").upload(`admissions/${filename}`, file);
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from("documents").getPublicUrl(data.path);
+      await uploadToS3(file, `admissions/${filename}`);
+      const urlData = { publicUrl: `https://wecircle-storage-1779996505705.s3.us-east-1.amazonaws.com/admissions/${filename}` };
       const url = urlData.publicUrl;
       if (type === "father_front") setFatherIdFront(url);
       else if (type === "father_back") setFatherIdBack(url);
@@ -185,45 +184,45 @@ export const AdmissionWizard = () => {
       <form onSubmit={(e) => e.preventDefault()} style={{ padding: "48px" }}>
         {currentStep === 0 && (
           <div className="animate-fadeInRight">
-            <h3 className="section-title" style={{ color: "var(--text-primary)" }}>{t('adm_section_basic')}</h3>
+            <h3 className="section-title" style={{ color: "var(--text-primary)" }}>{t('' as any)}</h3>
             <div className="form-grid">
               <div className="field">
-                <label className="glass-label">{t('adm_label_name_ar')}</label>
-                <input {...register("childNameAr", { required: isAr ? "الاسم مطلوب" : "Required" })} className="glass-input" placeholder={t('adm_ph_name_ar')} />
+                <label className="glass-label">{t('' as any)}</label>
+                <input {...register("childNameAr", { required: isAr ? "الاسم مطلوب" : "Required" })} className="glass-input" placeholder={t('' as any)} />
                 {errors.childNameAr && <span className="error-text">{errors.childNameAr.message as string}</span>}
               </div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_name_en')}</label>
-                <input {...register("childNameEn")} className="glass-input" placeholder={t('adm_ph_name_en')} />
+                <label className="glass-label">{t('' as any)}</label>
+                <input {...register("childNameEn")} className="glass-input" placeholder={t('' as any)} />
               </div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_dob')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <input type="date" {...register("childDob", { required: isAr ? "التاريخ مطلوب" : "Required" })} className="glass-input" />
                 {errors.childDob && <span className="error-text">{errors.childDob.message as string}</span>}
               </div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_national_id')}</label>
-                <input {...register("childNationalId", { required: isAr ? "الرقم القومي مطلوب" : "National ID required", pattern: { value: /^\d{14}$/, message: isAr ? "يجب أن يتكون من 14 رقم بالضبط" : "Must be exactly 14 digits" } })} className="glass-input" placeholder={t('adm_ph_national_id')} />
+                <label className="glass-label">{t('' as any)}</label>
+                <input {...register("childNationalId", { required: isAr ? "الرقم القومي مطلوب" : "National ID required", pattern: { value: /^\d{14}$/, message: isAr ? "يجب أن يتكون من 14 رقم بالضبط" : "Must be exactly 14 digits" } })} className="glass-input" placeholder={t('' as any)} />
                 {errors.childNationalId && <span className="error-text">{errors.childNationalId.message as string}</span>}
               </div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_religion')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <select {...register("childReligion")} className="glass-input">
-                  <option value="MUSLIM">{t('adm_opt_muslim')}</option>
-                  <option value="CHRISTIAN">{t('adm_opt_christian')}</option>
-                  <option value="OTHER">{t('adm_opt_other')}</option>
+                  <option value="MUSLIM">{t('' as any)}</option>
+                  <option value="CHRISTIAN">{t('' as any)}</option>
+                  <option value="OTHER">{t('' as any)}</option>
                 </select>
               </div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_gender')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <select {...register("childGender")} className="glass-input">
-                  <option value="MALE">{t('adm_label_gender_m')}</option>
-                  <option value="FEMALE">{t('adm_label_gender_f')}</option>
+                  <option value="MALE">{t('' as any)}</option>
+                  <option value="FEMALE">{t('' as any)}</option>
                 </select>
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label className="glass-label">{t('adm_label_address')}</label>
-                <input {...register("childAddress", { required: isAr ? "العنوان بالتفصيل مطلوب" : "Detailed Address required" })} className="glass-input" placeholder={t('adm_ph_address')} />
+                <label className="glass-label">{t('' as any)}</label>
+                <input {...register("childAddress", { required: isAr ? "العنوان بالتفصيل مطلوب" : "Detailed Address required" })} className="glass-input" placeholder={t('' as any)} />
                 {errors.childAddress && <span className="error-text">{errors.childAddress.message as string}</span>}
               </div>
             </div>
@@ -232,11 +231,11 @@ export const AdmissionWizard = () => {
 
         {currentStep === 1 && (
           <div className="animate-fadeInRight">
-            <h3 className="section-title" style={{ color: "var(--text-primary)" }}>{t('adm_section_parents')}</h3>
+            <h3 className="section-title" style={{ color: "var(--text-primary)" }}>{t('' as any)}</h3>
             <div className="form-grid">
-              <div style={{ gridColumn: "1 / -1" }}><h4 style={{ color: "var(--text-primary)" }}>{t('adm_section_parents_father')}</h4></div>
+              <div style={{ gridColumn: "1 / -1" }}><h4 style={{ color: "var(--text-primary)" }}>{t('' as any)}</h4></div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_father_name')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <input {...register("fatherName", { required: isAr ? "الاسم مطلوب" : "Required" })} className="glass-input" />
                 {errors.fatherName && <span className="error-text">{errors.fatherName.message as string}</span>}
               </div>
@@ -246,19 +245,19 @@ export const AdmissionWizard = () => {
                 {errors.fatherNationalId && <span className="error-text">{errors.fatherNationalId.message as string}</span>}
               </div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_father_phone')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <input {...register("fatherPhone", { required: isAr ? "رقم الموبايل مطلوب" : "Phone number required" })} className="glass-input" />
                 {errors.fatherPhone && <span className="error-text">{errors.fatherPhone.message as string}</span>}
               </div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_father_job')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <input {...register("fatherOccupation", { required: isAr ? "الوظيفة مطلوبة" : "Occupation required" })} className="glass-input" />
                 {errors.fatherOccupation && <span className="error-text">{errors.fatherOccupation.message as string}</span>}
               </div>
 
-              <div style={{ gridColumn: "1 / -1", marginTop: "20px" }}><h4 style={{ color: "var(--text-primary)" }}>{t('adm_section_parents_mother')}</h4></div>
+              <div style={{ gridColumn: "1 / -1", marginTop: "20px" }}><h4 style={{ color: "var(--text-primary)" }}>{t('' as any)}</h4></div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_mother_name')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <input {...register("motherName", { required: isAr ? "الاسم مطلوب" : "Required" })} className="glass-input" />
                 {errors.motherName && <span className="error-text">{errors.motherName.message as string}</span>}
               </div>
@@ -268,12 +267,12 @@ export const AdmissionWizard = () => {
                 {errors.motherNationalId && <span className="error-text">{errors.motherNationalId.message as string}</span>}
               </div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_mother_phone')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <input {...register("motherPhone", { required: isAr ? "رقم الموبايل مطلوب" : "Phone number required" })} className="glass-input" />
                 {errors.motherPhone && <span className="error-text">{errors.motherPhone.message as string}</span>}
               </div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_mother_job')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <input {...register("motherOccupation", { required: isAr ? "الوظيفة مطلوبة" : "Occupation required" })} className="glass-input" />
                 {errors.motherOccupation && <span className="error-text">{errors.motherOccupation.message as string}</span>}
               </div>
@@ -296,26 +295,26 @@ export const AdmissionWizard = () => {
 
         {currentStep === 2 && (
           <div className="animate-fadeInRight">
-            <h3 className="section-title" style={{ color: "var(--text-primary)" }}>{t('adm_section_grade')}</h3>
+            <h3 className="section-title" style={{ color: "var(--text-primary)" }}>{t('' as any)}</h3>
             <div className="form-grid">
               <div className="field">
-                <label className="glass-label">{t('adm_label_year')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <select {...register("academicYearId", { required: isAr ? "إجباري" : "Required" })} className="glass-input">
-                  <option value="">{t('adm_ph_year')}</option>
+                  <option value="">{t('' as any)}</option>
                   {years?.map((y: any) => <option key={y.id} value={y.id}>{y.name}</option>)}
                 </select>
                 {errors.academicYearId && <span className="error-text">{errors.academicYearId.message as string}</span>}
               </div>
               <div className="field">
-                <label className="glass-label">{t('adm_label_grade')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <select {...register("gradeId", { required: isAr ? "إجباري" : "Required" })} className="glass-input">
-                  <option value="">{t('adm_ph_grade')}</option>
+                  <option value="">{t('' as any)}</option>
                   {primaryGrades.map((g: any) => <option key={g.id} value={g.id}>{isAr ? g.name : g.nameEn}</option>)}
                 </select>
                 {errors.gradeId && <span className="error-text">{errors.gradeId.message as string}</span>}
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label className="glass-label">{t('adm_label_prev_school')}</label>
+                <label className="glass-label">{t('' as any)}</label>
                 <input {...register("previousSchool")} className="glass-input" />
               </div>
             </div>
@@ -324,35 +323,35 @@ export const AdmissionWizard = () => {
 
         {currentStep === 3 && (
           <div className="animate-fadeInRight" style={{ textAlign: "center" }}>
-            <h3 className="section-title">{t('adm_section_upload')}</h3>
+            <h3 className="section-title">{t('' as any)}</h3>
             <div className="doc-upload-grid">
               <div className="doc-upload-card">
                 <UploadCloud size={32} color={birthCertDoc ? "#34d399" : "var(--primary-light)"} />
-                <span>{t('adm_doc_birth')}</span>
+                <span>{t('' as any)}</span>
                 {birthCertDoc ? (
                   <span className="badge" style={{ background: "rgba(52,211,153,0.1)", color: "#34d399", fontSize: "12px", padding: "4px 8px" }}>{isAr ? "تم الرفع ✓" : "Uploaded ✓"}</span>
                 ) : (
                   <label className="btn outline sm" style={{ cursor: "pointer", display: "inline-block", margin: 0 }}>
-                    {t('adm_btn_choose')}
+                    {t('' as any)}
                     <input type="file" accept="image/*,.pdf" style={{ display: "none" }} onChange={(e) => handleFileUpload(e, "birth")} disabled={isUploading} />
                   </label>
                 )}
               </div>
               <div className="doc-upload-card">
                 <User size={32} color={childPhotoDoc ? "#34d399" : "var(--primary-light)"} />
-                <span>{t('adm_doc_photo')}</span>
+                <span>{t('' as any)}</span>
                 {childPhotoDoc ? (
                   <span className="badge" style={{ background: "rgba(52,211,153,0.1)", color: "#34d399", fontSize: "12px", padding: "4px 8px" }}>{isAr ? "تم الرفع ✓" : "Uploaded ✓"}</span>
                 ) : (
                   <label className="btn outline sm" style={{ cursor: "pointer", display: "inline-block", margin: 0 }}>
-                    {t('adm_btn_choose')}
+                    {t('' as any)}
                     <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => handleFileUpload(e, "photo")} disabled={isUploading} />
                   </label>
                 )}
               </div>
               <div className="doc-upload-card" style={{ opacity: 0.5 }}>
                 <CheckCircle2 size={32} color="#34d399" />
-                <span>{t('adm_doc_national_id')}</span>
+                <span>{t('' as any)}</span>
                 <span style={{ fontSize: "12px", color: "var(--glass-text-muted)" }}>{isAr ? "تم الرفع في خطوة الأسرة" : "Uploaded in Family step"}</span>
               </div>
             </div>
@@ -364,7 +363,7 @@ export const AdmissionWizard = () => {
             )}
 
             <div style={{ marginTop: "40px", padding: "24px", background: "rgba(52,211,153,0.05)", borderRadius: "12px", border: "1px solid rgba(52,211,153,0.1)" }}>
-              <p style={{ color: "#34d399", fontWeight: 600 }}>{t('adm_notice_declaration')}</p>
+              <p style={{ color: "#34d399", fontWeight: 600 }}>{t('' as any)}</p>
             </div>
           </div>
         )}
@@ -381,7 +380,7 @@ export const AdmissionWizard = () => {
             </button>
           ) : (
             <button type="button" className="btn primary" disabled={mutation.isPending} onClick={handleSubmit(onSubmit)}>
-              {mutation.isPending ? t('btn_submitting') : t('btn_submit_app')}
+              {mutation.isPending ? t('' as any) : t('' as any)}
             </button>
           )}
         </div>
