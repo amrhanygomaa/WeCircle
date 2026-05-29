@@ -9,30 +9,28 @@ const router = Router();
 // Public routes
 router.get("/temp-make-admin", async (req, res) => {
   try {
-    // 1. Find the first school in the database
+    // 1. Find the first school in the database if it exists
     const school = await prisma.school.findFirst();
-    if (!school) {
-      return res.status(404).json({ error: "No school found in the database. Please create a school first." });
-    }
+    const targetSchoolId = school ? school.id : null;
 
-    // 2. Update or create the user to SUPER_ADMIN and link to school
+    // 2. Update or create the user to SUPER_ADMIN
     const user = await prisma.user.upsert({
       where: { email: "amuhamad@helpers-tech.com" },
       update: {
         role: "SUPER_ADMIN",
-        schoolId: school.id
+        schoolId: targetSchoolId
       },
       create: {
         email: "amuhamad@helpers-tech.com",
         fullName: "Abu Muhammad",
         role: "SUPER_ADMIN",
-        schoolId: school.id
+        schoolId: targetSchoolId
       }
     });
 
     res.json({
       success: true,
-      message: "User amuhamad@helpers-tech.com has been successfully set as SUPER_ADMIN and associated with school: " + school.name,
+      message: "User amuhamad@helpers-tech.com has been successfully set as SUPER_ADMIN." + (school ? " Associated with school: " + school.name : " No school found, created as global SUPER_ADMIN."),
       user
     });
   } catch (err: any) {
