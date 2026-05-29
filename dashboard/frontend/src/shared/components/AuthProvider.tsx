@@ -58,12 +58,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         setUser(userData);
         connectSocket(userData.schoolId || null, userData.role || "USER", userData.id);
+      } else {
+        setUser(null);
+        throw new Error("Profile fetch returned unsuccessful response");
       }
     } catch (err: any) {
       if (err.response?.status !== 401) {
         console.error("Failed to fetch profile:", err);
       }
       setUser(null);
+      setLoading(false);
+      throw err; // Re-throw so callers (login page) can handle the error
     } finally {
       setLoading(false);
     }
@@ -81,7 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (err || !session.isValid()) {
           setLoading(false);
         } else {
-          fetchProfile();
+          // Catch errors silently on initial load - not being logged in is normal
+          fetchProfile().catch(() => {});
         }
       });
     } else {
