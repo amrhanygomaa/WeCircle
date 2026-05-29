@@ -81,28 +81,38 @@ export default function LoginPage() {
       });
 
       // Wrap callback-based Cognito auth in a Promise so we can properly await it
-      await new Promise<void>((resolve, reject) => {
+      const idToken = await new Promise<string>((resolve, reject) => {
         cognitoUser.authenticateUser(authenticationDetails, {
-          onSuccess: async () => {
-            try {
-              // Load profile data from backend using the new Cognito token
-              await refreshProfile();
-              resolve();
-            } catch (profileErr) {
-              reject(profileErr);
-            }
+          onSuccess: (result) => {
+            resolve(result.getIdToken().getJwtToken());
           },
           onFailure: (err: any) => {
             reject(err);
           },
           newPasswordRequired: () => {
-            // Handle this edge case gracefully
             reject(new Error("NEW_PASSWORD_REQUIRED"));
           }
         });
       });
 
-      // Only navigate after profile is successfully loaded
+      // Sync the Cognito session with the backend and get user profile
+      // This endpoint bypasses requireAuth middleware — it verifies the token itself
+      let syncData = null;
+      try {
+        const syncRes = await api.post("/auth/cognito-sync", { token: idToken });
+        if (syncRes.data?.success) {
+          syncData = syncRes.data.data;
+        }
+      } catch (syncErr: any) {
+        const backendMsg = syncErr.response?.data?.message;
+        console.error("Cognito sync failed:", backendMsg || syncErr.message);
+        // Will try refreshProfile without preloaded data as fallback
+      }
+
+      // Load profile — use sync data if available, otherwise fall back to /auth/me
+      await refreshProfile(syncData || undefined);
+
+      // Navigate to dashboard
       router.push("/dashboard");
 
     } catch (err: any) {
@@ -112,7 +122,9 @@ export default function LoginPage() {
       } else if (err.message === "NEW_PASSWORD_REQUIRED") {
         setGeneralError("You must set a new password. Please contact support.");
       } else {
-        setGeneralError(err.message || "An error occurred during sign in.");
+        // Extract backend error message if available
+        const backendMsg = err.response?.data?.message;
+        setGeneralError(backendMsg || err.message || "An error occurred during sign in.");
       }
     }
   });

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, register, checkSchoolId, checkSchoolName, checkSchoolEmail, getMe, handleWebhook, mobileLogin, mobileSocialLogin, changeMobilePassword } from "../../controllers/auth.controller";
+import { login, register, checkSchoolId, checkSchoolName, checkSchoolEmail, getMe, handleWebhook, mobileLogin, mobileSocialLogin, changeMobilePassword, cognitoSync } from "../../controllers/auth.controller";
 import { requireAuth } from "../../core/http/middlewares/auth";
 import { requireMobileAuth } from "../../core/http/middlewares/mobileAuth";
 
@@ -14,6 +14,7 @@ router.get("/check-school-id/:code", checkSchoolId);
 router.get("/check-school-name/:name", checkSchoolName);
 router.get("/check-school-email/:email", checkSchoolEmail);
 router.post("/webhook", handleWebhook);
+router.post("/cognito-sync", cognitoSync);
 
 // Protected routes
 router.get("/me", requireAuth, getMe);

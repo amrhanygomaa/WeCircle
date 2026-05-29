@@ -9,6 +9,7 @@ import { asyncHandler } from "../core/utils/asyncHandler";
 import { getIO } from "../config/websocket";
 import crypto from "crypto";
 import axios from "axios";
+import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { addSession, revokeAllSessionsForParent, revokeAllSessionsForTeacher } from "../core/utils/sessionStore";
 import {
   AuthenticationError,
@@ -107,6 +108,87 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
         schoolId: existingUser.schoolId
       },
       session: data.session
+    }
+  });
+});
+
+/* ── POST /auth/cognito-sync ── */
+// This endpoint verifies a Cognito token directly (no middleware) and returns user data.
+// Used by the frontend after successful Cognito authentication to sync the session.
+export const cognitoSync = asyncHandler(async (req: Request, res: Response) => {
+  const { token } = z.object({ token: z.string().min(1, "Token is required") }).parse(req.body);
+
+  // 1. Verify the Cognito token server-side
+  const verifier = CognitoJwtVerifier.create({
+    userPoolId: env.cognitoUserPoolId || "",
+    tokenUse: "id",
+    clientId: env.cognitoClientId || "",
+  });
+
+  let cognitoPayload;
+  try {
+    cognitoPayload = await verifier.verify(token);
+  } catch (cognitoErr: any) {
+    console.error("Cognito Sync - Token verification failed:", cognitoErr?.message);
+    throw new AuthenticationError(
+      "Invalid or expired authentication token. Please try logging in again.",
+      "INVALID_TOKEN"
+    );
+  }
+
+  const email = cognitoPayload.email as string;
+  if (!email) {
+    throw new ValidationError("Token does not contain an email address.");
+  }
+
+  // 2. Find the user in the database
+  let dbUser = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      school: {
+        select: { id: true, code: true, name: true, email: true, phone: true }
+      }
+    }
+  });
+
+  // 3. If user doesn't exist in DB, auto-create them (they exist in Cognito so they registered)
+  if (!dbUser) {
+    const fullName = (cognitoPayload.name as string) || (cognitoPayload["custom:fullName"] as string) || email.split("@")[0];
+    const role = (cognitoPayload["custom:role"] as string) === "ADMIN" ? Role.ADMIN
+               : (cognitoPayload["custom:role"] as string) === "SUPER_ADMIN" ? Role.SUPER_ADMIN
+               : Role.PARENT;
+
+    dbUser = await prisma.user.create({
+      data: {
+        email,
+        fullName,
+        role,
+        schoolId: null
+      },
+      include: {
+        school: {
+          select: { id: true, code: true, name: true, email: true, phone: true }
+        }
+      }
+    });
+    console.log(`[Cognito Sync] Auto-created user in DB for email: ${email}`);
+  }
+
+  // 4. Return user data (same shape as /auth/me)
+  let schoolCount: number | undefined;
+  if (dbUser.role === Role.SUPER_ADMIN) {
+    schoolCount = await prisma.school.count();
+  }
+
+  res.json({
+    success: true,
+    data: {
+      id: dbUser.id,
+      email: dbUser.email,
+      fullName: dbUser.fullName,
+      role: dbUser.role,
+      school: dbUser.school,
+      ...(schoolCount !== undefined && { totalSchools: schoolCount })
     }
   });
 });

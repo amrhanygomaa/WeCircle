@@ -12,7 +12,7 @@ interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   logout: (reason?: string) => void;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: (preloadedData?: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,35 +33,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/login");
   }, [router]);
 
-  const fetchProfile = useCallback(async () => {
+  const fetchProfile = useCallback(async (preloadedData?: any) => {
     try {
-      const { data } = await api.get("/auth/me");
-      if (data.success) {
-        const cognitoUser = userPool.getCurrentUser();
-        let email = data.data.email;
-        if (cognitoUser) {
-          cognitoUser.getSession((err: any, session: any) => {
-            if (!err && session.isValid()) {
-              email = session.getIdToken().payload.email || data.data.email;
-            }
-          });
-        }
-        
-        const userData: AuthUser = {
-          id: data.data.id,
-          email: email,
-          fullName: data.data.fullName,
-          schoolId: data.data.school?.id,
-          role: data.data.role,
-          school: data.data.school,
-          avatarUrl: undefined
-        };
-        setUser(userData);
-        connectSocket(userData.schoolId || null, userData.role || "USER", userData.id);
+      let profileData;
+      
+      if (preloadedData) {
+        // Use pre-loaded data (from cognito-sync) — no need to call /auth/me
+        profileData = preloadedData;
       } else {
-        setUser(null);
-        throw new Error("Profile fetch returned unsuccessful response");
+        // Fetch from backend — requires valid token in middleware
+        const { data } = await api.get("/auth/me");
+        if (!data.success) {
+          setUser(null);
+          throw new Error("Profile fetch returned unsuccessful response");
+        }
+        profileData = data.data;
       }
+
+      const cognitoUser = userPool.getCurrentUser();
+      let email = profileData.email;
+      if (cognitoUser) {
+        cognitoUser.getSession((err: any, session: any) => {
+          if (!err && session.isValid()) {
+            email = session.getIdToken().payload.email || profileData.email;
+          }
+        });
+      }
+      
+      const userData: AuthUser = {
+        id: profileData.id,
+        email: email,
+        fullName: profileData.fullName,
+        schoolId: profileData.school?.id,
+        role: profileData.role,
+        school: profileData.school,
+        avatarUrl: undefined
+      };
+      setUser(userData);
+      connectSocket(userData.schoolId || null, userData.role || "USER", userData.id);
     } catch (err: any) {
       if (err.response?.status !== 401) {
         console.error("Failed to fetch profile:", err);
