@@ -15,7 +15,11 @@ export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   allowedOrigins: [
     process.env.FRONTEND_URL || "http://localhost:3000",
-    "http://wecircle-frontend-035611741710.s3-website-us-east-1.amazonaws.com"
+    "http://wecircle-frontend-035611741710.s3-website-us-east-1.amazonaws.com",
+    "https://wecircle.helpers-tech.com",
+    "http://wecircle.helpers-tech.com",
+    "http://52.90.177.139",
+    "http://52.90.177.139:3000"
   ],
   supabaseUrl: requireEnv("SUPABASE_URL"),
   supabaseAnonKey: requireEnv("SUPABASE_ANON_KEY"),

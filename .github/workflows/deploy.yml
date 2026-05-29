@@ -45,18 +45,18 @@ jobs:
           unzip -o /home/ec2-user/frontend_build.zip
           npm install --production --ignore-scripts
 
-          # Kill ALL pm2 processes named frontend
-          pm2 delete all || true
+          # Delete ONLY frontend processes (loop to catch duplicates)
+          while pm2 delete frontend 2>/dev/null; do echo "deleted a frontend process"; done
           # Kill anything still holding port 3000
-          fuser -k 3000/tcp || true
+          fuser -k 3000/tcp 2>/dev/null || true
           sleep 2
 
           # Start fresh single frontend instance
           pm2 start npm --name frontend -- start
-          pm2 start /opt/wecircle/dashboard/backend/dist/server.js --name backend
           pm2 save
           pm2 list
           ENDSSH
+
 
       - name: Deploy Backend to EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -74,5 +74,6 @@ jobs:
             npx prisma generate
             npm run build
             
-            pm2 restart backend || pm2 start dist/server.js --name backend
+            pm2 delete backend 2>/dev/null || true
+            pm2 start dist/server.js --name backend
             pm2 save
