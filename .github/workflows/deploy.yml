@@ -27,8 +27,8 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: https://api.wecircle.helpers-tech.com/api
           NEXT_PUBLIC_AWS_REGION: us-east-1
-          NEXT_PUBLIC_COGNITO_USER_POOL_ID: us-east-1_IvG7IexJJ
-          NEXT_PUBLIC_COGNITO_CLIENT_ID: 2meppogljnsldj9iivqf6d1p02
+          NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
 
       - name: Configure SSH Key
         run: |
@@ -70,6 +70,15 @@ jobs:
             git pull origin main
             
             cd dashboard/backend
+            
+            # Securely inject Cognito pool IDs and JWT secrets from GitHub secrets into server .env
+            sed -i '/^JWT_SECRET=/d' .env 2>/dev/null || true
+            sed -i '/^COGNITO_USER_POOL_ID=/d' .env 2>/dev/null || true
+            sed -i '/^COGNITO_CLIENT_ID=/d' .env 2>/dev/null || true
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+            echo "COGNITO_USER_POOL_ID=${{ secrets.COGNITO_USER_POOL_ID }}" >> .env
+            echo "COGNITO_CLIENT_ID=${{ secrets.COGNITO_CLIENT_ID }}" >> .env
+            
             npm ci --only=production=false
             npx prisma generate
             npm run build
