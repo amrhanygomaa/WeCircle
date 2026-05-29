@@ -97,6 +97,18 @@ export type DashboardOverview = {
   totalFines: number;
   unpaidStudents: { count: number; recent: { student: { id: string; photo: string | null; user: { fullName: string } } }[] };
   platformPerformance: { high: number; medium: number; low: number };
+  bestTeacher?: {
+    id: string;
+    name: string;
+    subject: string;
+    photo: string | null;
+  } | null;
+  starStudent?: {
+    id: string;
+    name: string;
+    code: string;
+    photo: string | null;
+  } | null;
 
   attendanceTrend30d: OverviewAttendancePoint[];
   monthlyRevenue: OverviewRevenuePoint[];

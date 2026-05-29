@@ -8,7 +8,7 @@
   --ov-text-soft: #334155;
   --ov-divider: #f1f5f9;
   padding: 16px 24px;
-  background-color: var(--ov-bg);
+  background-color: transparent;
   min-height: 100vh;
   font-family: 'Inter', system-ui, sans-serif;
 }
@@ -28,18 +28,6 @@
   --ov-divider: #1d2a40;
 }
 
-@media (prefers-color-scheme: dark) {
-  :global(.dashboard) .container {
-    --ov-bg: #0b1220;
-    --ov-surface: #111b2e;
-    --ov-surface-2: #0f1a2b;
-    --ov-border: #23324a;
-    --ov-text: #e5edf8;
-    --ov-text-muted: #9fb2cf;
-    --ov-text-soft: #c4d3e8;
-    --ov-divider: #1d2a40;
-  }
-}
 
 .header {
   display: flex;
@@ -1009,14 +997,7 @@
   border-radius: 10px;
 }
 
-/* Force dark styling when dashboard theme is dark */
-:global(.dashboard--dark) .container,
-:global(.dashboard.dashboard--saas.dashboard--dark) :global(.dashboard-content) .container,
-:global(.dark) .container,
-:global([data-theme="dark"]) .container,
-:global(body.dark) .container {
-  background-color: #0b1220 !important;
-}
+
 
 :global(.dashboard--dark) .card,
 :global(.dashboard--dark) .statCard,

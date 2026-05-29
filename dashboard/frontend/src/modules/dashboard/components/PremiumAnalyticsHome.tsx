@@ -575,6 +575,7 @@ export function PremiumAnalyticsHome() {
 
           {/* Best Performers */}
           <div className={styles.starCardsRow}>
+            {/* Best Performer Card */}
             <div className={`${styles.starCard} ${styles.green}`}>
               <img src="/icons/best-performer.png" alt="" style={{ position: 'absolute', left: 12, top: 20, width: 64, height: 'auto', opacity: 0.8, pointerEvents: 'none' }} />
               <div className={styles.starTitle}>{isAr ? "أفضل أداء" : "Best Performer"}</div>
@@ -582,12 +583,22 @@ export function PremiumAnalyticsHome() {
                 <button className={styles.starNavBtn}><ChevronLeft size={14} /></button>
                 <button className={styles.starNavBtn}><ChevronRight size={14} /></button>
               </div>
-              <h3 className={styles.starName}>{isAr ? "أ/ سارة" : "Ms Sara"}</h3>
-              <p className={styles.starSub}>{isAr ? "معلمة فيزياء" : "Physics Teacher"}</p>
+              <h3 className={styles.starName}>
+                {ov?.bestTeacher ? ov.bestTeacher.name : (isAr ? "لا يوجد معلمون" : "No active teachers")}
+              </h3>
+              <p className={styles.starSub}>
+                {ov?.bestTeacher ? ov.bestTeacher.subject : (isAr ? "أضف معلمين لبدء اللوحة" : "Add teachers to start")}
+              </p>
               <div style={{ width: 100, height: 100, background: 'rgba(255,255,255,0.2)', borderTopLeftRadius: 50, borderTopRightRadius: 50, marginTop: 'auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden' }}>
-                <img src="/icons/best-performer-avatar.png" alt="Ms Sara" style={{ width: '85%', height: 'auto', objectFit: 'contain', marginBottom: '-5px' }} />
+                <img 
+                  src={ov?.bestTeacher?.photo || "/icons/best-performer-avatar.png"} 
+                  alt="Best Performer" 
+                  style={{ width: '85%', height: 'auto', objectFit: 'contain', marginBottom: '-5px' }} 
+                />
               </div>
             </div>
+
+            {/* Star Student Card */}
             <div className={`${styles.starCard} ${styles.blue}`}>
               <img src="/icons/star-student.png" alt="" style={{ position: 'absolute', left: 12, top: 20, width: 64, height: 'auto', opacity: 0.8, pointerEvents: 'none' }} />
               <div className={styles.starTitle}>{isAr ? "طلاب متميزون" : "Star Students"}</div>
@@ -595,10 +606,18 @@ export function PremiumAnalyticsHome() {
                 <button className={styles.starNavBtn}><ChevronLeft size={14} /></button>
                 <button className={styles.starNavBtn}><ChevronRight size={14} /></button>
               </div>
-              <h3 className={styles.starName}>{isAr ? "أحمد" : "Ahmed"}</h3>
-              <p className={styles.starSub}>A12</p>
+              <h3 className={styles.starName}>
+                {ov?.starStudent ? ov.starStudent.name : (isAr ? "لا يوجد طلاب" : "No star students")}
+              </h3>
+              <p className={styles.starSub}>
+                {ov?.starStudent ? ov.starStudent.code : (isAr ? "امنح الطلاب نقاطاً للتميز" : "Award points to students")}
+              </p>
               <div style={{ width: 100, height: 100, background: 'rgba(255,255,255,0.2)', borderTopLeftRadius: 50, borderTopRightRadius: 50, marginTop: 'auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden' }}>
-                <img src="/icons/star-student-avatar.png" alt="Ahmed" style={{ width: '85%', height: 'auto', objectFit: 'contain', marginBottom: '-5px' }} />
+                <img 
+                  src={ov?.starStudent?.photo || "/icons/star-student-avatar.png"} 
+                  alt="Star Student" 
+                  style={{ width: '85%', height: 'auto', objectFit: 'contain', marginBottom: '-5px' }} 
+                />
               </div>
             </div>
           </div>

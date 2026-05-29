@@ -263,7 +263,32 @@ export const getOverview = asyncHandler(async (req: Request, res: Response) => {
       where: { ...where, status: "ACTIVE" }
     }).catch(() => 0);
 
+    // Fetch Best Performer (First active teacher) & Star Student (Student with highest points)
+    const [bestTeacher, starStudent] = await Promise.all([
+      prisma.teacher.findFirst({
+        where: { ...where, status: "ACTIVE" },
+        include: { user: true }
+      }).catch(() => null),
+      prisma.student.findFirst({
+        where: { ...where, status: "ACTIVE" },
+        orderBy: { points: "desc" },
+        include: { user: true }
+      }).catch(() => null)
+    ]);
+
     const resData = {
+      bestTeacher: bestTeacher ? {
+        id: bestTeacher.id,
+        name: bestTeacher.nameAr || bestTeacher.user.fullName,
+        subject: bestTeacher.jobTitle || bestTeacher.subject || "Teacher",
+        photo: bestTeacher.photo || bestTeacher.personalPhoto || null
+      } : null,
+      starStudent: starStudent ? {
+        id: starStudent.id,
+        name: starStudent.nameAr || starStudent.user.fullName,
+        code: starStudent.studentCode || "Star Student",
+        photo: starStudent.photo || null
+      } : null,
       totalStudents: students,
       activeStudents,
       inactiveStudents: students - activeStudents,
