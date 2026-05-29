@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+﻿import { Request, Response } from "express";
 import axios from "axios";
 import { BedrockRuntimeClient, ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
 import { env } from "../../config/env";
@@ -9,7 +9,7 @@ import { z } from "zod";
 import { asyncHandler } from "../../core/utils/asyncHandler";
 import { ValidationError } from "../../core/utils/AppError";
 import { getIO } from "../../config/websocket";
-import { clearDashboardCache } from "../../controllers/dashboard.controller";
+import { clearDashboardCache } from "../dashboard/dashboard.controller";
 import crypto from "crypto";
 
 // Helper for password
