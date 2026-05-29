@@ -11,10 +11,11 @@
 مركز تواصل بيخلي ولي الأمر متابع كل الإشعارات والرسايل في مكان واحد.
 */
 
-import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
-import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
-import 'chat_detail_screen.dart'; // استيراد شاشة تفاصيل المحادثة
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'chat_detail_screen.dart';
 import '../../widgets/wesal_background.dart';
+import '../../services/chat_service.dart';
 
 class MessagingCenterScreen extends StatefulWidget { // تعريف كلاس شاشة مركز المراسلة كـ StatefulWidget
   final bool isTab; // هل تعمل الشاشة كأحد التبويبات؟
@@ -25,16 +26,77 @@ class MessagingCenterScreen extends StatefulWidget { // تعريف كلاس شا
   State<MessagingCenterScreen> createState() => _MessagingCenterScreenState();
 }
 
-class _MessagingCenterScreenState extends State<MessagingCenterScreen> { // كلاس حالة شاشة مركز المراسلة
-  // ── Design tokens ─────────────────────────────────────────────────────────
-  static const Color primaryBlue   = Color(0xFF2563EB); // اللون الأزرق الأساسي
-  static const Color primaryPurple = Color(0xFF9333EA); // اللون البنفسجي الأساسي
-  static const Color baseColor     = Color(0xFFF0F3F8); // لون الخلفية الأساسي
-  static const Color textDark      = Color(0xFF1E293B); // لون النص الداكن
-  static const Color textMuted     = Color(0xFF64748B); // لون النص الباهت
+class _MessagingCenterScreenState extends State<MessagingCenterScreen> {
+  static const Color primaryBlue   = Color(0xFF2563EB);
+  static const Color primaryPurple = Color(0xFF9333EA);
+  static const Color baseColor     = Color(0xFFF0F3F8);
+  static const Color textDark      = Color(0xFF1E293B);
+  static const Color textMuted     = Color(0xFF64748B);
 
-  String _selectedFilter = 'الكل'; // متغير الحالة لاختيار الفلتر النشط
-  String _searchQuery = ''; // متغير الحالة لنص البحث
+  String _selectedFilter = 'الكل';
+  String _searchQuery = '';
+
+  final ChatService _chatService = ChatService();
+  List<ChatModel> _conversations = [];
+  bool _loadingConversations = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConversations();
+  }
+
+  Future<void> _loadConversations() async {
+    setState(() => _loadingConversations = true);
+    final raw = await _chatService.getConversations();
+    if (mounted) {
+      setState(() {
+        _conversations = raw.map((c) => ChatModel(
+          id: c['id'] as String? ?? '',
+          name: c['name'] as String? ?? c['participantName'] as String? ?? 'محادثة',
+          role: _typeLabel(c['type'] as String? ?? c['participantType'] as String? ?? ''),
+          message: (c['lastMessage'] as Map<String, dynamic>?)?['content'] as String? ?? '',
+          time: _formatTime(c['lastMessageAt'] as String?),
+          unread: (c['unreadCount'] as int?) ?? 0,
+          isOnline: false,
+          image: c['photo'] as String? ?? c['participantImage'] as String? ?? '',
+          category: _typeCategory(c['type'] as String? ?? c['participantType'] as String? ?? ''),
+        )).toList();
+        _loadingConversations = false;
+      });
+    }
+  }
+
+  static String _typeLabel(String type) {
+    switch (type) {
+      case 'TEACHER': return 'معلم';
+      case 'PARENT': return 'ولي أمر';
+      case 'SCHOOL_ADMIN': return 'الإدارة';
+      default: return type;
+    }
+  }
+
+  static String _typeCategory(String type) {
+    switch (type) {
+      case 'TEACHER': return 'المدرسين';
+      case 'SCHOOL_ADMIN': return 'الإدارة';
+      default: return 'الكل';
+    }
+  }
+
+  static String _formatTime(String? iso) {
+    if (iso == null) return '';
+    try {
+      final dt = DateTime.parse(iso).toLocal();
+      final now = DateTime.now();
+      if (dt.day == now.day && dt.month == now.month && dt.year == now.year) {
+        return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+      }
+      return 'أمس';
+    } catch (_) {
+      return '';
+    }
+  }
 
   @override // بناء واجهة المستخدم الرئيسية
   Widget build(BuildContext context) {
@@ -58,16 +120,19 @@ class _MessagingCenterScreenState extends State<MessagingCenterScreen> { // كل
                   primaryPurple: primaryPurple,
                 ),
                 SizedBox(height: 16.h),
-                Expanded( // قائمة المحادثات المفلترة
-                  child: _ChatListView(
-                    searchQuery: _searchQuery,
-                    selectedFilter: _selectedFilter,
-                    baseColor: baseColor,
-                    textDark: textDark,
-                    textMuted: textMuted,
-                    primaryBlue: primaryBlue,
-                    primaryPurple: primaryPurple,
-                  ),
+                Expanded(
+                  child: _loadingConversations
+                      ? const Center(child: CircularProgressIndicator())
+                      : _ChatListView(
+                          chats: _conversations,
+                          searchQuery: _searchQuery,
+                          selectedFilter: _selectedFilter,
+                          baseColor: baseColor,
+                          textDark: textDark,
+                          textMuted: textMuted,
+                          primaryBlue: primaryBlue,
+                          primaryPurple: primaryPurple,
+                        ),
                 ),
               ],
             ),
@@ -243,25 +308,25 @@ class _FilterBar extends StatelessWidget { // ويدجت شريط الفلترة
   }
 }
 
-class _ChatListView extends StatelessWidget { // ويدجت قائمة المحادثات (معزول الأداء)
+class _ChatListView extends StatelessWidget {
+  final List<ChatModel> chats;
   final String searchQuery, selectedFilter;
   final Color baseColor, textDark, textMuted, primaryBlue, primaryPurple;
 
   const _ChatListView({
-    required this.searchQuery, required this.selectedFilter,
-    required this.baseColor, required this.textDark, required this.textMuted,
-    required this.primaryBlue, required this.primaryPurple
+    required this.chats,
+    required this.searchQuery,
+    required this.selectedFilter,
+    required this.baseColor,
+    required this.textDark,
+    required this.textMuted,
+    required this.primaryBlue,
+    required this.primaryPurple,
   });
 
-  @override // بناء القائمة باستخدام ListView.builder
+  @override
   Widget build(BuildContext context) {
-    final List<ChatModel> allChats = [ // بيانات تجريبية
-      ChatModel(name: 'أ. مروة الشاذلي', role: 'معلمة اللغة العربية', message: 'مستوى الطالب ممتاز في القراءة والاملاء', time: '10:30 ص', unread: 2, isOnline: true, image: 'https://i.pravatar.cc/150?u=teacher1', category: 'المدرسين'),
-      ChatModel(name: 'أ. أحمد علي', role: 'معلم الرياضيات', message: 'برجاء مراجعة جدول الضرب مع الطالب', time: 'أمس', unread: 0, isOnline: false, image: 'https://i.pravatar.cc/150?u=teacher2', category: 'المدرسين'),
-      ChatModel(name: 'إدارة المدرسة', role: 'الإدارة العامة', message: 'تنبيه: اجتماع أولياء الأمور يوم السبت القادم', time: '9:00 ص', unread: 1, isOnline: true, image: 'https://i.pravatar.cc/150?u=admin', category: 'الإدارة'),
-    ];
-
-    final filteredChats = allChats.where((chat) { // تصفية البيانات برمجياً
+    final filteredChats = chats.where((chat) {
       final matchesFilter = selectedFilter == 'الكل' || chat.category == selectedFilter;
       final matchesSearch = searchQuery.isEmpty || chat.name.contains(searchQuery);
       return matchesFilter && matchesSearch;
@@ -299,7 +364,12 @@ class _ChatTile extends StatelessWidget { // ويدجت بطاقة المحاد�
         ],
       ),
       child: InkWell(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChatDetailScreen(chat: chat))), // فتح التفاصيل
+        onTap: () => Navigator.push(context, MaterialPageRoute(
+          builder: (_) => ChatDetailScreen(
+            conversationId: chat.id,
+            participantName: chat.name,
+          ),
+        )),
         child: Row(
           children: [
             _ChatAvatar(baseColor: baseColor, primaryBlue: primaryBlue), // صورة الشخص الرمزية
@@ -377,10 +447,21 @@ class _UnreadBadge extends StatelessWidget { // شارة عدد الرسائل �
   }
 }
 
-class ChatModel { // كلاس موديل البيانات
+class ChatModel {
+  final String id; // backend conversation ID
   final String name, role, message, time, image, category;
   final int unread;
   final bool isOnline;
 
-  ChatModel({required this.name, required this.role, required this.message, required this.time, required this.unread, required this.isOnline, required this.image, required this.category});
+  ChatModel({
+    required this.id,
+    required this.name,
+    required this.role,
+    required this.message,
+    required this.time,
+    required this.unread,
+    required this.isOnline,
+    required this.image,
+    required this.category,
+  });
 }

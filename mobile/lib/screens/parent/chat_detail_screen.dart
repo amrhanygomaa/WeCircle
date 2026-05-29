@@ -13,16 +13,19 @@
 
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
-import 'messages_screen.dart'; // استيراد شاشة الرسائل للوصول للنماذج
 import '../../widgets/wesal_background.dart';
-import '../../models/message_model.dart'; // استيراد نموذج بيانات الرسالة
-import '../../services/chat_service.dart'; // استيراد خدمة المحادثة
-import 'package:intl/intl.dart' hide TextDirection; // استيراد مكتبة تنسيق الوقت
+import '../../models/message_model.dart';
+import '../../services/chat_service.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 class ChatDetailScreen extends StatefulWidget {
-  // تعريف كلاس شاشة تفاصيل المحادثة كـ StatefulWidget
-  final ChatModel chat; // استقبال بيانات المحادثة
-  const ChatDetailScreen({super.key, required this.chat}); // مشيد الكلاس
+  final String conversationId;
+  final String participantName;
+  const ChatDetailScreen({
+    super.key,
+    required this.conversationId,
+    required this.participantName,
+  });
 
   @override // إنشاء حالة الشاشة
   State<ChatDetailScreen> createState() => _ChatDetailScreenState();
@@ -49,20 +52,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   }
 
   void _sendMessage() {
-    // دالة معالجة إرسال الرسالة
-    if (_msgController.text.trim().isEmpty) return; // منع الإرسال الفارغ
+    final text = _msgController.text.trim();
+    if (text.isEmpty) return;
+    _msgController.clear();
     _chatService.sendMessage(
-      MessageModel(
-        senderId: 'parent_123',
-        receiverId: 'teacher_456',
-        studentId: 'student_adham',
-        messageText: _msgController.text,
-        timestamp: DateTime.now(),
-        category: MessageCategory.general,
-        isFromTeacher: false,
-      ),
+      conversationId: widget.conversationId,
+      content: text,
     );
-    _msgController.clear(); // مسح الحقل بعد الإرسال
   }
 
   @override // بناء واجهة الشاشة
@@ -74,22 +70,23 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent, // شفاف لرؤية الخلفية الموحدة
           appBar: _ChatAppBar(
-            chat: widget.chat,
+            participantName: widget.participantName,
             baseColor: baseColor,
             textDark: textDark,
             primaryBlue: primaryBlue,
-          ), // ترويسة المحادثة (معزولة)
+          ),
           body: Column(
             children: [
               Expanded(
                 child: _MessageListArea(
                   chatService: _chatService,
+                  conversationId: widget.conversationId,
                   textMuted: textMuted,
                   primaryBlue: primaryBlue,
                   primaryPurple: primaryPurple,
                   textDark: textDark,
                 ),
-              ), // منطقة عرض الرسائل
+              ),
               _ChatInputArea(
                 controller: _msgController,
                 onSend: _sendMessage,
@@ -108,12 +105,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 // ── Optimized Sub-Widgets ──────────────────────────────────────────────────
 
 class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
-  // ويدجت ترويسة المحادثة (معزول)
-  final ChatModel chat;
+  final String participantName;
   final Color baseColor, textDark, primaryBlue;
 
   const _ChatAppBar({
-    required this.chat,
+    required this.participantName,
     required this.baseColor,
     required this.textDark,
     required this.primaryBlue,
@@ -147,7 +143,7 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                chat.name,
+                participantName,
                 style: TextStyle(
                   color: textDark,
                   fontWeight: FontWeight.w900,
@@ -176,22 +172,23 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class _MessageListArea extends StatelessWidget {
-  // ويدجت منطقة عرض الرسائل (معزول الأداء)
   final ChatService chatService;
+  final String conversationId;
   final Color textMuted, primaryBlue, primaryPurple, textDark;
 
   const _MessageListArea({
     required this.chatService,
+    required this.conversationId,
     required this.textMuted,
     required this.primaryBlue,
     required this.primaryPurple,
     required this.textDark,
   });
 
-  @override // بناء القائمة باستخدام StreamBuilder
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<MessageModel>>(
-      stream: chatService.getChatMessages('parent_123', 'teacher_456'),
+      stream: chatService.pollMessages(conversationId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(

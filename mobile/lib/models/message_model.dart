@@ -1,6 +1,3 @@
-// نموذج هيكلة بيانات الرسائل والمحادثات بين المدرسة وأولياء الأمور
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 enum MessageCategory { general, behavior, fees }
 
 class MessageModel {
@@ -30,28 +27,35 @@ class MessageModel {
       'receiverId': receiverId,
       'studentId': studentId,
       'messageText': messageText,
-      'timestamp': FieldValue.serverTimestamp(),
+      'timestamp': timestamp.toIso8601String(),
       'category': category.name,
       'isFromTeacher': isFromTeacher,
     };
   }
 
-  factory MessageModel.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = (doc.data() as Map<String, dynamic>?) ?? {};
+  /// Creates a [MessageModel] from a backend REST response map.
+  /// Pass [myEntityId] (the current user's parent/teacher entity ID) to
+  /// determine which side of the bubble the message belongs to.
+  factory MessageModel.fromJson(
+    Map<String, dynamic> json, {
+    String? myEntityId,
+  }) {
+    final senderId = (json['senderId'] as String?) ?? '';
     return MessageModel(
-      id: doc.id,
-      senderId: data['senderId'] ?? '',
-      receiverId: data['receiverId'] ?? '',
-      studentId: data['studentId'] ?? '',
-      messageText: data['messageText'] ?? '',
-      timestamp: data['timestamp'] != null
-          ? (data['timestamp'] as Timestamp).toDate()
+      id: json['id'] as String?,
+      senderId: senderId,
+      receiverId: (json['receiverId'] as String?) ?? '',
+      studentId: '',
+      messageText:
+          (json['content'] as String?) ?? (json['messageText'] as String?) ?? '',
+      timestamp: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
           : DateTime.now(),
       category: MessageCategory.values.firstWhere(
-        (e) => e.name == (data['category'] ?? 'general'),
+        (e) => e.name == (json['category'] as String?),
         orElse: () => MessageCategory.general,
       ),
-      isFromTeacher: data['isFromTeacher'] ?? true,
+      isFromTeacher: myEntityId != null ? senderId != myEntityId : true,
     );
   }
 }

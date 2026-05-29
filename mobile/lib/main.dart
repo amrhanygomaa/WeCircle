@@ -46,7 +46,6 @@ import 'package:wesal/screens/parent/tips_screen.dart';
 import 'package:wesal/screens/parent/behavior_report_screen.dart';
 import 'package:wesal/screens/student_shared/student_chatbot_screen.dart';
 import 'package:wesal/screens/parent/activities_screen.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class WesalScrollBehavior extends MaterialScrollBehavior {
   @override
@@ -67,18 +66,6 @@ void main() async {
     ),
   );
 
-  try {
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: 'AIzaSyA-fake-key-for-ui-demo',
-        appId: '1:1234567890:android:fake-app-id',
-        messagingSenderId: '1234567890',
-        projectId: 'wesal-app-demo',
-      ),
-    );
-  } catch (e) {
-    debugPrint('Firebase initialization warning: $e');
-  }
   runApp(const WesalApp());
 }
 

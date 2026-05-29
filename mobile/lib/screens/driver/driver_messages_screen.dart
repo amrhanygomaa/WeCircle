@@ -238,9 +238,9 @@ class _ChatListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<ChatModel> allChats = [
-      ChatModel(name: 'والد أدهم', role: 'ولي أمر', message: 'هل اقترب الباص من المنزل؟', time: '10:30 ص', unread: 2, isOnline: true, image: 'https://i.pravatar.cc/150?u=parent1', category: 'أولياء الأمور'),
-      ChatModel(name: 'والدة مريم', role: 'ولي أمر', message: 'مريم غائبة اليوم، شكراً لك', time: 'أمس', unread: 0, isOnline: false, image: 'https://i.pravatar.cc/150?u=parent2', category: 'أولياء الأمور'),
-      ChatModel(name: 'إدارة الحركة', role: 'الإدارة', message: 'برجاء الحضور مبكراً غداً لاجتماع السائقين', time: '9:00 ص', unread: 1, isOnline: true, image: 'https://i.pravatar.cc/150?u=admin', category: 'الإدارة'),
+      ChatModel(id: '', name: 'والد أدهم', role: 'ولي أمر', message: 'هل اقترب الباص من المنزل؟', time: '10:30 ص', unread: 2, isOnline: true, image: 'https://i.pravatar.cc/150?u=parent1', category: 'أولياء الأمور'),
+      ChatModel(id: '', name: 'والدة مريم', role: 'ولي أمر', message: 'مريم غائبة اليوم، شكراً لك', time: 'أمس', unread: 0, isOnline: false, image: 'https://i.pravatar.cc/150?u=parent2', category: 'أولياء الأمور'),
+      ChatModel(id: '', name: 'إدارة الحركة', role: 'الإدارة', message: 'برجاء الحضور مبكراً غداً لاجتماع السائقين', time: '9:00 ص', unread: 1, isOnline: true, image: 'https://i.pravatar.cc/150?u=admin', category: 'الإدارة'),
     ];
 
     final filteredChats = allChats.where((chat) {
@@ -281,7 +281,12 @@ class _ChatTile extends StatelessWidget {
         ],
       ),
       child: InkWell(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChatDetailScreen(chat: chat))),
+        onTap: () => Navigator.push(context, MaterialPageRoute(
+          builder: (_) => ChatDetailScreen(
+            conversationId: chat.id,
+            participantName: chat.name,
+          ),
+        )),
         child: Row(
           children: [
             _ChatAvatar(baseColor: baseColor, primaryBlue: primaryBlue),
