@@ -81,8 +81,19 @@ jobs:
             
             npm ci --only=production=false
             npx prisma generate
+
+            # Pre-migration: NULL out Notification.recipientId rows that point to deleted Users.
+            # Prevents the FK constraint addition in phase2_additions from failing on dirty data.
+            echo 'UPDATE "Notification" SET "recipientId" = NULL WHERE "recipientId" IS NOT NULL AND "recipientId" NOT IN (SELECT id FROM "User");' | npx prisma db execute --stdin
+
+            # Baseline the init migration on first deploy (no-op if already recorded).
+            npx prisma migrate resolve --applied "20260529000000_init" 2>&1 || true
+
+            # Apply all pending incremental migrations (idempotent).
+            npx prisma migrate deploy
+
             npm run build
-            
+
             pm2 delete backend 2>/dev/null || true
             pm2 start dist/server.js --name backend
             pm2 save
