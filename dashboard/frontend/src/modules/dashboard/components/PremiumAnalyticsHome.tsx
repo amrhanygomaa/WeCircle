@@ -330,7 +330,7 @@ export function PremiumAnalyticsHome() {
               </select>
             </div>
           </div>
-          <div style={{ height: 240 }}>
+          <div style={{ height: 300 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={(ov?.feesCollectionTrend || feesData).map((d: any) => ({
@@ -476,7 +476,7 @@ export function PremiumAnalyticsHome() {
               </div>
               <div style={{ width: 32, height: 32, background: '#3b82f6', color: '#fff', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><TrendingUp size={16} /></div>
             </div>
-            <div style={{ height: 80, marginTop: 12 }}>
+            <div style={{ height: 110, marginTop: 16 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={earningsData}>
                   <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#eff6ff" strokeWidth={2} />
@@ -496,7 +496,7 @@ export function PremiumAnalyticsHome() {
               </div>
               <div style={{ width: 32, height: 32, background: '#ef4444', color: '#fff', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><TrendingUp size={16} style={{ transform: 'rotate(180deg)' }} /></div>
             </div>
-            <div style={{ height: 80, marginTop: 12 }}>
+            <div style={{ height: 110, marginTop: 16 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={earningsData}>
                   <Area type="monotone" dataKey="value" stroke="#ef4444" fill="#fef2f2" strokeWidth={2} />
@@ -589,7 +589,7 @@ export function PremiumAnalyticsHome() {
               <p className={styles.starSub}>
                 {ov?.bestTeacher ? ov.bestTeacher.subject : (isAr ? "أضف معلمين لبدء اللوحة" : "Add teachers to start")}
               </p>
-              <div style={{ width: 100, height: 100, background: 'rgba(255,255,255,0.2)', borderTopLeftRadius: 50, borderTopRightRadius: 50, marginTop: 'auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden' }}>
+              <div style={{ width: 120, height: 120, background: 'rgba(255,255,255,0.2)', borderTopLeftRadius: 60, borderTopRightRadius: 60, marginTop: 'auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden' }}>
                 <img 
                   src={ov?.bestTeacher?.photo || "/icons/best-performer-avatar.png"} 
                   alt="Best Performer" 
@@ -612,7 +612,7 @@ export function PremiumAnalyticsHome() {
               <p className={styles.starSub}>
                 {ov?.starStudent ? ov.starStudent.code : (isAr ? "امنح الطلاب نقاطاً للتميز" : "Award points to students")}
               </p>
-              <div style={{ width: 100, height: 100, background: 'rgba(255,255,255,0.2)', borderTopLeftRadius: 50, borderTopRightRadius: 50, marginTop: 'auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden' }}>
+              <div style={{ width: 120, height: 120, background: 'rgba(255,255,255,0.2)', borderTopLeftRadius: 60, borderTopRightRadius: 60, marginTop: 'auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden' }}>
                 <img 
                   src={ov?.starStudent?.photo || "/icons/star-student-avatar.png"} 
                   alt="Star Student" 
@@ -711,7 +711,7 @@ export function PremiumAnalyticsHome() {
               <h3 className={styles.cardTitle}>{isAr ? "الفصول الأكاديمية" : "Academic Classes"}</h3>
               <Link href="/dashboard/classes" className={styles.cardSubtitle} style={{ color: '#3b82f6', fontWeight: 600, textDecoration: 'none' }}>+ {isAr ? "إضافة جديد" : "Add New"}</Link>
             </div>
-            <div style={{ maxHeight: 220, overflowY: 'auto', paddingRight: 4 }}>
+            <div style={{ maxHeight: 270, overflowY: 'auto', paddingRight: 4 }}>
               {ov?.academicClasses && ov.academicClasses.length > 0 ? (
                 ov.academicClasses.map((cls, idx) => {
                   const percent = Math.min(100, Math.round((cls.studentsCount / (cls.capacity || 1)) * 100));
@@ -766,7 +766,7 @@ export function PremiumAnalyticsHome() {
                   <span style={{ color: '#ef4444' }}>■ {isAr ? "منخفض" : "Low"}:</span><span>{pp.low}</span>
                 </div>
               </div>
-              <div style={{ width: 100, height: 100, position: 'relative' }}>
+              <div style={{ width: 120, height: 120, position: 'relative' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={performanceData} innerRadius={25} outerRadius={45} dataKey="value" stroke="none">
