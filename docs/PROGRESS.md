@@ -1,6 +1,6 @@
 # WeCircle — Progress Log
 
-Last updated: **2026-05-29**. Update at the end of every session. Re-verify against code at the start.
+Last updated: **2026-05-30**. Update at the end of every session. Re-verify against code at the start.
 
 ---
 
@@ -28,16 +28,25 @@ Last updated: **2026-05-29**. Update at the end of every session. Re-verify agai
 
 ---
 
-## 🔄 In progress — Phase 3 (logic & structure refactor)
+## ✅ Done (Phase 3 — logic & structure refactor, 2026-05-30)
 
-Started 2026-05-29. Workstreams:
+All 5 workstreams complete; deployed to production via CI on 2026-05-30.
 
-1. **Flutter lint cleanup** ✅ — 23 `withOpacity` → `withValues(alpha:)`, `flutter analyze` → 0 issues.
-2. **Backend chat consolidation** — merge duplicate `chat.controller.ts` + `conversation.controller.ts`
-   into a single `modules/chat/` module.
-3. **Mobile chat consolidation** — rewrite `chat_service.dart` to use REST + Socket.IO; remove Firebase.
-4. **Controller migrations** — move remaining 37 legacy flat controllers into `modules/<domain>/`.
-5. **Device session store** — replace file-based `device_sessions.json` with DB/Redis.
+1. **Flutter lint cleanup** — 23 `withOpacity` → `withValues(alpha:)`, `flutter analyze` → 0 issues. (R17)
+2. **Backend chat consolidation** — `controllers/chat.controller.ts` + `controllers/conversation.controller.ts`
+   merged into `modules/chat/` (333 lines). Both `/chat` and `/conversations` mount the same router. (R6, R9)
+3. **Mobile chat consolidation** — Firebase/Firestore removed from the mobile app. `chat_service.dart`
+   rewritten to REST + 5-second polling. `pubspec.yaml` drops `cloud_firestore` and `firebase_core`.
+   Parent messages screen loads real conversations from the backend. (D5, R9)
+4. **Controller migrations** — all 35 remaining legacy flat controllers moved into `modules/<domain>/`
+   (routes → controller pattern). `src/controllers/` and `src/routes/modules/` directories deleted. (R6)
+5. **Device session store** — `device_sessions.json` + sync file I/O replaced by `DeviceSession` Prisma
+   model + async `sessionStore.ts`. Migration `20260530000002_device_sessions` applied in production. (R8)
+
+**Post-deploy notes:**
+- Mobile users were logged out once (expected — file sessions don't migrate to DB).
+- `mobile_token` + `mobile_entity_id` still need to be written to SharedPreferences during login
+  (`login_screen.dart`) — chat service won't authenticate until this is wired up.
 
 ## ✅ Done (Phase 1 + Phase 2)
 
@@ -73,14 +82,14 @@ Started 2026-05-29. Workstreams:
 
 ### 🟠 High (stability / architecture)
 - **R5 — No DB migrations.** ✅ **FIXED (Phase 2)** — `prisma/migrations/` established with baseline + Phase 2 additions.
-- **R6 — Half-done backend refactor.** Only `src/modules/student/` uses the target layered style;
-  everything else is the legacy flat `controllers/`. `controllers/student.controller.ts` is **dead
-  code** (nothing imports it; `/students` uses the module version). Services layer is essentially
-  empty (only `notification.service.ts`) → controllers talk to Prisma directly.
+- **R6 — Half-done backend refactor.** ✅ **FIXED (Phase 3)** — all 35 legacy flat controllers migrated
+  to `modules/<domain>/`. Services layer is still thin (only `notification.service.ts`) — next step
+  is extracting business logic out of controllers into service files.
 - **R7 — Socket.IO won't scale.** No Redis adapter; in-process state. Breaks on >1 instance / ECS.
-- **R8 — Device session store is a JSON file** (`device_sessions.json` + `core/utils/sessionStore.ts`).
-  Not durable, not multi-instance safe.
-- **R9 — Duplicated chat systems** (Postgres `Conversation`/`Message` vs Firestore). Pick one (D5).
+- **R8 — Device session store is a JSON file** ✅ **FIXED (Phase 3)** — replaced with `DeviceSession`
+  Prisma model + async `sessionStore.ts`. Migration applied in production.
+- **R9 — Duplicated chat systems** ✅ **FIXED (Phase 3)** — Firestore removed from mobile app; all chat
+  goes through Postgres `Conversation`/`Message` via the consolidated `modules/chat/` backend.
 - **R10 — In-process cron** (`startOverdueChecker`) runs per-instance → duplicate work when scaled.
   Move to EventBridge Scheduler.
 
