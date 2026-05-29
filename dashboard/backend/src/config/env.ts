@@ -21,11 +21,11 @@ export const env = {
     "http://52.90.177.139",
     "http://52.90.177.139:3000"
   ],
-  jwtSecret: requireEnv("JWT_SECRET"),
+  jwtSecret: requireEnv("JWT_SECRET", process.env.SUPABASE_JWT_SECRET || "default-fallback-jwt-secret-key-wecircle"),
   databaseUrl: requireEnv("DATABASE_URL"),
   superAdminEmail: requireEnv("SUPER_ADMIN_EMAIL"),
-  cognitoUserPoolId: requireEnv("COGNITO_USER_POOL_ID", "local"),
-  cognitoClientId: requireEnv("COGNITO_CLIENT_ID", "local"),
+  cognitoUserPoolId: requireEnv("COGNITO_USER_POOL_ID", "us-east-1_IvG7IexJJ"),
+  cognitoClientId: requireEnv("COGNITO_CLIENT_ID", "2meppogljnsldj9iivqf6d1p02"),
   awsRegion: requireEnv("AWS_REGION", "us-east-1"),
   awsS3BucketName: requireEnv("AWS_S3_BUCKET_NAME", "local"),
 };
