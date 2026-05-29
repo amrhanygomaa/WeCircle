@@ -5,16 +5,11 @@ export type Language = 'en' | 'ar';
 
 export const translations = {
   en: {
-    auth_register_title: "Create your school account",
-    auth_register_subtitle: "Begin Your Journey as an Authorized Institution.",
     field_name: "Full Name",
-    field_email: "Email Address",
     field_phone: "Phone Number",
-    field_password: "Password",
     field_confirm_password: "Confirm Password",
     auth_btn_loading: "Loading...",
     auth_btn_register: "Create Account",
-    auth_have_account: "Already have Account?",
 
     // Nav & General
     nav_features: "Features",
@@ -514,16 +509,11 @@ export const translations = {
     data_PE: "Physical Education",
   },
   ar: {
-    auth_register_title: "إنشاء حساب مدرسة جديد",
-    auth_register_subtitle: "ابدأ رحلتك كمؤسسة معتمدة.",
     field_name: "الاسم الكامل",
-    field_email: "البريد الإلكتروني",
     field_phone: "رقم الهاتف",
-    field_password: "كلمة المرور",
     field_confirm_password: "تأكيد كلمة المرور",
     auth_btn_loading: "جاري التحميل...",
     auth_btn_register: "إنشاء الحساب",
-    auth_have_account: "لديك حساب بالفعل؟",
 
     // Nav & General (Egyptian Ammiya)
     nav_features: "المميزات",
