@@ -98,12 +98,12 @@ export default function LoginPage() {
   });
 
   return (
-    <AuthShell variant="login" title={t('' as any)} subtitle={t('' as any)}>
+    <AuthShell variant="login" title={t('auth_login_title')} subtitle={t('auth_login_subtitle')}>
       <div style={{ position: "relative" }}>
         
         <form onSubmit={onSubmit}>
           <div className="glass-input-group">
-            <label>{t('' as any)}</label>
+            <label>{t('field_email')}</label>
             <div className="glass-input-wrapper">
               <Mail className="glass-input-icon" size={18} />
               <input placeholder="name@email.com" {...form.register("email")} />
@@ -117,7 +117,7 @@ export default function LoginPage() {
           </div>
 
           <div className="glass-input-group">
-            <label>{t('' as any)}</label>
+            <label>{t('field_password')}</label>
             <GlassPasswordInput placeholder="••••••••" {...form.register("password")}  />
             {passwordError && (
               <div className="field-error-inline error-shake">
@@ -130,20 +130,20 @@ export default function LoginPage() {
           <div className="remember-row" style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <label className="checkbox-row" style={{ color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", gap: "8px" }}>
               <input type="checkbox" {...form.register("rememberMe")} />
-              {t('' as any)}
+              {t('btn_remember')}
             </label>
-            <Link className="glass-link" style={{ fontSize: "14px" }} href="/forgot-password">{t('' as any)}</Link>
+            <Link className="glass-link" style={{ fontSize: "14px" }} href="/forgot-password">{t('btn_forgot')}</Link>
           </div>
 
           {generalError && <p className="error error-shake" style={{ marginBottom: "16px" }}>{generalError}</p>}
           
           <button type="submit" className="btn-glass-primary" disabled={isLoading}>
-            {isLoading ? t('' as any) : t('' as any)}
+            {isLoading ? t('btn_authorizing') : t('btn_authorize')}
           </button>
         </form>
 
         <p className="auth-bottom" style={{ color: "rgba(255,255,255,0.5)", marginTop: "24px", textAlign: "center" }}>
-          {t('' as any)} <Link className="glass-link" href="/register" style={{ fontWeight: 700, color: "#fff" }}>{t('' as any)}</Link>
+          {t('btn_no_account')} <Link className="glass-link" href="/register" style={{ fontWeight: 700, color: "#fff" }}>{t('btn_signup')}</Link>
         </p>
       </div>
     </AuthShell>

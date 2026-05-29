@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "backend",
   "version": "1.0.0",
   "description": "School management backend with Supabase and Prisma",
@@ -26,7 +26,6 @@
     "@aws-sdk/s3-request-presigner": "^3.1056.0",
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.17.1",
-    "@supabase/supabase-js": "^2.82.0",
     "aws-jwt-verify": "^5.1.1",
     "axios": "^1.15.2",
     "cors": "^2.8.5",
@@ -50,3 +49,4 @@
     "typescript": "^5.9.3"
   }
 }
+

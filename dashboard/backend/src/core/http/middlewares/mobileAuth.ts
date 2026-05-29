@@ -24,7 +24,7 @@ export function requireMobileAuth(req: Request, res: Response, next: NextFunctio
   }
 
   try {
-    const decoded = jwt.verify(token, env.supabaseJwtSecret) as MobileRequestUser;
+    const decoded = jwt.verify(token, env.jwtSecret) as MobileRequestUser;
     
     // Check if the device session is active in our session store (for PARENT and TEACHER)
     if ((decoded.role === "PARENT" && decoded.parentId) || (decoded.role === "TEACHER" && decoded.teacherId)) {
@@ -42,7 +42,7 @@ export function requireMobileAuth(req: Request, res: Response, next: NextFunctio
       email: decoded.loginId,
       role: decoded.role as any,
       schoolId: decoded.schoolId,
-      supabaseId: decoded.id // Placeholder to satisfy TypeScript strict user definition
+      cognitoId: decoded.id // Placeholder to satisfy TypeScript strict user definition
     };
     req.userId = decoded.id;
     req.schoolId = decoded.schoolId;

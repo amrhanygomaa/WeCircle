@@ -126,7 +126,7 @@ export default function UpdatePasswordPage() {
       {!success && (
         <p className="auth-bottom" style={{ color: "rgba(255,255,255,0.5)", marginTop: "24px", textAlign: "center" }}>
           <Link className="glass-link" href="/login" style={{ fontWeight: 700, color: "#fff" }}>
-            {t('' as any)}
+            {t('auth_return_login')}
           </Link>
         </p>
       )}

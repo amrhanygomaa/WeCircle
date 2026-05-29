@@ -58,7 +58,7 @@ export default function SupervisorWizard({
   const formatDate = (date: any) => {
     if (!date) return "";
     const d = new Date(date);
-    return d.toISOString().split('' as any)[0];
+    return d.toISOString().split('T')[0];
   };
 
   const [formData, setFormData] = useState<any>(() => {
@@ -84,7 +84,7 @@ export default function SupervisorWizard({
   const handleFileUpload = async (field: string, file: File) => {
     try {
       setUploading(field);
-      const fileExt = file.name.split('' as any).pop();
+      const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `supervisors/${field}/${fileName}`;
 

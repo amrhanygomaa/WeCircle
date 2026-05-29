@@ -22,11 +22,11 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   try {
     try {
       // 1. Try to verify the token as a custom AppCredential JWT token first
-      const decoded = jwt.verify(token, env.supabaseJwtSecret || "secret") as any;
+      const decoded = jwt.verify(token, env.jwtSecret || "secret") as any;
       if (decoded && decoded.id) {
         req.user = {
           id: decoded.id,
-          supabaseId: "", // Custom credentials users do not have a Cognito native record
+          cognitoId: "", // Custom credentials users do not have a Cognito native record
           email: decoded.loginId || "",
           role: decoded.role,
           schoolId: decoded.schoolId || null
@@ -82,7 +82,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
     req.user = {
       id: dbUser.id,
-      supabaseId: cognitoPayload.sub,
+      cognitoId: cognitoPayload.sub,
       email,
       role: dbUser.role,
       schoolId: dbUser.schoolId

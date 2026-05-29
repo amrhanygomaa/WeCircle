@@ -20,7 +20,7 @@ export const env = {
   supabaseUrl: requireEnv("SUPABASE_URL"),
   supabaseAnonKey: requireEnv("SUPABASE_ANON_KEY"),
   supabaseServiceRoleKey: requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
-  supabaseJwtSecret: requireEnv("SUPABASE_JWT_SECRET"),
+  jwtSecret: process.env.JWT_SECRET || requireEnv("SUPABASE_JWT_SECRET"),
   databaseUrl: requireEnv("DATABASE_URL"),
   superAdminEmail: requireEnv("SUPER_ADMIN_EMAIL"),
   cognitoUserPoolId: requireEnv("COGNITO_USER_POOL_ID", "local"),

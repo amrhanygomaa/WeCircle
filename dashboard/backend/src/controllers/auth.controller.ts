@@ -489,7 +489,7 @@ export const mobileLogin = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
-  // 4. Generate JWT Token signed with supabaseJwtSecret
+  // 4. Generate JWT Token signed with jwtSecret
   const token = jwt.sign(
     {
       id: credential.id,
@@ -502,7 +502,7 @@ export const mobileLogin = asyncHandler(async (req: Request, res: Response) => {
       driverId: credential.driverId,
       supervisorId: credential.supervisorId
     },
-    env.supabaseJwtSecret,
+    env.jwtSecret,
     { expiresIn: "30d" }
   );
 
@@ -647,7 +647,7 @@ export const mobileSocialLogin = asyncHandler(async (req: Request, res: Response
     );
   }
 
-  // 2. Generate JWT Token signed with supabaseJwtSecret
+  // 2. Generate JWT Token signed with jwtSecret
   const token = jwt.sign(
     {
       id: credential.id,
@@ -660,7 +660,7 @@ export const mobileSocialLogin = asyncHandler(async (req: Request, res: Response
       driverId: credential.driverId,
       supervisorId: credential.supervisorId
     },
-    env.supabaseJwtSecret,
+    env.jwtSecret,
     { expiresIn: "30d" }
   );
 
