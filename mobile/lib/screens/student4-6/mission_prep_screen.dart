@@ -23,7 +23,7 @@ class MissionItem {
   final String name;
   final String imagePath;
   final double weight;
-  final int importance; 
+  final int importance;
   final String description;
   final List<String> solves;
 
@@ -45,43 +45,68 @@ class MissionPrepScreen extends StatefulWidget {
   State<MissionPrepScreen> createState() => _MissionPrepScreenState();
 }
 
-class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProviderStateMixin {
+class _MissionPrepScreenState extends State<MissionPrepScreen>
+    with TickerProviderStateMixin {
   final List<MissionItem> _availableItems = [
     MissionItem(
-      id: 'ruler', 
-      name: 'مسطرة', 
-      imagePath: 'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_ruler_1778937775494.png', 
-      weight: 0.2, importance: 4, description: 'للقياس الدقيق.', solves: ['measurement']
+      id: 'ruler',
+      name: 'مسطرة',
+      imagePath:
+          'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_ruler_1778937775494.png',
+      weight: 0.2,
+      importance: 4,
+      description: 'للقياس الدقيق.',
+      solves: ['measurement'],
     ),
     MissionItem(
-      id: 'ball', 
-      name: 'كورة', 
-      imagePath: 'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_ball_1778937790490.png', 
-      weight: 0.5, importance: 3, description: 'للعب في وقت الفراغ.', solves: ['fun']
+      id: 'ball',
+      name: 'كورة',
+      imagePath:
+          'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_ball_1778937790490.png',
+      weight: 0.5,
+      importance: 3,
+      description: 'للعب في وقت الفراغ.',
+      solves: ['fun'],
     ),
     MissionItem(
-      id: 'controller', 
-      name: 'ذراع بلايستيشن', 
-      imagePath: 'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_ps_controller_1778937804349.png', 
-      weight: 0.6, importance: 1, description: 'للتسلية الرقمية.', solves: ['gaming']
+      id: 'controller',
+      name: 'ذراع بلايستيشن',
+      imagePath:
+          'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_ps_controller_1778937804349.png',
+      weight: 0.6,
+      importance: 1,
+      description: 'للتسلية الرقمية.',
+      solves: ['gaming'],
     ),
     MissionItem(
-      id: 'lunchbox', 
-      name: 'لانش بوكس', 
-      imagePath: 'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_lunchbox_1778937818501.png', 
-      weight: 1.2, importance: 10, description: 'وجبات الطاقة الأساسية.', solves: ['hunger']
+      id: 'lunchbox',
+      name: 'لانش بوكس',
+      imagePath:
+          'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_lunchbox_1778937818501.png',
+      weight: 1.2,
+      importance: 10,
+      description: 'وجبات الطاقة الأساسية.',
+      solves: ['hunger'],
     ),
     MissionItem(
-      id: 'toy', 
-      name: 'لعبة', 
-      imagePath: 'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_nutcracker_1778937832895.png', 
-      weight: 0.4, importance: 2, description: 'لعبة خشبية تقليدية.', solves: ['entertainment']
+      id: 'toy',
+      name: 'لعبة',
+      imagePath:
+          'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_nutcracker_1778937832895.png',
+      weight: 0.4,
+      importance: 2,
+      description: 'لعبة خشبية تقليدية.',
+      solves: ['entertainment'],
     ),
     MissionItem(
-      id: 'bottle', 
-      name: 'زمزمية', 
-      imagePath: 'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_bottle_1778937844230.png', 
-      weight: 0.8, importance: 10, description: 'مياه شرب نقية.', solves: ['thirst']
+      id: 'bottle',
+      name: 'زمزمية',
+      imagePath:
+          'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_bottle_1778937844230.png',
+      weight: 0.8,
+      importance: 10,
+      description: 'مياه شرب نقية.',
+      solves: ['thirst'],
     ),
   ];
 
@@ -93,7 +118,10 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
       if (_selectedItems.contains(item)) {
         _selectedItems.remove(item);
       } else {
-        double currentWeight = _selectedItems.fold(0.0, (sum, i) => sum + i.weight);
+        double currentWeight = _selectedItems.fold(
+          0.0,
+          (sum, i) => sum + i.weight,
+        );
         if (currentWeight + item.weight <= _maxWeight) {
           _selectedItems.add(item);
           HapticFeedback.lightImpact();
@@ -107,7 +135,10 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
   void _showWeightWarning() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('الوزن تجاوز الحد المسموح به! تخلص من بعض الأشياء غير الضرورية.', style: TextStyle(fontFamily: 'Cairo')),
+        content: Text(
+          'الوزن تجاوز الحد المسموح به! تخلص من بعض الأشياء غير الضرورية.',
+          style: TextStyle(fontFamily: 'Cairo'),
+        ),
         backgroundColor: Colors.orangeAccent,
       ),
     );
@@ -164,7 +195,11 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28.sp),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 28.sp,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           Row(
@@ -193,16 +228,21 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
       margin: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E3F).withValues(alpha: 0.5),
+        color: const Color(0xFF1E1E3F).withOpacity(0.5),
         borderRadius: BorderRadius.circular(25.r),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildStatItem('3', 'مستوى', Icons.star_rounded, Colors.amber),
           _buildDivider(),
-          _buildStatItem('1', '', Icons.local_fire_department_rounded, Colors.orange),
+          _buildStatItem(
+            '1',
+            '',
+            Icons.local_fire_department_rounded,
+            Colors.orange,
+          ),
           _buildDivider(),
           _buildStatItem('210', '', Icons.diamond_rounded, Colors.cyanAccent),
         ],
@@ -210,14 +250,33 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
     );
   }
 
-  Widget _buildStatItem(String value, String label, IconData icon, Color iconColor) {
+  Widget _buildStatItem(
+    String value,
+    String label,
+    IconData icon,
+    Color iconColor,
+  ) {
     return Row(
       children: [
         if (label.isNotEmpty) ...[
-          Text(label, style: TextStyle(color: Colors.white70, fontSize: 14.sp, fontFamily: 'Cairo')),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14.sp,
+              fontFamily: 'Cairo',
+            ),
+          ),
           SizedBox(width: 8.w),
         ],
-        Text(value, style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         SizedBox(width: 4.w),
         Icon(icon, color: iconColor, size: 20.sp),
       ],
@@ -225,7 +284,11 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
   }
 
   Widget _buildDivider() {
-    return Container(width: 1, height: 20.h, color: Colors.white.withValues(alpha: 0.2));
+    return Container(
+      width: 1,
+      height: 20.h,
+      color: Colors.white.withOpacity(0.2),
+    );
   }
 
   Widget _buildWarningBar() {
@@ -233,18 +296,27 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
       margin: EdgeInsets.symmetric(horizontal: 24.w),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withValues(alpha: 0.8),
+        color: const Color(0xFF0F172A).withOpacity(0.8),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
+        border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.info_outline_rounded, color: Colors.blueAccent, size: 20.sp),
+          Icon(
+            Icons.info_outline_rounded,
+            color: Colors.blueAccent,
+            size: 20.sp,
+          ),
           SizedBox(width: 8.w),
           Text(
             'احذر! هناك أشياء غير مهمة تشتت الانتباه.',
-            style: TextStyle(color: Colors.white, fontSize: 13.sp, fontFamily: 'Cairo', fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 13.sp,
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -260,10 +332,13 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
           height: 220.r,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.3), width: 2),
+            border: Border.all(
+              color: Colors.cyanAccent.withOpacity(0.3),
+              width: 2,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.cyanAccent.withValues(alpha: 0.1),
+                color: Colors.cyanAccent.withOpacity(0.1),
                 blurRadius: 40,
                 spreadRadius: 10,
               ),
@@ -277,15 +352,17 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
             shape: BoxShape.circle,
             gradient: RadialGradient(
               colors: [
-                Colors.cyanAccent.withValues(alpha: 0.4),
-                Colors.cyanAccent.withValues(alpha: 0.1),
+                Colors.cyanAccent.withOpacity(0.4),
+                Colors.cyanAccent.withOpacity(0.1),
                 Colors.transparent,
               ],
             ),
           ),
           child: Center(
             child: Image.file(
-              File('C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_backpack_icon_1778937857877.png'),
+              File(
+                'C:/Users/hp/.gemini/antigravity/brain/411d440e-450d-4c7c-980f-81666922e2ae/realistic_backpack_icon_1778937857877.png',
+              ),
               width: 140.r,
               height: 140.r,
               fit: BoxFit.contain,
@@ -303,7 +380,11 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
             ),
             child: Text(
               '${_selectedItems.length} / 0',
-              style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -322,25 +403,29 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.purple.withValues(alpha: 0.4),
-                    Colors.purple.withValues(alpha: 0.1),
+                    Colors.purple.withOpacity(0.4),
+                    Colors.purple.withOpacity(0.1),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(25.r),
                 border: Border.all(
-                  color: isSelected ? Colors.cyanAccent : Colors.white.withValues(alpha: 0.1),
+                  color: isSelected
+                      ? Colors.cyanAccent
+                      : Colors.white.withOpacity(0.1),
                   width: 2,
                 ),
-                boxShadow: isSelected ? [
-                  BoxShadow(color: Colors.cyanAccent.withValues(alpha: 0.3), blurRadius: 10),
-                ] : [],
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: Colors.cyanAccent.withOpacity(0.3),
+                          blurRadius: 10,
+                        ),
+                      ]
+                    : [],
               ),
-              child: Image.file(
-                File(item.imagePath),
-                fit: BoxFit.contain,
-              ),
+              child: Image.file(File(item.imagePath), fit: BoxFit.contain),
             ),
           ),
           SizedBox(height: 8.h),
@@ -371,18 +456,21 @@ class _MissionPrepScreenState extends State<MissionPrepScreen> with TickerProvid
         children: List.generate(60, (index) {
           final random = math.Random();
           return Positioned(
-            left: random.nextDouble() * 1.sw,
-            top: random.nextDouble() * 1.sh,
-            child: Container(
-              width: random.nextDouble() * 2 + 0.5,
-              height: random.nextDouble() * 2 + 0.5,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: random.nextDouble() * 0.7 + 0.3),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ).animate(onPlay: (c) => c.repeat(reverse: true))
-           .fadeOut(duration: (random.nextInt(2000) + 1000).ms);
+                left: random.nextDouble() * 1.sw,
+                top: random.nextDouble() * 1.sh,
+                child: Container(
+                  width: random.nextDouble() * 2 + 0.5,
+                  height: random.nextDouble() * 2 + 0.5,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(
+                      random.nextDouble() * 0.7 + 0.3,
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              )
+              .animate(onPlay: (c) => c.repeat(reverse: true))
+              .fadeOut(duration: (random.nextInt(2000) + 1000).ms);
         }),
       ),
     );

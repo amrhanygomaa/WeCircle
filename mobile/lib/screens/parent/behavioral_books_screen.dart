@@ -38,26 +38,32 @@ class BehavioralBooksScreen extends StatelessWidget {
       {
         'title': 'التعامل مع نوبات الغضب',
         'category': 'تعديل سلوك',
-        'summary': 'كيف تتعامل مع صراخ الطفل وغضبه المفاجئ بطريقة تربوية هادئة.',
-        'content': 'عندما يمر طفلك بنوبة غضب، تذكر أنها وسيلة للتعبير عن مشاعر لا يستطيع وصفها بالكلمات. الخطوة الأولى هي الحفاظ على هدوئك الشخصي. لا تصرخ ولا تحاول الجدال أثناء النوبة.\n\nانتظر حتى يهدأ الطفل تماماً، ثم اقترب منه واحتضنه. عندما يشعر بالأمان، ابدأ بالتحدث معه عن مشاعره بكلمات بسيطة. علمه بدائل للتعبير عن إحباطه، مثل قول "أنا غاضب لأن اللعبة انكسرت" بدلاً من البكاء والصراخ. الثبات على الهدوء هو مفتاحك للسيطرة على الموقف.',
+        'summary':
+            'كيف تتعامل مع صراخ الطفل وغضبه المفاجئ بطريقة تربوية هادئة.',
+        'content':
+            'عندما يمر طفلك بنوبة غضب، تذكر أنها وسيلة للتعبير عن مشاعر لا يستطيع وصفها بالكلمات. الخطوة الأولى هي الحفاظ على هدوئك الشخصي. لا تصرخ ولا تحاول الجدال أثناء النوبة.\n\nانتظر حتى يهدأ الطفل تماماً، ثم اقترب منه واحتضنه. عندما يشعر بالأمان، ابدأ بالتحدث معه عن مشاعره بكلمات بسيطة. علمه بدائل للتعبير عن إحباطه، مثل قول "أنا غاضب لأن اللعبة انكسرت" بدلاً من البكاء والصراخ. الثبات على الهدوء هو مفتاحك للسيطرة على الموقف.',
       },
       {
         'title': 'قوة التشجيع الإيجابي',
         'category': 'تحفيز',
-        'summary': 'لماذا ينجح المديح في تغيير السلوك أكثر من العقاب؟ وكيف تطبقه؟',
-        'content': 'التشجيع الإيجابي يركز على تسليط الضوء على السلوكيات الجيدة وتكرارها. بدلاً من التركيز فقط على توبيخ الطفل عند ارتكاب الأخطاء، ابحث عن اللحظات التي يتصرف فيها بشكل جيد وامدحه عليها.\n\nمن المهم أن تمدح "الجهد" وليس "النتيجة" فقط. فمثلاً، بدلاً من قول "أنت عبقري لأنك حصلت على درجة كاملة"، قل "أنا فخور بك لأنك درست بجد واجتهدت". هذا النوع من التشجيع يبني لدى الطفل عقلية النمو ويزيد من ثقته بقدرته على التطور ومواجهة التحديات.',
+        'summary':
+            'لماذا ينجح المديح في تغيير السلوك أكثر من العقاب؟ وكيف تطبقه؟',
+        'content':
+            'التشجيع الإيجابي يركز على تسليط الضوء على السلوكيات الجيدة وتكرارها. بدلاً من التركيز فقط على توبيخ الطفل عند ارتكاب الأخطاء، ابحث عن اللحظات التي يتصرف فيها بشكل جيد وامدحه عليها.\n\nمن المهم أن تمدح "الجهد" وليس "النتيجة" فقط. فمثلاً، بدلاً من قول "أنت عبقري لأنك حصلت على درجة كاملة"، قل "أنا فخور بك لأنك درست بجد واجتهدت". هذا النوع من التشجيع يبني لدى الطفل عقلية النمو ويزيد من ثقته بقدرته على التطور ومواجهة التحديات.',
       },
       {
         'title': 'وضع الحدود الذكية',
         'category': 'انضباط',
         'summary': 'كيف تضع قوانين منزلية يحترمها الطفل بدون صراخ أو تهديد.',
-        'content': 'الأطفال يشعرون بالأمان الحقيقي عندما يعرفون أن هناك حدوداً وقوانين تحميهم وتنظم حياتهم. وضع الحدود لا يعني القسوة، بل يعني الحزم الممزوج باللطف.\n\nابدأ بوضع قوانين واضحة وبسيطة للمنزل (مثل وقت النوم، أو ترتيب الألعاب). اشرح للطفل سبب وجود هذه القوانين، وما هي العواقب المنطقية في حال مخالفتها. كن ثابتاً في تطبيق هذه العواقب دائماً دون غضب، ليعرف الطفل أن كلمتك واحدة، مما يقلل من محاولاته لتجاوز الحدود مستقبلاً.',
+        'content':
+            'الأطفال يشعرون بالأمان الحقيقي عندما يعرفون أن هناك حدوداً وقوانين تحميهم وتنظم حياتهم. وضع الحدود لا يعني القسوة، بل يعني الحزم الممزوج باللطف.\n\nابدأ بوضع قوانين واضحة وبسيطة للمنزل (مثل وقت النوم، أو ترتيب الألعاب). اشرح للطفل سبب وجود هذه القوانين، وما هي العواقب المنطقية في حال مخالفتها. كن ثابتاً في تطبيق هذه العواقب دائماً دون غضب، ليعرف الطفل أن كلمتك واحدة، مما يقلل من محاولاته لتجاوز الحدود مستقبلاً.',
       },
       {
         'title': 'تنمية الذكاء العاطفي',
         'category': 'ذكاء عاطفي',
         'summary': 'ساعد طفلك على فهم مشاعره والتعامل معها بذكاء.',
-        'content': 'الذكاء العاطفي هو القدرة على التعرف على المشاعر الذاتية ومشاعر الآخرين وإدارتها. الأطفال الذين يتمتعون بذكاء عاطفي هم أكثر نجاحاً في بناء العلاقات ومواجهة ضغوط الحياة.\n\nساعد طفلك على تسمية مشاعره. اسأله: "هل تشعر بالحزن؟ هل أنت محبط؟". عندما يدرك الطفل مسمى الشعور، يسهل عليه التحكم فيه. كن قدوة له في التعبير عن مشاعرك بهدوء، واستمع له باهتمام عندما يحاول إخبارك بما يشعر به دون إطلاق أحكام مسبقة.',
+        'content':
+            'الذكاء العاطفي هو القدرة على التعرف على المشاعر الذاتية ومشاعر الآخرين وإدارتها. الأطفال الذين يتمتعون بذكاء عاطفي هم أكثر نجاحاً في بناء العلاقات ومواجهة ضغوط الحياة.\n\nساعد طفلك على تسمية مشاعره. اسأله: "هل تشعر بالحزن؟ هل أنت محبط؟". عندما يدرك الطفل مسمى الشعور، يسهل عليه التحكم فيه. كن قدوة له في التعبير عن مشاعرك بهدوء، واستمع له باهتمام عندما يحاول إخبارك بما يشعر به دون إطلاق أحكام مسبقة.',
       },
     ];
 
@@ -70,7 +76,11 @@ class BehavioralBooksScreen extends StatelessWidget {
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.keyboard_arrow_right_rounded, color: primaryPurple, size: 32.sp),
+              icon: Icon(
+                Icons.keyboard_arrow_right_rounded,
+                color: primaryPurple,
+                size: 32.sp,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -120,7 +130,11 @@ class ArticleContentScreen extends StatelessWidget {
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.keyboard_arrow_right_rounded, color: primaryPurple, size: 32.sp),
+              icon: Icon(
+                Icons.keyboard_arrow_right_rounded,
+                color: primaryPurple,
+                size: 32.sp,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -142,7 +156,7 @@ class ArticleContentScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(30.r),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryPurple.withValues(alpha: 0.08),
+                    color: primaryPurple.withOpacity(0.08),
                     blurRadius: 30,
                     offset: const Offset(0, 10),
                   ),
@@ -152,9 +166,12 @@ class ArticleContentScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
                     decoration: BoxDecoration(
-                      color: primaryPurple.withValues(alpha: 0.1),
+                      color: primaryPurple.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Text(
@@ -178,7 +195,7 @@ class ArticleContentScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 16.h),
-                  Divider(color: primaryPurple.withValues(alpha: 0.1)),
+                  Divider(color: primaryPurple.withOpacity(0.1)),
                   SizedBox(height: 20.h),
                   Text(
                     article['content']!,
@@ -195,7 +212,7 @@ class ArticleContentScreen extends StatelessWidget {
                       'تمت القراءة • منصة وصال',
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: primaryPurple.withValues(alpha: 0.5),
+                        color: primaryPurple.withOpacity(0.5),
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
                       ),
@@ -215,9 +232,9 @@ class _ArticleCard extends StatefulWidget {
   final Map<String, String> article;
   final VoidCallback onTap;
   final Color primaryPurple, secondaryPurple, lightPurple;
-  
+
   const _ArticleCard({
-    required this.article, 
+    required this.article,
     required this.onTap,
     required this.primaryPurple,
     required this.secondaryPurple,
@@ -245,15 +262,21 @@ class _ArticleCardState extends State<_ArticleCard> {
           margin: EdgeInsets.only(bottom: 16.h),
           padding: EdgeInsets.all(20.r),
           decoration: BoxDecoration(
-            color: _isHovered ? widget.lightPurple.withValues(alpha: 0.5) : Colors.white,
+            color: _isHovered
+                ? widget.lightPurple.withOpacity(0.5)
+                : Colors.white,
             borderRadius: BorderRadius.circular(25.r),
             border: Border.all(
-              color: _isHovered ? widget.primaryPurple.withValues(alpha: 0.2) : Colors.transparent,
+              color: _isHovered
+                  ? widget.primaryPurple.withOpacity(0.2)
+                  : Colors.transparent,
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: widget.primaryPurple.withValues(alpha: _isHovered ? 0.1 : 0.05),
+                color: widget.primaryPurple.withOpacity(
+                  _isHovered ? 0.1 : 0.05,
+                ),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -266,9 +289,12 @@ class _ArticleCardState extends State<_ArticleCard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
+                    ),
                     decoration: BoxDecoration(
-                      color: widget.primaryPurple.withValues(alpha: 0.1),
+                      color: widget.primaryPurple.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Text(
@@ -282,9 +308,9 @@ class _ArticleCardState extends State<_ArticleCard> {
                     ),
                   ),
                   Icon(
-                    Icons.arrow_forward_ios_rounded, 
-                    color: widget.primaryPurple.withValues(alpha: 0.5), 
-                    size: 16.sp
+                    Icons.arrow_forward_ios_rounded,
+                    color: widget.primaryPurple.withOpacity(0.5),
+                    size: 16.sp,
                   ),
                 ],
               ),
