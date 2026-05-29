@@ -25,7 +25,7 @@ import reportsRoutes from "./modules/reports.routes";
 import schoolRoutes from "./modules/school.routes";
 import resultRoutes from "./modules/result.routes";
 import zoomRoutes from "./modules/zoom.routes";
-import chatRoutes from "./modules/chat.routes";
+import chatRoutes from "../modules/chat/chat.routes";
 
 import feeStructureRoutes from "./modules/feeStructure.routes";
 import archiveRoutes from "./modules/archive.routes";
@@ -35,7 +35,6 @@ import scheduleRoutes from "./modules/schedule.routes";
 import behaviorRoutes from "./modules/behavior.routes";
 import dailyReportRoutes from "./modules/dailyReport.routes";
 import studentTaskRoutes from "./modules/studentTask.routes";
-import conversationRoutes from "./modules/conversation.routes";
 
 const router = Router();
 
@@ -86,7 +85,8 @@ router.use("/schedules", scheduleRoutes);
 router.use("/behavior", behaviorRoutes);
 router.use("/daily-reports", dailyReportRoutes);
 router.use("/student-tasks", studentTaskRoutes);
-router.use("/conversations", conversationRoutes);
+// Both /chat and /conversations use the same module (backward compat for web dashboard)
+router.use("/conversations", chatRoutes);
 
 import aiRoutes from "./modules/ai.routes";
 import mobileTransportRoutes from "./modules/mobile.transport.routes";
