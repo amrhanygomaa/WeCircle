@@ -23,8 +23,8 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const staticText = isAr ? "Ø¯ÙŠØ± Ù…Ø¯Ø±Ø³ØªÙƒ Ø¨Ø§Ù„ÙƒØ§Ù…Ù„" : "Run Your Entire";
-  const animatedText = isAr ? "Ù…Ù† Ù„ÙˆØ­Ø© ØªØ­ÙƒÙ… ÙˆØ§Ø­Ø¯Ø© Ø¬Ø¨Ø§Ø±Ø©" : "School from One Powerful Dashboard";
+  const staticText = isAr ? "دير مدرستك بالكامل" : "Run Your Entire";
+  const animatedText = isAr ? "من لوحة تحكم واحدة جبارة" : "School from One Powerful Dashboard";
 
   // Ultra-Premium Entrance Animation (No disappearing)
   const entranceVariant: Variants = {
@@ -48,16 +48,16 @@ export default function LandingPage() {
   };
 
   const logos = [
-    "ðŸ« Future Leaders",
-    "ðŸ“š Al Noor Academy",
-    "ðŸŽ“ Bright Minds",
-    "ðŸ“– Horizon Schools",
-    "ðŸ›ï¸ Al Azhar Int'l"
+    "🏫 Future Leaders",
+    "📚 Al Noor Academy",
+    "🎓 Bright Minds",
+    "📖 Horizon Schools",
+    "🏛️ Al Azhar Int'l"
   ];
 
   return (
     <div className="landing-page">
-      {/* â”€â”€ NAVIGATION â”€â”€ */}
+      {/* ——— NAVIGATION ——— */}
       <nav className={`landing-nav ${scrolled ? "scrolled" : ""}`}>
         <div className="nav-brand">
           <div className="logo-icon"><GraduationCap size={22} /></div>
@@ -140,12 +140,12 @@ export default function LandingPage() {
             <div className="hero-image-wrapper">
               <img src="/hero-dashboard.png" alt="EduControl Dashboard" />
               <div className="hero-float-card card-1">
-                <div className="card-icon">ðŸ“Š</div>
+                <div className="card-icon">📊</div>
                 <div className="card-label">Attendance Rate</div>
                 <div className="card-value">96.4%</div>
               </div>
               <div className="hero-float-card card-2">
-                <div className="card-icon">ðŸŽ“</div>
+                <div className="card-icon">🎓</div>
                 <div className="card-label">Active Students</div>
                 <div className="card-value">1,248</div>
               </div>
@@ -265,7 +265,7 @@ export default function LandingPage() {
             <div className="testimonial-card" key={tItem.name}>
               <div className="testimonial-stars">
                 {Array.from({ length: tItem.stars }).map((_, i) => (
-                  <span key={i}>â˜…</span>
+                  <span key={i}>★</span>
                 ))}
               </div>
               <blockquote>"{tItem.quote}"</blockquote>
@@ -322,7 +322,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>Â© {new Date().getFullYear()} EduControl. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} EduControl. All rights reserved.</span>
         </div>
       </footer>
     </div>
