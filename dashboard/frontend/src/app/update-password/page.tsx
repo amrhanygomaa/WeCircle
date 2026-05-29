@@ -31,7 +31,6 @@ export default function UpdatePasswordPage() {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // We should be logged in via the recovery link fragment (access_token)
-  // Supabase automatically parses this and creates a session.
   
   const form = useForm<z.infer<typeof updatePasswordSchema>>({
     resolver: zodResolver(updatePasswordSchema),

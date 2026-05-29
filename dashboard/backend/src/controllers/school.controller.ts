@@ -5,7 +5,6 @@ import { asyncHandler } from "../core/utils/asyncHandler";
 import { ConflictError, NotFoundError } from "../core/utils/AppError";
 import { requireSid } from "../core/utils/tenant";
 import { getIO } from "../config/websocket";
-import { supabaseAdmin } from "../config/supabase";
 
 export const getMySchool = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
@@ -70,14 +69,6 @@ export const updateMySchool = asyncHandler(async (req: Request, res: Response) =
       });
       if (existingUserEmail) throw new ConflictError("A user with this email is already registered.", "email");
 
-      // 3. Update Supabase Auth email (Syncing Login Identity)
-      const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(
-        currentUser.cognitoId,
-        { email: newEmail, email_confirm: true }
-      );
-      if (authUpdateError) {
-        throw new ConflictError(`Failed to update authentication: ${authUpdateError.message}`, "email");
-      }
 
       // 4. Update local User record to match new email
       await prisma.user.update({

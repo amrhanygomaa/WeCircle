@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../config/prisma";
-import { supabaseAdmin } from "../config/supabase";
 import { env } from "../config/env";
 import { Role } from "@prisma/client";
 import { z } from "zod";
@@ -35,81 +34,10 @@ const registerSchema = z.object({
 
 /* ── POST /auth/login ── */
 export const login = asyncHandler(async (req: Request, res: Response) => {
-  const { email, password } = loginSchema.parse(req.body);
-
-  // Step 1: Check if email exists in our database
-  const existingUser = await prisma.user.findUnique({ 
-    where: { email },
-    include: {
-      student: { include: { credentials: { select: { isActive: true } } } },
-      parent: { include: { credentials: { select: { isActive: true } } } }
-    }
-  });
-
-  if (!existingUser) {
-    throw new AuthenticationError(
-      "The email address you entered isn't connected to an account.",
-      "EMAIL_NOT_FOUND",
-      "email"
-    );
-  }
-
-  // Step 1.5: Check if account is active (for students and parents)
-  const studentCred = existingUser.student?.credentials?.[0];
-  const parentCred = existingUser.parent?.credentials?.[0];
-
-  if ((studentCred && !studentCred.isActive) || (parentCred && !parentCred.isActive)) {
-    throw new AuthenticationError(
-      "Your account has been disabled. Please contact administration regarding your dues.",
-      "ACCOUNT_DISABLED",
-      "email"
-    );
-  }
-
-  // Step 2: Try Supabase auth — if password is wrong, Supabase returns error
-  const { data, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (signInError) {
-    // Supabase returns "Invalid login credentials" for wrong password
-    // We make it field-specific
-    throw new AuthenticationError(
-      "The password you've entered is incorrect.",
-      "WRONG_PASSWORD",
-      "password"
-    );
-  }
-
-  // Step 3: Emit live logout signal to other active sessions
-  getIO().to(`user:${existingUser.id}`).emit("SESSION_TERMINATED", {
-    message: "New login detected. You have been logged out."
-  });
-
-  // Step 4: Update currentSessionId in our database for single-session enforcement
-  const decoded = jwt.decode(data.session?.access_token || "") as any;
-  const sessionId = decoded?.session_id;
-
-  await prisma.user.update({
-    where: { id: existingUser.id },
-    data: { currentSessionId: (sessionId as string) || null }
-  });
-
-  // Step 4: Return user data + session
-  res.json({
-    success: true,
-    data: {
-      user: {
-        id: existingUser.id,
-        email: existingUser.email,
-        fullName: existingUser.fullName,
-        role: existingUser.role,
-        schoolId: existingUser.schoolId
-      },
-      session: data.session
-    }
-  });
+  throw new ValidationError(
+    "Direct password authentication is disabled. Please authenticate via AWS Cognito.",
+    "email"
+  );
 });
 
 /* ── POST /auth/cognito-sync ── */

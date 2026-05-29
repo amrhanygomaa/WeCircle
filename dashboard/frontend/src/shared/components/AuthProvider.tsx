@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
     
-    // We don't have an auth state change listener in raw Cognito JS SDK like Supabase.
+    // We don't have an auth state change listener in raw Cognito JS SDK.
     // Auth changes are triggered via login/logout calls manually.
   }, [fetchProfile]);
 

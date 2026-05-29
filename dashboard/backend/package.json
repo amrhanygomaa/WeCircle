@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "School management backend with Supabase and Prisma",
+  "description": "School management backend with AWS Cognito, Prisma and PostgreSQL",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -12,7 +12,7 @@
   },
   "keywords": [
     "express",
-    "supabase",
+    "aws-cognito",
     "prisma",
     "school-dashboard"
   ],
