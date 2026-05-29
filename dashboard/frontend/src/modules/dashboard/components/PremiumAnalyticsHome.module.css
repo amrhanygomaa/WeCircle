@@ -13,6 +13,10 @@
   font-family: 'Inter', system-ui, sans-serif;
 }
 
+:global([dir="rtl"]) .container {
+  font-family: 'Cairo', 'Inter', system-ui, sans-serif;
+}
+
 :global(.dashboard--dark) .container,
 :global(.dashboard.dashboard--saas.dashboard--dark) :global(.dashboard-content) .container,
 :global(.dark) .container,

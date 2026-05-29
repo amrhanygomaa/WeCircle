@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 *,
 *::before,
@@ -20,6 +20,22 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   zoom: 0.8;
+}
+
+/* Apply Cairo font for Arabic language / RTL layout */
+html[lang="ar"] body,
+html[dir="rtl"] body,
+[dir="rtl"] body,
+[lang="ar"] body,
+[dir="rtl"] button,
+[lang="ar"] button,
+[dir="rtl"] input,
+[lang="ar"] input,
+[dir="rtl"] select,
+[lang="ar"] select,
+[dir="rtl"] textarea,
+[lang="ar"] textarea {
+  font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif !important;
 }
 
 a {
