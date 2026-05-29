@@ -156,7 +156,7 @@ class ArticleContentScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(30.r),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryPurple.withOpacity(0.08),
+                    color: primaryPurple.withValues(alpha: 0.08),
                     blurRadius: 30,
                     offset: const Offset(0, 10),
                   ),
@@ -171,7 +171,7 @@ class ArticleContentScreen extends StatelessWidget {
                       vertical: 6.h,
                     ),
                     decoration: BoxDecoration(
-                      color: primaryPurple.withOpacity(0.1),
+                      color: primaryPurple.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Text(
@@ -195,7 +195,7 @@ class ArticleContentScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 16.h),
-                  Divider(color: primaryPurple.withOpacity(0.1)),
+                  Divider(color: primaryPurple.withValues(alpha: 0.1)),
                   SizedBox(height: 20.h),
                   Text(
                     article['content']!,
@@ -212,7 +212,7 @@ class ArticleContentScreen extends StatelessWidget {
                       'تمت القراءة • منصة وصال',
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: primaryPurple.withOpacity(0.5),
+                        color: primaryPurple.withValues(alpha: 0.5),
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
                       ),
@@ -263,18 +263,18 @@ class _ArticleCardState extends State<_ArticleCard> {
           padding: EdgeInsets.all(20.r),
           decoration: BoxDecoration(
             color: _isHovered
-                ? widget.lightPurple.withOpacity(0.5)
+                ? widget.lightPurple.withValues(alpha: 0.5)
                 : Colors.white,
             borderRadius: BorderRadius.circular(25.r),
             border: Border.all(
               color: _isHovered
-                  ? widget.primaryPurple.withOpacity(0.2)
+                  ? widget.primaryPurple.withValues(alpha: 0.2)
                   : Colors.transparent,
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: widget.primaryPurple.withOpacity(
+                color: widget.primaryPurple.withValues(alpha: 
                   _isHovered ? 0.1 : 0.05,
                 ),
                 blurRadius: 20,
@@ -294,7 +294,7 @@ class _ArticleCardState extends State<_ArticleCard> {
                       vertical: 4.h,
                     ),
                     decoration: BoxDecoration(
-                      color: widget.primaryPurple.withOpacity(0.1),
+                      color: widget.primaryPurple.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Text(
@@ -309,7 +309,7 @@ class _ArticleCardState extends State<_ArticleCard> {
                   ),
                   Icon(
                     Icons.arrow_forward_ios_rounded,
-                    color: widget.primaryPurple.withOpacity(0.5),
+                    color: widget.primaryPurple.withValues(alpha: 0.5),
                     size: 16.sp,
                   ),
                 ],

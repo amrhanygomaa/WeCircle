@@ -28,32 +28,51 @@ Last updated: **2026-05-29**. Update at the end of every session. Re-verify agai
 
 ---
 
-## 🔜 In progress / Next (awaiting sign-off)
-- **BLOCKED ON SIGN-OFF:** Phase 1 ambiguity decisions (D1–D6 in MIGRATION_PLAN.md).
-- **BLOCKED ON SIGN-OFF:** Phase 2 schema redesign + introducing Prisma migrations.
-- **BLOCKED ON SIGN-OFF / APPROVAL:** Phase 4 AWS provisioning; any file deletions; any data changes.
-- Answer the 5 open questions in MIGRATION_PLAN.md §5.
+## 🔄 In progress — Phase 3 (logic & structure refactor)
+
+Started 2026-05-29. Workstreams:
+
+1. **Flutter lint cleanup** ✅ — 23 `withOpacity` → `withValues(alpha:)`, `flutter analyze` → 0 issues.
+2. **Backend chat consolidation** — merge duplicate `chat.controller.ts` + `conversation.controller.ts`
+   into a single `modules/chat/` module.
+3. **Mobile chat consolidation** — rewrite `chat_service.dart` to use REST + Socket.IO; remove Firebase.
+4. **Controller migrations** — move remaining 37 legacy flat controllers into `modules/<domain>/`.
+5. **Device session store** — replace file-based `device_sessions.json` with DB/Redis.
+
+## ✅ Done (Phase 1 + Phase 2)
+
+### Phase 1 — Resolve ambiguities (2026-05-29)
+- D1: Supabase removed; Postgres via Prisma confirmed; `directUrl` (pgBouncer) removed from schema.
+- D2: Vite/react-router removed from frontend; `next build` still clean; static export confirmed.
+- D3: Auth hardened — backdoor removed, `requireEnv` strict, `ALLOWED_ORIGINS` env var.
+- D4–D6: Socket.IO kept; Firestore chat to consolidate; Gemini kept (Phase 3+4).
+- Dead code deleted: `controllers/student.controller.ts` (451 lines), `src/core/routing/*`,
+  `src/assets/{react,vite}.svg`. Build artifacts untracked from git.
+
+### Phase 2 — Schema redesign / Prisma migrations (2026-05-29)
+- Created `prisma/migrations/` with `migration_lock.toml`.
+- `20260529000000_init`: 1674-line baseline SQL (production already applied via `db push`).
+  Deploy with `prisma migrate resolve --applied "20260529000000_init"`.
+- `20260529000001_phase2_additions`: non-destructive additions (80 lines):
+  - `@db.Decimal(12,2)` on 9 money fields.
+  - Composite indexes: `Attendance(schoolId,classId,date)`, `Invoice(schoolId,status,dueDate)`.
+  - `StudentGameProgress` model (replaces flat `game1Lvl…game5Lvl` in Phase 3).
+  - `Conversation.pairKey String? @unique` (deterministic pair deduplication).
+  - `Notification.recipient → User` FK.
+  - Chat controllers updated to use `pairKey` on upsert/create.
 
 ---
 
 ## 🐞 Prioritized risks / bugs / tech debt
 
 ### 🔴 Critical (security / data)
-- **R1 — Auth backdoor.** `GET /api/auth/temp-make-admin` (`routes/modules/auth.routes.ts:10`) is
-  **unauthenticated** and elevates a hardcoded account (`amuhamad@helpers-tech.com`) to `SUPER_ADMIN`,
-  auto-creating a school. Anyone who hits the URL gains super-admin. **Remove ASAP.**
-- **R2 — Hardcoded fallback JWT secret.** `config/env.ts` falls back to
-  `"default-fallback-jwt-secret-key-wecircle"` (and to `SUPABASE_JWT_SECRET`). If `JWT_SECRET` is
-  unset, all mobile JWTs are forgeable. `requireEnv` also only throws when `NODE_ENV !== development`.
-- **R3 — `aws_config.txt` committed.** Exposes Cognito pool/client IDs + S3 bucket name (infra
-  topology). `env.ts` `allowedOrigins` hardcodes a leaked AWS account id (`035611741710`) and public
-  EC2 IPs. Not credentials, but should not be in git.
-- **R4 — `/auth/cognito-sync`** was added "to bypass failing requireAuth middleware" — auto-creates a
-  DB user from a Cognito token. Review for account-takeover / unverified-email issues.
+- **R1 — Auth backdoor.** ✅ **FIXED (Phase 1)** — endpoint removed.
+- **R2 — Hardcoded fallback JWT secret.** ✅ **FIXED (Phase 1)** — `requireEnv` strict, no fallback.
+- **R3 — `aws_config.txt` committed.** ✅ **FIXED (Phase 1)** — untracked + gitignored; `ALLOWED_ORIGINS` env var.
+- **R4 — `/auth/cognito-sync`** — still needs review for account-takeover / unverified-email issues.
 
 ### 🟠 High (stability / architecture)
-- **R5 — No DB migrations.** Schema is synced via `prisma db push`; no `prisma/migrations/` history.
-  No safe way to evolve a production DB. (Phase 2 priority.)
+- **R5 — No DB migrations.** ✅ **FIXED (Phase 2)** — `prisma/migrations/` established with baseline + Phase 2 additions.
 - **R6 — Half-done backend refactor.** Only `src/modules/student/` uses the target layered style;
   everything else is the legacy flat `controllers/`. `controllers/student.controller.ts` is **dead
   code** (nothing imports it; `/students` uses the module version). Services layer is essentially
@@ -82,13 +101,18 @@ Last updated: **2026-05-29**. Update at the end of every session. Re-verify agai
   box; no OIDC; no tests/typecheck/lint gate before deploy.
 
 ### 🟢 Low (polish)
-- **R17 — 23 Flutter `withOpacity` deprecation lints.** Mechanical fix → `.withValues()`.
+- **R17 — 23 Flutter `withOpacity` deprecation lints.** ✅ **FIXED (Phase 3A)** — replaced with `.withValues(alpha:)`.
 - **R18 — `express.json({ limit: "50mb" })`** is very large; tighten or scope to upload routes.
 
 ---
 
-## 📌 Known unknowns (need owner input — see MIGRATION_PLAN.md §5)
-- Is the live EC2 environment production-with-real-data or a dev box?
-- Does a Supabase project still hold authoritative data to migrate, or is current Postgres the source?
-- Firestore chat: keep or consolidate?
-- IaC: Terraform vs CDK. Frontend: SSR vs static export.
+## 📌 Known unknowns / open items
+- **R4 `/auth/cognito-sync`** — auto-creates DB user from Cognito token; review for account-takeover risk.
+- **Deferred schema changes** (need data migration before applying):
+  - Drop `ADMIN` enum value (migrate rows first).
+  - Remove `Teacher.subject`, `Driver.idCopy` legacy fields.
+  - Remove `Student.game1Lvl…game5Lvl` flat cols (after backfilling `StudentGameProgress`).
+  - Make `Parent.schoolId` non-nullable (patch null rows first).
+  - Type `Message.senderId` as FK (needs chat identity consolidation).
+- **Phase 4 provisioning** — RDS, ECS, ALB, CloudFront, Cognito, S3, ElastiCache, EventBridge.
+  Needs sign-off before any paid AWS resources are created.

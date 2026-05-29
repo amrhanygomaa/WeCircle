@@ -18,9 +18,9 @@ until signed off.**
 | Phase | Goal | Status |
 |------|------|--------|
 | 0 | Stabilize & baseline (map, verify stack, build locally, set up docs) | ✅ Done (2026-05-29) |
-| 1 | Resolve ambiguities (single DB, single FE build tool, single auth) | 🔜 Proposed below — needs sign-off |
-| 2 | Schema redesign (Prisma migrations) | ⏸ Proposed below — **needs sign-off, not applied** |
-| 3 | Logic & structure refactor (layered arch, Zod, error handling, mobile alignment) | ⏳ Pending |
+| 1 | Resolve ambiguities (single DB, single FE build tool, single auth) | ✅ Done (2026-05-29) |
+| 2 | Schema redesign (Prisma migrations) | ✅ Done (2026-05-29) |
+| 3 | Logic & structure refactor (layered arch, Zod, error handling, mobile alignment) | 🔄 In progress |
 | 4 | AWS + IaC (Terraform/CDK) | ⏸ Target below — **needs sign-off before provisioning** |
 | 5 | Cutover (migrate data, switch endpoints, decommission Supabase) | ⏳ Pending |
 
