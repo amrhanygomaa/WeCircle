@@ -10,6 +10,13 @@ export const translations = {
     field_confirm_password: "Confirm Password",
     auth_btn_loading: "Loading...",
     auth_btn_register: "Create Account",
+    auth_verify_title: "Verify your email",
+    auth_verify_subtitle: "Enter the verification code sent to your email.",
+    auth_btn_verify: "Verify Account",
+    auth_resend_code: "Resend Code",
+    auth_verification_success: "Account verified successfully! Redirecting to login...",
+    auth_code_resent: "A new code has been sent to your email.",
+    field_verification_code: "Verification Code (OTP)",
 
     // Nav & General
     nav_features: "Features",
@@ -514,6 +521,13 @@ export const translations = {
     field_confirm_password: "تأكيد كلمة المرور",
     auth_btn_loading: "جاري التحميل...",
     auth_btn_register: "إنشاء الحساب",
+    auth_verify_title: "تأكيد الحساب",
+    auth_verify_subtitle: "أدخل رمز التأكيد (OTP) اللي وصلك على الإيميل.",
+    auth_btn_verify: "تأكيد الحساب",
+    auth_resend_code: "إعادة إرسال الرمز",
+    auth_verification_success: "تم تأكيد الحساب بنجاح! جاري تحويلك لصفحة الدخول...",
+    auth_code_resent: "تم إرسال رمز جديد لإيميلك.",
+    field_verification_code: "رمز التأكيد (OTP)",
 
     // Nav & General (Egyptian Ammiya)
     nav_features: "المميزات",

@@ -86,9 +86,13 @@ export default function LoginPage() {
           await refreshProfile();
           router.push("/dashboard");
         },
-        onFailure: (err) => {
+        onFailure: (err: any) => {
           setIsLoading(false);
-          setGeneralError(err.message || "Invalid credentials");
+          if (err.code === "UserNotConfirmedException") {
+            router.push(`/verify?email=${encodeURIComponent(values.email)}`);
+          } else {
+            setGeneralError(err.message || "Invalid credentials");
+          }
         }
       });
     } catch (err: unknown) {

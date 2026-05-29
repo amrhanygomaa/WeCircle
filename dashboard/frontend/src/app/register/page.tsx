@@ -27,7 +27,7 @@ const registerSchema = z.object({
 });
 
 export default function RegisterPage() {
-  const { t } = useTranslation();
+  const { t, isAr } = useTranslation();
   const router = useRouter();
   
   const [generalError, setGeneralError] = useState("");
@@ -65,8 +65,11 @@ export default function RegisterPage() {
             phone: values.phone,
             password: values.password
           });
-          setSuccessMsg("Registration successful! Please check your email to verify your account or login directly.");
-          setTimeout(() => router.push("/login"), 3000);
+          const successAlert = isAr 
+            ? "تم التسجيل بنجاح! جاري تحويلك لصفحة تأكيد الحساب لكتابة كود الـ OTP..." 
+            : "Registration successful! Redirecting to verification page to enter your OTP...";
+          setSuccessMsg(successAlert);
+          setTimeout(() => router.push(`/verify?email=${encodeURIComponent(values.email)}`), 3000);
         } catch (backendErr) {
           setGeneralError("Registered in Auth provider but failed to sync with database.");
         }
