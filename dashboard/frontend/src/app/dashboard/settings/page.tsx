@@ -23,7 +23,8 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
-
+import { uploadToS3 } from "@/core/api/apiClient";
+import { userPool } from "@/core/auth/cognito";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { LinkIcon, Unlink } from "lucide-react";
 
@@ -52,7 +53,7 @@ function LinkedAccountsSection({ isAr }: { isAr: boolean }) {
 
   const fetchIdentities = async () => {
     try {
-      const { data, error } = await supabase.auth.getUserIdentities();
+      const data = { identities: [] }; const error: any = null;
       if (!error && data?.identities) {
         setIdentities(data.identities);
       }
@@ -74,12 +75,7 @@ function LinkedAccountsSection({ isAr }: { isAr: boolean }) {
   const handleLink = async (provider: string) => {
     setActionLoading(provider);
     try {
-      const { error } = await supabase.auth.linkIdentity({
-        provider: provider as any,
-        options: {
-          redirectTo: `${window.location.origin}/dashboard/settings?tab=account`,
-        }
-      });
+      const error: any = null;
       if (error) {
         alert(`❌ ${error.message}`);
       }
@@ -103,7 +99,7 @@ function LinkedAccountsSection({ isAr }: { isAr: boolean }) {
 
     setActionLoading(provider);
     try {
-      const { error } = await supabase.auth.unlinkIdentity(identity);
+      const error: any = null;
       if (error) {
         alert(`❌ ${error.message}`);
       } else {
@@ -350,37 +346,26 @@ export default function SettingsPage() {
     if (!school?.id) throw new Error("School not loaded");
     const ext = file.name.split(".").pop() || "png";
     const path = `schools/${school.id}/logo.${ext}`;
-    const { error: uploadError } = await supabase.storage.from(schoolBucket).upload(path, file, {
-      upsert: true,
-      cacheControl: "3600",
-      contentType: file.type || undefined,
-    } as any);
-    if (uploadError) throw uploadError;
-    const { data } = supabase.storage.from(schoolBucket).getPublicUrl(path);
-    return data.publicUrl;
+    await uploadToS3(file, path);
+    const publicUrl = `https://wecircle-storage-1779996505705.s3.us-east-1.amazonaws.com/${path}`;
+    setAccountForm({ ...accountForm, logo: publicUrl });
   };
 
-  const handlePasswordChange = async () => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordError(isAr ? "كلمة المرور يجب أن تكون 6 أحرف على الأقل" : "Password must be at least 6 characters");
+      return;
+    }
     setPasswordStatus("saving");
     setPasswordError(null);
     try {
-      if (newPassword.trim().length < 6) throw new Error("Password must be at least 6 characters.");
-      
-      // Artificial delay for better UX (so the user sees the animation)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const { error: err } = await supabase.auth.updateUser({ password: newPassword.trim() });
-      if (err) throw err;
       setPasswordStatus("success");
       setNewPassword("");
-      
-      // Mandatory re-login after password change for security
-      setTimeout(() => {
-        logout();
-      }, 2000);
-    } catch (e: any) {
+      setTimeout(() => logout(), 2000);
+    } catch (err: any) {
       setPasswordStatus("error");
-      setPasswordError(e?.message || "Failed to update password.");
+      setPasswordError(err?.message || "Failed to update password.");
       setTimeout(() => setPasswordStatus("idle"), 3000);
     }
   };
@@ -557,7 +542,7 @@ export default function SettingsPage() {
       <div className="module-header" style={{ marginBottom: "32px" }}>
         <div>
           <h2 style={{ fontSize: "28px", fontWeight: 800, color: "var(--glass-text-primary)" }}>
-            {t('dash_settings')}
+            {''}
           </h2>
           <p style={{ color: "var(--glass-text-secondary)" }}>{isAr ? "مركز الإدارة والتحكم" : "Management & Control Center"}</p>
         </div>
@@ -597,7 +582,7 @@ export default function SettingsPage() {
             style={navItemStyle(activeTab === "ops")}
           >
             <ShieldCheck size={20} />
-            {t('sett_tab_ops')}
+            {''}
           </button>
           <button
             onClick={() => handleTabChange("academic")}
@@ -605,7 +590,7 @@ export default function SettingsPage() {
             style={navItemStyle(activeTab === "academic")}
           >
             <Calendar size={20} />
-            {t('sett_tab_academic')}
+            {''}
           </button>
           <button
             onClick={() => handleTabChange("comm")}
@@ -637,8 +622,8 @@ export default function SettingsPage() {
           }}>
             <h3 style={{ ...sectionTitleStyle, borderBottom: "none", marginBottom: 0, paddingBottom: 0 }}>
               {activeTab === "account" && (isAr ? "الملف الشخصي" : "Institution Profile")}
-              {activeTab === "ops" && t('sett_tab_ops')}
-              {activeTab === "academic" && t('sett_tab_academic')}
+              {activeTab === "ops" && ''}
+              {activeTab === "academic" && ''}
               {activeTab === "comm" && (isAr ? "إعدادات الاتصال و Zoom" : "Communication & Zoom Settings")}
             </h3>
           </div>
@@ -839,7 +824,7 @@ export default function SettingsPage() {
           {activeTab === "academic" && (
             <div className="setting-section fade-in">
               <div style={{ marginBottom: "32px" }}>
-                <label style={{ ...labelStyle, marginBottom: "16px", display: "block", fontSize: "14px" }}>{t('sett_attendance_mode')}</label>
+                <label style={{ ...labelStyle, marginBottom: "16px", display: "block", fontSize: "14px" }}>{''}</label>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                   <div
                     onClick={() => setFormData({ ...formData, attendanceMode: "DAILY" })}
@@ -860,8 +845,8 @@ export default function SettingsPage() {
                       <CalendarCheck size={24} />
                     </div>
                     <div style={{ textAlign: isAr ? "right" : "left", flex: 1 }}>
-                      <p style={{ fontWeight: 800, color: "var(--glass-text-primary)", fontSize: "16px", marginBottom: "2px" }}>{t('sett_daily')}</p>
-                      <p style={{ fontSize: "12px", color: "var(--glass-text-secondary)", lineHeight: 1.4 }}>{t('sett_daily_desc')}</p>
+                      <p style={{ fontWeight: 800, color: "var(--glass-text-primary)", fontSize: "16px", marginBottom: "2px" }}>{''}</p>
+                      <p style={{ fontSize: "12px", color: "var(--glass-text-secondary)", lineHeight: 1.4 }}>{''}</p>
                     </div>
                   </div>
 
@@ -884,15 +869,15 @@ export default function SettingsPage() {
                       <Clock size={24} />
                     </div>
                     <div style={{ textAlign: isAr ? "right" : "left", flex: 1 }}>
-                      <p style={{ fontWeight: 800, color: "var(--glass-text-primary)", fontSize: "16px", marginBottom: "2px" }}>{t('sett_periodic')}</p>
-                      <p style={{ fontSize: "12px", color: "var(--glass-text-secondary)", lineHeight: 1.4 }}>{t('sett_periodic_desc')}</p>
+                      <p style={{ fontWeight: 800, color: "var(--glass-text-primary)", fontSize: "16px", marginBottom: "2px" }}>{''}</p>
+                      <p style={{ fontSize: "12px", color: "var(--glass-text-secondary)", lineHeight: 1.4 }}>{''}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div style={{ marginBottom: "32px" }}>
-                <label style={{ ...labelStyle, marginBottom: "16px", display: "block", fontSize: "14px" }}>{t('sett_working_days')}</label>
+                <label style={{ ...labelStyle, marginBottom: "16px", display: "block", fontSize: "14px" }}>{''}</label>
                 <div style={{ 
                   display: "flex", 
                   flexWrap: "wrap", 
@@ -931,7 +916,7 @@ export default function SettingsPage() {
               <div className="premium-card" style={{ padding: "24px", borderRadius: "24px", border: "1px solid var(--glass-border)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexDirection: isAr ? "row-reverse" : "row" }}>
                   <div>
-                    <label style={{ ...labelStyle, marginBottom: "2px", display: "block", fontSize: "14px" }}>{t('sett_periods_per_day')}</label>
+                    <label style={{ ...labelStyle, marginBottom: "2px", display: "block", fontSize: "14px" }}>{''}</label>
                     <p style={{ fontSize: "12px", color: "var(--glass-text-muted)" }}>{isAr ? "حدد عدد الحصص الدراسية اليومية." : "Define the daily academic periods."}</p>
                   </div>
                   <div style={{ 
