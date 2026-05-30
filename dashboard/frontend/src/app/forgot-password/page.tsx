@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
   });
 
   return (
-    <AuthShell variant="login" title={t('' as any)} subtitle={t('' as any)}>
+    <AuthShell variant="login" title={t('auth_forgot_title')} subtitle={t('auth_forgot_subtitle')}>
       <div style={{ position: "relative" }}>
         {success ? (
           <div className="glass-panel" style={{ padding: "24px", textAlign: "center" }}>
@@ -68,19 +68,19 @@ export default function ForgotPasswordPage() {
               <Mail size={28} />
             </div>
             <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#fff", marginBottom: "8px" }}>
-              {t('auth_check_email' as any)}
+              {t('auth_check_email')}
             </h3>
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px", lineHeight: 1.5, marginBottom: "24px" }}>
-              {t('auth_check_email_desc' as any)}
+              {t('auth_check_email_desc')}
             </p>
             <Link href="/login" className="btn-glass-secondary" style={{ display: "block", textDecoration: "none", textAlign: "center" }}>
-              {t('' as any)}
+              {t('auth_back_login')}
             </Link>
           </div>
         ) : (
           <form onSubmit={onSubmit}>
             <div className="glass-input-group" style={{ marginBottom: "32px" }}>
-              <label>{t('' as any)}</label>
+              <label>{t('field_email_recover')}</label>
               <div className="glass-input-wrapper">
                 <Mail className="glass-input-icon" size={18} />
                 <input placeholder="name@email.com" {...form.register("email")} />
@@ -94,13 +94,13 @@ export default function ForgotPasswordPage() {
             </div>
 
             {generalError && <p className="error error-shake" style={{ marginBottom: "16px" }}>{generalError}</p>}
-            
+
             <button type="submit" className="btn-glass-primary" disabled={isLoading}>
-              {isLoading ? t('' as any) : t('' as any)}
+              {isLoading ? t('auth_btn_loading') : t('btn_send_link')}
             </button>
 
             <Link href="/login" className="btn-glass-secondary" style={{ display: "block", textDecoration: "none", textAlign: "center", marginTop: "16px" }}>
-              {t('' as any)}
+              {t('auth_back_login')}
             </Link>
           </form>
         )}

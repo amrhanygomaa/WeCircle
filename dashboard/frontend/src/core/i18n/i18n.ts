@@ -369,6 +369,9 @@ export const translations = {
     field_email_recover: "Enter your Email",
     field_email_recover_placeholder: "Enter Email to Recover Account...",
     btn_send_link: "Send Recovery Link",
+    auth_check_email: "Check your email",
+    auth_check_email_desc: "We sent a password reset link to your email address.",
+    auth_back_login: "Back to Login",
     auth_regained_access: "Regained access?",
     auth_return_login: "Return to Sign In",
 
@@ -853,6 +856,9 @@ export const translations = {
     field_email_recover: "اكتب إيميلك",
     field_email_recover_placeholder: "اكتب الإيميل عشان نبعتلك رابط الاسترجاع...",
     btn_send_link: "بعث رابط الاسترجاع",
+    auth_check_email: "تحقق من بريدك الإلكتروني",
+    auth_check_email_desc: "أرسلنا رابط إعادة تعيين كلمة المرور لبريدك الإلكتروني.",
+    auth_back_login: "رجوع لتسجيل الدخول",
     auth_regained_access: "افتكرت الباسورد؟",
     auth_return_login: "رجوع للدخول",
 
