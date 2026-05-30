@@ -78,7 +78,12 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
 - **R1 — Auth backdoor.** ✅ **FIXED (Phase 1)** — endpoint removed.
 - **R2 — Hardcoded fallback JWT secret.** ✅ **FIXED (Phase 1)** — `requireEnv` strict, no fallback.
 - **R3 — `aws_config.txt` committed.** ✅ **FIXED (Phase 1)** — untracked + gitignored; `ALLOWED_ORIGINS` env var.
-- **R4 — `/auth/cognito-sync`** — still needs review for account-takeover / unverified-email issues.
+- **R4 — `/auth/cognito-sync`** ✅ **FIXED (2026-05-30)** — two vulnerabilities closed:
+  (a) `auto-confirm` Lambda no longer sets `autoVerifyEmail=true`; real Cognito email verification
+  now enforced. **Action required: redeploy the Lambda from `infra/lambda/auto-confirm/index.mjs`
+  before Phase 5 cutover** — the code is fixed but the running Lambda on AWS still has the old logic.
+  (b) `cognitoSync` now rejects tokens with `email_verified !== true` and always creates new users
+  as PARENT — `custom:role` attribute in token is no longer trusted for elevated roles.
 
 ### 🟠 High (stability / architecture)
 - **R5 — No DB migrations.** ✅ **FIXED (Phase 2)** — `prisma/migrations/` established with baseline + Phase 2 additions.
@@ -100,13 +105,11 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
   since Phase 1; local copies deleted. ~40 MB of blob objects remain in old commits (history rewrite
   via `git filter-repo` + force-push would remove them but needs explicit sign-off — CLAUDE.md prohibits
   rewriting shared history without approval).
-- **R13 — Vite/react-router leftovers** in the frontend (`vite`, `@vitejs/plugin-react`,
-  `react-router-dom`, `src/core/routing/*`, `vite.svg`). Dead since the Next conversion.
-- **R14 — Stale config drift:** infra `README.md` still diagrams "Supabase (DB/Auth)" and references
-  `VITE_*` GitHub secrets; frontend `.env.local` still carries placeholder `NEXT_PUBLIC_SUPABASE_*`;
-  two different EC2 IPs appear across files; root API route still self-identifies as "EduControl".
-- **R15 — Name drift:** Flutter `pubspec` name is `wesal`; backend self-describes as "EduControl";
-  product is "WeCircle". Unify branding.
+- **R13 — Vite/react-router leftovers** ✅ **Already clean** — removed in Phase 1; confirmed 2026-05-30.
+- **R14 — Stale config drift** ✅ **FIXED (2026-05-30)** — `buildspec.yml`, `ec2-userdata.sh`,
+  `ecs-task-definition.json`, `infra/README.md` all updated to Cognito/JWT stack; Supabase vars purged.
+- **R15 — Name drift** ✅ **FIXED (2026-05-30)** — "EduControl" → "WeCircle" in `server.ts`,
+  `ai.controller.ts`, `admission.controller.ts`, `zoom.controller.ts`.
 - **R16 — CI/CD weaknesses:** `deploy.yml` SCPs a zip and `sed`/`echo`s secrets into `.env` on the
   box; no OIDC; no tests/typecheck/lint gate before deploy.
 
