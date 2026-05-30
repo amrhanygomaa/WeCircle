@@ -64,8 +64,10 @@ WeCircle/
 ## Stack (verified)
 
 - **Backend:** Node 24 / Express 5 / TypeScript (strict) / Prisma 6 / Postgres. Socket.IO for
-  realtime (no Redis adapter yet → won't scale past one instance). Google Gemini for AI assistant.
-  AWS SDKs present: Cognito, S3, S3 presigner, Bedrock. Zod for validation. Helmet, CORS, morgan.
+  realtime (no Redis adapter yet → won't scale past one instance). **AWS Bedrock** for the AI
+  assistant (`ai.controller.ts`, Converse API + tool use; model via `BEDROCK_MODEL_ID`, default
+  `amazon.nova-lite-v1:0`). AWS SDKs: Cognito, S3, S3 presigner, Bedrock. Zod, Helmet, CORS, morgan.
+  (`GOOGLE_AI_API_KEY` lingers in env examples but no Gemini SDK is used — Bedrock is the AI path.)
 - **Frontend:** Next.js 16 (App Router) / React 19 / TanStack Query / Tailwind v4 / framer-motion /
   recharts / amazon-cognito-identity-js. `NEXT_PUBLIC_*` env. **Stray Vite + react-router-dom deps.**
 - **Mobile:** Flutter 3.41 / Dart 3.10. REST via `http` to the backend; `cloud_firestore` +

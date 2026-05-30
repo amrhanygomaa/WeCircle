@@ -281,7 +281,7 @@ export const chatWithAI = asyncHandler(async (req: Request, res: Response) => {
     ];
 
     let command = new ConverseCommand({
-      modelId: "amazon.nova-2-lite-v1:0", // AWS Bedrock Claude 3 Haiku is fast and cheap
+      modelId: env.bedrockModelId,
       messages,
       system: [{ text: systemPrompt }],
       toolConfig,
@@ -365,7 +365,7 @@ export const chatWithAI = asyncHandler(async (req: Request, res: Response) => {
       messages.push({ role: "user", content: toolResults });
 
       command = new ConverseCommand({
-        modelId: "amazon.nova-2-lite-v1:0",
+        modelId: env.bedrockModelId,
         messages,
         system: [{ text: systemPrompt }],
         toolConfig,

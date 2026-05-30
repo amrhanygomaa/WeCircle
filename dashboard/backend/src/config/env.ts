@@ -33,4 +33,9 @@ export const env = {
   // on an hourly interval. Set DISABLE_INPROCESS_CRON=true once an external scheduler
   // (EventBridge → /api/internal/cron/check-overdue) takes over, to avoid double-running.
   inProcessCron: process.env.DISABLE_INPROCESS_CRON !== "true",
+  // Bedrock model for the AI assistant (Converse API + tool use). Override via BEDROCK_MODEL_ID.
+  // Default: Amazon Nova Lite — on-demand in us-east-1, cheap, supports tool use.
+  // For higher-quality Arabic, switch to "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+  // (requires enabling Anthropic model access + the cross-region inference profile).
+  bedrockModelId: process.env.BEDROCK_MODEL_ID || "amazon.nova-lite-v1:0",
 };
