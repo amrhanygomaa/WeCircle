@@ -11,7 +11,7 @@
     "alwaysStrict": true,
     "outDir": "./dist",
     "rootDir": "./",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "inlineSourceMap": true,
