@@ -94,9 +94,8 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
   Move to EventBridge Scheduler.
 
 ### 🟡 Medium (cleanliness / migration debt)
-- **R11 — ~22 `fix_*.js` band-aid codemods** at repo root + in `backend/` + `mobile/` (Supabase
-  removal, Vite→Next conversion, i18n key restoration via `git show`, TS-error patches). Some contain
-  self-doubt comments. Plan removal **after** confirming their effects are baked in (don't delete yet).
+- **R11 — ~22 `fix_*.js` band-aid codemods** ✅ **FIXED (2026-05-30)** — all 23 scripts deleted after
+  confirming effects are baked in. `forgot-password` i18n keys restored as a side-fix.
 - **R12 — Committed build artifacts:** `frontend_build.zip` (17 MB), `dashboard/frontend/frontend.zip`
   (8 MB), `infra/lambda/auto-confirm/auto-confirm.zip`. Remove from git; add to `.gitignore`.
 - **R13 — Vite/react-router leftovers** in the frontend (`vite`, `@vitejs/plugin-react`,
