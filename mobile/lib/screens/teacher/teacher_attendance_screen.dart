@@ -11,8 +11,12 @@
 توفير وقت الحصة وضمان دقة كشوف الغياب وإرسال تنبيهات فورية لأولياء الأمور.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/api_config.dart';
 import '../../widgets/wesal_background.dart';
 
 class TeacherAttendanceScreen extends StatefulWidget { // تعريف كلاس شاشة تسجيل الحضور للمعلم كـ StatefulWidget
@@ -35,13 +39,93 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> { // 
   static const Color lateColor     = Color(0xFFF59E0B); // لون حالة المتأخر (برتقالي)
 
   // ── State ──────────────────────────────────────────────────────────────────
-  final List<Map<String, dynamic>> students = [ // قائمة الطلاب المتاحين لرصد حضورهم (بيانات تجريبية)
-    {'name': 'عمر محمود',   'class': '5-أ', 'status': 'حاضر',  'initial': 'ع'},
-    {'name': 'سارة أحمد',   'class': '5-أ', 'status': 'حاضر',  'initial': 'س'},
-    {'name': 'أدهم سمير',   'class': '5-أ', 'status': 'غائب',  'initial': 'أ'},
-    {'name': 'ليلى حسن',    'class': '5-أ', 'status': 'حاضر',  'initial': 'ل'},
-    {'name': 'داوود أحمد',  'class': '5-أ', 'status': 'متأخر', 'initial': 'د'},
+  List<Map<String, dynamic>> students = [
+    {'name': 'عمر محمود',   'class': '5-أ', 'status': 'حاضر',  'initial': 'ع', 'id': ''},
+    {'name': 'سارة أحمد',   'class': '5-أ', 'status': 'حاضر',  'initial': 'س', 'id': ''},
+    {'name': 'أدهم سمير',   'class': '5-أ', 'status': 'غائب',  'initial': 'أ', 'id': ''},
+    {'name': 'ليلى حسن',    'class': '5-أ', 'status': 'حاضر',  'initial': 'ل', 'id': ''},
+    {'name': 'داوود أحمد',  'class': '5-أ', 'status': 'متأخر', 'initial': 'د', 'id': ''},
   ];
+  String _classId   = '';
+  bool   _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStudents();
+  }
+
+  Future<void> _loadStudents() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+
+      final res = await http.get(
+        Uri.parse('${ApiConfig.getBaseUrl()}/teachers/mobile/classes'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (res.statusCode != 200 || !mounted) return;
+
+      final classes = (jsonDecode(res.body)['data'] as List? ?? [])
+          .cast<Map<String, dynamic>>();
+      if (classes.isEmpty) return;
+
+      // Prefer the class passed via initialClass, else use first
+      Map<String, dynamic> cls = classes.first;
+      if (widget.initialClass != null) {
+        cls = classes.firstWhere(
+          (c) => c['id'] == widget.initialClass!['id'],
+          orElse: () => classes.first,
+        );
+      }
+
+      final studs = (cls['students'] as List? ?? []).cast<Map<String, dynamic>>();
+      final mapped = studs.map((s) => {
+        'id':      s['id'] ?? '',
+        'name':    s['name'] ?? 'طالب',
+        'class':   cls['name'] ?? '',
+        'status':  'حاضر',
+        'initial': (s['name'] as String? ?? 'ط').isNotEmpty
+            ? (s['name'] as String).substring(0, 1)
+            : 'ط',
+      }).toList();
+
+      if (mounted) setState(() { students = mapped; _classId = cls['id'] as String? ?? ''; });
+    } catch (_) {}
+  }
+
+  Future<void> _saveToApi() async {
+    if (_classId.isEmpty || _submitting) return;
+    setState(() => _submitting = true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+
+      const statusMap = {'حاضر': 'PRESENT', 'غائب': 'ABSENT', 'متأخر': 'LATE'};
+      final records = students
+          .where((s) => (s['id'] as String).isNotEmpty)
+          .map((s) => {
+            'studentId': s['id'],
+            'status': statusMap[s['status']] ?? 'PRESENT',
+          })
+          .toList();
+
+      await http.post(
+        Uri.parse('${ApiConfig.getBaseUrl()}/attendance/mobile/bulk'),
+        headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'classId': _classId,
+          'date':    DateTime.now().toIso8601String(),
+          'records': records,
+        }),
+      ).timeout(const Duration(seconds: 15));
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
 
   int get presentCount => students.where((s) => s['status'] == 'حاضر').length; // حساب عدد الطلاب الحاضرين
   int get absentCount  => students.where((s) => s['status'] == 'غائب').length; // حساب عدد الطلاب الغائبين
@@ -281,7 +365,9 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> { // 
     return Padding(
       padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
       child: GestureDetector(
-        onTap: () { // تنفيذ عملية الحفظ وإظهار رسالة تأكيد
+        onTap: _submitting ? null : () async {
+          await _saveToApi();
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('تم حفظ الحضور بنجاح لـ ${students.length} طالب',
@@ -291,7 +377,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> { // 
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
             ),
           );
-          Navigator.pop(context); // العودة للشاشة السابقة
+          Navigator.pop(context);
         },
         child: Container(
           height: 56.h,

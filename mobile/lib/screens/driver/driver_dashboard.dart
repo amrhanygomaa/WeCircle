@@ -12,8 +12,12 @@
 ضمان أمان الطلاب في الرحلة المدرسية وتوفير تتبع دقيق للحافلة.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wesal/core/config/api_config.dart';
 import 'package:wesal/core/theme/app_theme.dart';
 import 'driver_messages_screen.dart';
 
@@ -51,49 +55,48 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen>
   // متحكم الحركات (Animation) الخاص بنبض المؤشر على الخريطة
   late AnimationController _pulseController;
 
-  // قائمة وهمية ببيانات الطلاب المحمولين في الحافلة
-  // تحتوي على أسماء الطلاب، الصف الدراسي، محطة التوقف، وحالة التواجد
-  final List<Map<String, dynamic>> _students = [
-    {
-      'name': 'أدهم',
-      'grade': 'الصف الرابع',
-      'stop': 'مجمع الياسمين السكني',
-      'status': 'pending',
-    },
-    {
-      'name': 'مريم',
-      'grade': 'تمهيدي ج',
-      'stop': 'حي الورود، شارع 15',
-      'status': 'pending',
-    },
-    {
-      'name': 'كريم',
-      'grade': 'الصف الخامس',
-      'stop': 'الروضة بلازا',
-      'status': 'pending',
-    },
-    {
-      'name': 'جهاد',
-      'grade': 'الصف الأول',
-      'stop': 'شارع الحجاز',
-      'status': 'pending',
-    },
-    {
-      'name': 'فادي',
-      'grade': 'الصف الثالث',
-      'stop': 'ميدان المحكمة',
-      'status': 'pending',
-    },
-  ];
+  List<Map<String, dynamic>> _students = [];
 
   @override
   void initState() {
     super.initState();
-    // تهيئة تأثير النبض الخاص بأيقونة الحافلة عند بدء الرحلة
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
+    _loadDriverData();
+  }
+
+  Future<void> _loadDriverData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+
+      final res = await http.get(
+        Uri.parse('${ApiConfig.getBaseUrl()}/transport/driver/dashboard'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (res.statusCode != 200 || !mounted) return;
+
+      final data = (jsonDecode(res.body)['data'] as Map<String, dynamic>?) ?? {};
+      final rawStudents = (data['students'] as List? ?? []).cast<Map<String, dynamic>>();
+
+      final mapped = rawStudents.map((s) {
+        final student = (s['student'] as Map<String, dynamic>?) ?? {};
+        final route   = (s['route']   as Map<String, dynamic>?) ?? {};
+        return {
+          'name':   student['nameAr'] ?? student['nameEn'] ?? 'طالب',
+          'grade':  '',
+          'stop':   route['name'] ?? '',
+          'status': 'pending',
+          'id':     student['id'] ?? '',
+        };
+      }).toList();
+
+      if (mounted) setState(() => _students = mapped);
+    } catch (_) {}
   }
 
   @override

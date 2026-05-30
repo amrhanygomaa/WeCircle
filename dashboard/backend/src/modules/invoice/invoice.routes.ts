@@ -1,5 +1,6 @@
 ﻿import { Router } from "express";
 import { auth } from "../../core/http/middlewares/auth";
+import { requireMobileAuth } from "../../core/http/middlewares/mobileAuth";
 import {
   getInvoices,
   createInvoice,
@@ -8,10 +9,13 @@ import {
   deleteInvoice,
   applyDiscount,
   toggleInvoiceAccess,
-  updateInvoiceDeadline
+  updateInvoiceDeadline,
+  getMobileStudentInvoices
 } from "./invoice.controller";
 
 const router = Router();
+
+router.get("/mobile/student/:studentId", requireMobileAuth, getMobileStudentInvoices);
 
 router.use(auth);
 

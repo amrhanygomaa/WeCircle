@@ -11,9 +11,14 @@
 مساعدة ولي الأمر في متابعة التحصيل الدراسي لابنه والتأكد إنه بيخلص واجباته أول بأول.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart'; // استيراد مكتبة التقاط الصور من الكاميرا
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/api_config.dart';
+import '../../core/state/state_manager.dart';
 import '../../widgets/wesal_background.dart';
 
 class HomeworkScreen extends StatefulWidget {
@@ -32,7 +37,66 @@ class HomeworkScreen extends StatefulWidget {
 
 class _HomeworkScreenState extends State<HomeworkScreen> {
   // كلاس حالة شاشة الواجبات لتخزين البيانات المحلية
-  String _selectedFilter = 'الكل'; // متغير الحالة لتخزين الفلتر المختار حالياً
+  String _selectedFilter = 'الكل';
+  List<Map<String, dynamic>> _apiHomeworks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHomework();
+  }
+
+  Future<void> _loadHomework() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+
+      final children = AppStateManager().children.value;
+      final idx = AppStateManager().selectedChildIndex.value;
+      final studentId = children.isNotEmpty ? children[idx.clamp(0, children.length - 1)]['id'] as String? : null;
+      if (studentId == null || studentId.isEmpty) return;
+
+      final res = await http.get(
+        Uri.parse('${ApiConfig.getBaseUrl()}/homework/mobile/student/$studentId'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (res.statusCode != 200 || !mounted) return;
+
+      final raw = (jsonDecode(res.body)['data'] as List? ?? []).cast<Map<String, dynamic>>();
+      final mapped = raw.map((hw) {
+        final submissions = (hw['submissions'] as List? ?? []);
+        final isDone = submissions.isNotEmpty;
+        return {
+          'id':          hw['id'] ?? '',
+          'title':       hw['title'] ?? 'واجب',
+          'subject':     (hw['subject'] as Map?)?['name'] ?? 'مادة',
+          'description': hw['description'] ?? '',
+          'dueDate':     hw['dueDate'] != null
+              ? _formatDate(hw['dueDate'] as String)
+              : '',
+          'status':  isDone ? 'تم التسليم' : 'قيد التنفيذ',
+          'priority': 'عالي',
+          'icon':      Icons.menu_book_rounded,
+          'iconColor': const Color(0xFF0EA5E9),
+        };
+      }).toList();
+
+      if (mounted) setState(() => _apiHomeworks = mapped);
+    } catch (_) {}
+  }
+
+  static String _formatDate(String iso) {
+    try {
+      final d = DateTime.parse(iso);
+      const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو',
+                      'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      return '${d.day} ${months[d.month - 1]}';
+    } catch (_) {
+      return '';
+    }
+  }
 
   final List<Map<String, dynamic>> _allHomeworks = [
     // قائمة بيانات الواجبات المدرسية (بيانات تجريبية)
@@ -83,16 +147,15 @@ class _HomeworkScreenState extends State<HomeworkScreen> {
     },
   ];
 
+  List<Map<String, dynamic>> get _source =>
+      _apiHomeworks.isNotEmpty ? _apiHomeworks : _allHomeworks;
+
   List<Map<String, dynamic>> get _filteredHomeworks {
-    // دالة منطقية لتصفية القائمة بناءً على اختيار المستخدم
-    if (_selectedFilter == 'الكل') return _allHomeworks; // عرض الكل
+    if (_selectedFilter == 'الكل') return _source;
     if (_selectedFilter == 'قيد التنفيذ') {
-      // تصفية المعلق
-      return _allHomeworks.where((h) => h['status'] == 'قيد التنفيذ').toList();
+      return _source.where((h) => h['status'] == 'قيد التنفيذ').toList();
     }
-    return _allHomeworks
-        .where((h) => h['status'] == 'تم التسليم')
-        .toList(); // تصفية المسلم
+    return _source.where((h) => h['status'] == 'تم التسليم').toList();
   }
 
   @override // دالة بناء واجهة المستخدم الرئيسية

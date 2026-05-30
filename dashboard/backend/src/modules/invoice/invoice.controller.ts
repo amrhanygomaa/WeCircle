@@ -230,4 +230,21 @@ export const updateInvoiceDeadline = asyncHandler(async (req: Request, res: Resp
   res.json({ success: true, data: updated });
 });
 
+/** GET /invoices/mobile/student/:studentId — Parent views child's invoices */
+export const getMobileStudentInvoices = asyncHandler(async (req: Request, res: Response) => {
+  const schoolId = req.schoolId;
+  const studentId = req.params.studentId as string;
+
+  const data = await prisma.invoice.findMany({
+    where: { schoolId: schoolId!, studentId },
+    include: {
+      payments: { select: { id: true, amount: true, paymentMethod: true, paidAt: true } },
+      student: { select: { nameAr: true, nameEn: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  res.json({ success: true, data });
+});
+
 

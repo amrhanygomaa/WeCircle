@@ -12,11 +12,16 @@
 دعم الطالب نفسياً وسلوكياً من خلال "رفيق فضاء" بيسمع، بيحلل، وبيوجهه دايماً للتواصل مع أهله.
 */
 
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' as math;
 
+import '../../core/config/api_config.dart';
 import '../../widgets/student1-3/animated_space_background.dart';
 
 class StudentChatbotScreen extends StatefulWidget {
@@ -87,7 +92,7 @@ class _StudentChatbotScreenState extends State<StudentChatbotScreen> with Ticker
       _messageController.clear();
     });
     _scrollToBottom();
-    _respondToUser(userMsg);
+    unawaited(_respondToUser(userMsg));
   }
 
   String _getFormattedTime() {
@@ -107,33 +112,57 @@ class _StudentChatbotScreenState extends State<StudentChatbotScreen> with Ticker
     });
   }
 
-  // 🤖 محرك الاستجابة السلوكية (Behavioral Engine V2.0)
-  void _respondToUser(String userMsg) {
-    String response = '';
-    
-    // 🧠 منطق الاستماع النشط والخيارات المنظمة
-    if (userMsg.contains('زعلان') || userMsg.contains('مشكلة') || userMsg.contains('تعب')) {
-      response = 'أنا سامعك يا بطل 🚀... احكيلي اللي حصل بالتفصيل، أنا جنبك ومهمتي أدعمك. \n\nتحب نفكر مع بعض في حل؟\nOption A: نحكي اللي حصل بالراحة ونفهمه\nOption B: ناخد استراحة ونفكر في حل هادي';
-    } else if (userMsg.contains('حل') || userMsg.contains('عايز')) {
-      response = 'دايماً فيه حل يا قائد! 💡 المخطط الفضائي بيقول إننا لازم نفكر في الخطوات.\n\nتحب نجرب:\nA) نعتذر لو غلطنا\nB) نشرح وجهة نظرنا بهدوء؟\n\nومتنساش يا بطل، والديك (فريق الدعم الاستراتيجي) دايماً مستعدين يساعدوك 🛡️';
-    } else if (userMsg.contains('تمام') || userMsg.contains('شكرا')) {
-      response = 'أنت رائع يا بطل! 🌟 كمل في طريقك، وخليك دايماً صريح مع أهلك عشان تفتح Badge: Honesty وتزود الـ XP بتاعك 🚀';
-    } else {
-      response = 'أنا معاك يا بطل! 🛰️ قولي إيه اللي شاغل تفكيرك في "مركز العمليات" النهاردة؟';
-    }
+  // 🤖 محرك الاستجابة — Gemini AI عبر الـ backend
+  Future<void> _respondToUser(String userMsg) async {
+    // Build history from existing messages (exclude the last user message just added)
+    final history = _messages
+        .where((m) => !(m['isUser'] as bool) || m['text'] != userMsg)
+        .map((m) => {
+          'role':  (m['isUser'] as bool) ? 'user' : 'model',
+          'parts': [{'text': m['text'] as String}],
+        })
+        .toList();
 
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        setState(() {
-          _messages.add({
-            'isUser': false, 
-            'text': response, 
-            'time': _getFormattedTime()
-          });
-        });
-        _scrollToBottom();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+
+      final res = await http.post(
+        Uri.parse('${ApiConfig.getBaseUrl()}/students/mobile/ai-chat'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type':  'application/json',
+        },
+        body: jsonEncode({'message': userMsg, 'history': history}),
+      ).timeout(const Duration(seconds: 20));
+
+      if (!mounted) return;
+
+      String reply;
+      if (res.statusCode == 200) {
+        final d = jsonDecode(res.body) as Map<String, dynamic>;
+        reply = (d['data']?['reply'] as String?) ??
+                (d['reply']    as String?) ??
+                'أنا معاك يا بطل! 🛰️';
+      } else {
+        reply = 'أنا معاك يا بطل! 🛰️ قولي إيه اللي شاغل تفكيرك؟';
       }
-    });
+
+      setState(() {
+        _messages.add({'isUser': false, 'text': reply, 'time': _getFormattedTime()});
+      });
+      _scrollToBottom();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _messages.add({
+          'isUser': false,
+          'text':   'أنا معاك يا بطل! 🛰️ قولي إيه اللي شاغل تفكيرك؟',
+          'time':   _getFormattedTime(),
+        });
+      });
+      _scrollToBottom();
+    }
   }
 
   @override

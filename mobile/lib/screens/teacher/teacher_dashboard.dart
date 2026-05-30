@@ -11,9 +11,13 @@
 تسهيل الإدارة الصفية والمتابعة اليومية للطلاب في مكان واحد منظم.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
 import 'package:flutter/services.dart'; // استيراد مكتبة الهابتيك والخدمات
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/api_config.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_add_assignment_screen.dart'; // استيراد شاشة إضافة واجب جديد
 import 'teacher_behavior_report_screen.dart'; // استيراد شاشة تقارير سلوك الطلاب
@@ -54,6 +58,80 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   static const Color lateColor = Color(
     0xFFF59E0B,
   ); // لون حالة التأخير (برتقالي)
+
+  // ── API-loaded state ────────────────────────────────────────────────────────
+  String _teacherName  = '';
+  String _teacherEmail = '';
+  String _teacherTitle = '';
+  String _firstClassName   = '';
+  String _firstSubjectName = '';
+  int    _totalStudents = 0;
+  int    _absentToday   = 0;
+  List<Map<String, dynamic>> _students = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboard();
+  }
+
+  Future<void> _loadDashboard() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+
+      final base = ApiConfig.getBaseUrl();
+      final headers = {'Authorization': 'Bearer $token'};
+
+      final results = await Future.wait([
+        http.get(Uri.parse('$base/teachers/mobile/dashboard'), headers: headers)
+            .timeout(const Duration(seconds: 15)),
+        http.get(Uri.parse('$base/teachers/mobile/classes'), headers: headers)
+            .timeout(const Duration(seconds: 15)),
+      ]);
+
+      if (!mounted) return;
+
+      // Dashboard profile + stats
+      if (results[0].statusCode == 200) {
+        final d = (jsonDecode(results[0].body)['data'] as Map<String, dynamic>);
+        final profile = d['profile'] as Map<String, dynamic>? ?? {};
+        final stats   = d['stats']   as Map<String, dynamic>? ?? {};
+        setState(() {
+          _teacherName  = profile['fullName'] as String? ?? '';
+          _teacherEmail = profile['email']    as String? ?? '';
+          _teacherTitle = profile['jobTitle'] as String? ?? 'معلم';
+          _totalStudents = (stats['totalStudents'] as num?)?.toInt() ?? 0;
+          _absentToday   = (stats['absentStudents'] as num?)?.toInt() ?? 0;
+        });
+      }
+
+      // Classes + students
+      if (results[1].statusCode == 200) {
+        final classes = (jsonDecode(results[1].body)['data'] as List? ?? [])
+            .cast<Map<String, dynamic>>();
+        if (classes.isNotEmpty) {
+          final first = classes.first;
+          final studs = (first['students'] as List? ?? [])
+              .cast<Map<String, dynamic>>();
+          setState(() {
+            _firstClassName   = first['name']    as String? ?? '';
+            _firstSubjectName = first['subject'] as String? ?? '';
+            _students = studs.map((s) => {
+              'name':        s['name'] ?? 'طالب',
+              'class':       first['name'] ?? '',
+              'isPresent':   true,
+              'performance': 'جيد',
+            }).toList();
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  List<Map<String, dynamic>> get _displayStudents =>
+      _students.isNotEmpty ? _students : _mockStudents;
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   /// Lightweight shadow pair for Neumorphic "raised" effect
@@ -185,8 +263,8 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, i) =>
-                    _buildStudentCard(_mockStudents[i]), // بناء بطاقة لكل طالب
-                childCount: _mockStudents.length, // عدد الطلاب في القائمة
+                    _buildStudentCard(_displayStudents[i]),
+                childCount: _displayStudents.length,
               ),
             ),
           ),
@@ -236,7 +314,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'أستاذ أحمد علي',
+                _teacherName.isNotEmpty ? _teacherName : 'المعلم',
                 style: TextStyle(
                   fontSize: 17.sp,
                   fontWeight: FontWeight.w900,
@@ -245,7 +323,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                 ),
               ),
               Text(
-                'معلم - رياضيات',
+                _teacherTitle.isNotEmpty ? _teacherTitle : 'معلم',
                 style: TextStyle(
                   fontSize: 12.sp,
                   color: textMuted,
@@ -417,7 +495,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'فصل 5-أ',
+                      _firstClassName.isNotEmpty ? _firstClassName : 'الفصل',
                       style: TextStyle(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.bold,
@@ -426,7 +504,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                       ),
                     ),
                     Text(
-                      'الرياضيات',
+                      _firstSubjectName.isNotEmpty ? _firstSubjectName : 'المادة',
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: Colors.white.withValues(alpha: 0.85),
@@ -454,14 +532,14 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
             Row(
               // إحصائيات سريعة للطلاب والحضور داخل البطاقة
               children: [
-                _buildCardStat('إجمالي الطلاب', '5'),
+                _buildCardStat('إجمالي الطلاب', _totalStudents > 0 ? '$_totalStudents' : '-'),
                 Container(
                   width: 1,
                   height: 44.h,
                   color: Colors.white.withValues(alpha: 0.3),
                   margin: EdgeInsets.symmetric(horizontal: 20.w),
                 ),
-                _buildCardStat('حضور اليوم', '60%'),
+                _buildCardStat('غياب اليوم', '$_absentToday'),
               ],
             ),
           ],
@@ -964,7 +1042,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  'أستاذ أحمد علي',
+                  _teacherName.isNotEmpty ? _teacherName : 'المعلم',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18.sp,
@@ -973,7 +1051,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                   ),
                 ),
                 Text(
-                  'teacher@wesal.edu',
+                  _teacherEmail.isNotEmpty ? _teacherEmail : '',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.8),
                     fontSize: 11.sp,

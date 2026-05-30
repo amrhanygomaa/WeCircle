@@ -137,7 +137,6 @@ export const createTeacher = asyncHandler(async (req: Request, res: Response) =>
     address: z.string().optional(),
     // Job Info
     jobTitle: z.string().optional(),
-    subject: z.string().optional(),
     stage: z.string().optional(),
     appointmentDate: z.string().optional(),
     contractType: z.enum(["FULL_TIME", "PART_TIME", "TEMPORARY", "PROBATION"]).optional(),
@@ -276,7 +275,6 @@ export const updateTeacher = asyncHandler(async (req: Request, res: Response) =>
     address: z.string().optional(),
     email: z.string().email().optional(),
     jobTitle: z.string().optional(),
-    subject: z.string().optional(),
     stage: z.string().optional(),
     appointmentDate: z.string().optional(),
     contractType: z.enum(["FULL_TIME", "PART_TIME", "TEMPORARY", "PROBATION"]).optional(),

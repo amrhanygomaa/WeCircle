@@ -1,5 +1,5 @@
 ﻿import { Router } from "express";
-import { requireAuth } from "../../core/http/middlewares/auth";
+import { requireMobileAuth } from "../../core/http/middlewares/mobileAuth";
 import {
   getDriverDashboard,
   getSupervisorDashboard,
@@ -12,7 +12,7 @@ import {
 
 const router = Router();
 
-router.use(requireAuth);
+router.use(requireMobileAuth);
 
 router.get("/driver/dashboard", getDriverDashboard);
 router.put("/driver/profile", updateDriverProfile);

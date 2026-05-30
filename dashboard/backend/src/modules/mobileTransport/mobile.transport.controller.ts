@@ -9,7 +9,7 @@ import crypto from "crypto";
 
 /** GET /api/mobile/transport/driver/dashboard — Driver manifest & routes */
 export const getDriverDashboard = asyncHandler(async (req: Request, res: Response) => {
-  const credentialId = req.userId;
+  const credentialId = req.credentialId ?? req.userId;
   if (!credentialId) throw new ValidationError("Unauthorized");
 
   // Find Driver via AppCredential
@@ -68,7 +68,7 @@ export const getDriverDashboard = asyncHandler(async (req: Request, res: Respons
 
 /** GET /api/mobile/transport/supervisor/dashboard — Supervisor manifest & status */
 export const getSupervisorDashboard = asyncHandler(async (req: Request, res: Response) => {
-  const credentialId = req.userId;
+  const credentialId = req.credentialId ?? req.userId;
   if (!credentialId) throw new ValidationError("Unauthorized");
 
   const credential = await prisma.appCredential.findUnique({
@@ -138,7 +138,7 @@ export const getSupervisorDashboard = asyncHandler(async (req: Request, res: Res
 
 /** POST /api/mobile/transport/supervisor/attendance — Mark boarded / absent and notify parents */
 export const markBusAttendance = asyncHandler(async (req: Request, res: Response) => {
-  const credentialId = req.userId;
+  const credentialId = req.credentialId ?? req.userId;
   if (!credentialId) throw new ValidationError("Unauthorized");
 
   const credential = await prisma.appCredential.findUnique({
@@ -246,7 +246,7 @@ export const markBusAttendance = asyncHandler(async (req: Request, res: Response
 
 /** POST /api/mobile/transport/driver/attendance — Driver marks boarded / absent */
 export const markDriverBusAttendance = asyncHandler(async (req: Request, res: Response) => {
-  const credentialId = req.userId;
+  const credentialId = req.credentialId ?? req.userId;
   if (!credentialId) throw new ValidationError("Unauthorized");
 
   const credential = await prisma.appCredential.findUnique({
@@ -345,7 +345,7 @@ export const markDriverBusAttendance = asyncHandler(async (req: Request, res: Re
 
 /** PUT /api/mobile/transport/supervisor/profile — Update supervisor profile details (name, phone, photo, password) */
 export const updateSupervisorProfile = asyncHandler(async (req: Request, res: Response) => {
-  const credentialId = req.userId;
+  const credentialId = req.credentialId ?? req.userId;
   if (!credentialId) throw new ValidationError("Unauthorized");
 
   const payloadSchema = z.object({
@@ -417,7 +417,7 @@ export const updateSupervisorProfile = asyncHandler(async (req: Request, res: Re
 
 /** PUT /api/mobile/transport/driver/profile — Update driver profile (phone, password) */
 export const updateDriverProfile = asyncHandler(async (req: Request, res: Response) => {
-  const credentialId = req.userId;
+  const credentialId = req.credentialId ?? req.userId;
   if (!credentialId) throw new ValidationError("Unauthorized");
 
   const payloadSchema = z.object({
@@ -487,7 +487,7 @@ export const updateDriverProfile = asyncHandler(async (req: Request, res: Respon
 
 /** POST /api/mobile/transport/driver/location — Update and broadcast driver's live GPS coordinates */
 export const updateDriverLocation = asyncHandler(async (req: Request, res: Response) => {
-  const credentialId = req.userId;
+  const credentialId = req.credentialId ?? req.userId;
   if (!credentialId) throw new ValidationError("Unauthorized");
 
   const payload = z.object({

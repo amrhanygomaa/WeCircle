@@ -1,6 +1,6 @@
 # WeCircle — Progress Log
 
-Last updated: **2026-05-30** (session 3). Update at the end of every session. Re-verify against code at the start.
+Last updated: **2026-05-30** (session 4). Update at the end of every session. Re-verify against code at the start.
 
 ---
 
@@ -25,6 +25,20 @@ Last updated: **2026-05-30** (session 3). Update at the end of every session. Re
 - **Mobile data:** REST to the Express backend. Firestore used **only for chat**.
 - **Frontend:** Next.js 16 App Router (Vite/react-router deps are dead leftovers).
 - **Hosting:** already on AWS, ad-hoc — single EC2 + pm2 (backend & frontend) + S3 static + Cognito.
+
+---
+
+## ✅ Done (Session 4 — migrations applied to production, 2026-05-30)
+
+1. **5 schema migrations applied to production** (`20260530000003`–`20260530000007`):
+   - Drop `ADMIN` enum value (migrate rows to `SCHOOL_ADMIN` first).
+   - Remove `Teacher.subject` + `Driver.idCopy` legacy fields.
+   - Migrate `Student.game1Lvl…game5Lvl` → `StudentGameProgress` rows.
+   - Make `Parent.schoolId` non-nullable (patch nulls first).
+   - Add FK from `Message.senderId` → `User.id`.
+2. **Frontend static export removed** — `output: 'export'` dropped from `next.config.mjs`; EC2 runs Next.js as a server and dynamic routes (`[id]`) no longer require `generateStaticParams()`.
+3. **Teacher Zod schema cleanup** — `subject: z.string().optional()` removed from create and update schemas (field was dropped from DB in migration 000004).
+4. **CI pipeline green** — `validate` + `deploy-backend-ec2` passing consistently.
 
 ---
 
@@ -153,12 +167,12 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
 ---
 
 ## 📌 Known unknowns / open items
-- **R4 `/auth/cognito-sync`** — auto-creates DB user from Cognito token; review for account-takeover risk.
-- **Deferred schema changes** (need data migration before applying):
-  - Drop `ADMIN` enum value (migrate rows first).
-  - Remove `Teacher.subject`, `Driver.idCopy` legacy fields.
-  - Remove `Student.game1Lvl…game5Lvl` flat cols (after backfilling `StudentGameProgress`).
-  - Make `Parent.schoolId` non-nullable (patch null rows first).
-  - Type `Message.senderId` as FK (needs chat identity consolidation).
+- **R12 — build artifact blobs in git history** (~40 MB). Files are untracked/gitignored since
+  Phase 1, but the blobs remain in old commits. Removal requires `git filter-repo` + force-push —
+  executed in session 4 (see commits). Clone size reduced.
+- **Flutter screens partial audit** — functional screens (parent/teacher/driver dashboards) still
+  contain some hardcoded sample data. Game screens (student1-3 / student4-6) are intentionally
+  static. See session 4 audit results in PROGRESS.md.
 - **Phase 4 provisioning** — RDS, ECS, ALB, CloudFront, Cognito, S3, ElastiCache, EventBridge.
-  Needs sign-off before any paid AWS resources are created.
+  Decision: **not provisioned** — graduation project stays on EC2 + PM2 (free tier). CDK code
+  in `infra/cdk/` serves as architectural showcase only.

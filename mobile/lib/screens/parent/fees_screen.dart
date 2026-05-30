@@ -11,8 +11,13 @@
 تنظيم الأمور المالية وتسهيل عملية الدفع ومتابعة السداد بكل شفافية.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/api_config.dart';
+import '../../core/state/state_manager.dart';
 import '../../widgets/wesal_background.dart';
 
 class FeesScreen extends StatefulWidget { // تعريف كلاس شاشة المصروفات كـ StatefulWidget
@@ -24,12 +29,60 @@ class FeesScreen extends StatefulWidget { // تعريف كلاس شاشة الم
 
 class _FeesScreenState extends State<FeesScreen> { // كلاس حالة شاشة المصروفات
   // ── Design tokens ─────────────────────────────────────────────────────────
-  static const Color darkGreen = Color(0xFF114232); // اللون الأخضر الداكن
-  static const Color primaryPurple = Color(0xFF7C3AED); // اللون البنفسجي الأساسي
-  static const Color textMuted = Color(0xFF94A3B8); // لون النص الباهت
-  static const Color borderColor = Color(0xFFE2E8F0); // لون الإطارات
+  static const Color darkGreen = Color(0xFF114232);
+  static const Color primaryPurple = Color(0xFF7C3AED);
+  static const Color textMuted = Color(0xFF94A3B8);
+  static const Color borderColor = Color(0xFFE2E8F0);
 
-  bool _saveCard = true; // حالة خيار حفظ البطاقة
+  bool _saveCard = true;
+  List<Map<String, dynamic>> _invoices = [];
+  double _totalDue = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInvoices();
+  }
+
+  Future<void> _loadInvoices() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+
+      final children = AppStateManager().children.value;
+      final idx = AppStateManager().selectedChildIndex.value;
+      final studentId = children.isNotEmpty
+          ? children[idx.clamp(0, children.length - 1)]['id'] as String?
+          : null;
+      if (studentId == null || studentId.isEmpty) return;
+
+      final res = await http.get(
+        Uri.parse('${ApiConfig.getBaseUrl()}/invoices/mobile/student/$studentId'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (res.statusCode != 200 || !mounted) return;
+
+      final raw = (jsonDecode(res.body)['data'] as List? ?? [])
+          .cast<Map<String, dynamic>>();
+
+      double total = 0;
+      final mapped = raw.map((inv) {
+        final amount = double.tryParse(inv['totalAmount']?.toString() ?? '0') ?? 0;
+        final paid   = double.tryParse(inv['paidAmount']?.toString()  ?? '0') ?? 0;
+        final due    = amount - paid;
+        total += due;
+        return {
+          'title':  inv['description'] ?? inv['feeType'] ?? 'رسوم دراسية',
+          'amount': '${due.toStringAsFixed(0)} ج.م',
+          'status': inv['status'] ?? '',
+        };
+      }).toList();
+
+      if (mounted) setState(() { _invoices = mapped; _totalDue = total; });
+    } catch (_) {}
+  }
 
   @override // بناء واجهة المستخدم الرئيسية
   Widget build(BuildContext context) {
@@ -62,7 +115,11 @@ class _FeesScreenState extends State<FeesScreen> { // كلاس حالة شاشة
                       borderColor: borderColor,
                     ),
                     SizedBox(height: 24.h),
-                    const _PaymentSummary(darkGreen: darkGreen, primaryPurple: primaryPurple, textMuted: textMuted, borderColor: borderColor), // ملخص الفاتورة
+                    _PaymentSummary(
+                      darkGreen: darkGreen, primaryPurple: primaryPurple,
+                      textMuted: textMuted, borderColor: borderColor,
+                      invoices: _invoices, totalDue: _totalDue,
+                    ),
                     SizedBox(height: 40.h),
                   ],
                 ),
@@ -291,12 +348,30 @@ class _SecurityInfo extends StatelessWidget { // معلومة أمان الدف�
   }
 }
 
-class _PaymentSummary extends StatelessWidget { // ويدجت ملخص الفاتورة المستحقة (معزول)
+class _PaymentSummary extends StatelessWidget {
   final Color darkGreen, primaryPurple, textMuted, borderColor;
-  const _PaymentSummary({required this.darkGreen, required this.primaryPurple, required this.textMuted, required this.borderColor});
+  final List<Map<String, dynamic>> invoices;
+  final double totalDue;
 
-  @override // بناء بطاقة ملخص المبالغ
+  const _PaymentSummary({
+    required this.darkGreen, required this.primaryPurple,
+    required this.textMuted, required this.borderColor,
+    this.invoices = const [], this.totalDue = 0,
+  });
+
+  @override
   Widget build(BuildContext context) {
+    final items = invoices.isNotEmpty
+        ? invoices
+        : [
+            {'title': 'المصروفات الدراسية', 'amount': '5,000 ج.م'},
+            {'title': 'مصروفات الأنشطة',   'amount': '500 ج.م'},
+            {'title': 'مصروفات الباص',     'amount': '1,000 ج.م'},
+          ];
+    final totalLabel = invoices.isNotEmpty
+        ? '${totalDue.toStringAsFixed(0)} ج.م'
+        : '6,500 ج.م';
+
     return Container(
       padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
@@ -308,13 +383,18 @@ class _PaymentSummary extends StatelessWidget { // ويدجت ملخص الفا�
         children: [
           Text('ملخص الدفع', style: TextStyle(color: darkGreen, fontWeight: FontWeight.w900, fontSize: 18.sp, fontFamily: 'Cairo')),
           SizedBox(height: 20.h),
-          _SummaryItem(title: 'المصروفات الدراسية', amount: '5,000 ج.م', textMuted: textMuted, darkGreen: darkGreen),
-          SizedBox(height: 16.h),
-          _SummaryItem(title: 'مصروفات الأنشطة', amount: '500 ج.م', textMuted: textMuted, darkGreen: darkGreen),
-          SizedBox(height: 16.h),
-          _SummaryItem(title: 'مصروفات الباص', amount: '1,000 ج.م', textMuted: textMuted, darkGreen: darkGreen),
-          Padding(padding: EdgeInsets.symmetric(vertical: 20.h), child: Divider(color: borderColor, thickness: 1.5)),
-          _TotalRow(darkGreen: darkGreen, primaryPurple: primaryPurple), // سطر الإجمالى النهائى
+          ...items.expand((item) => [
+            _SummaryItem(title: item['title'] as String, amount: item['amount'] as String, textMuted: textMuted, darkGreen: darkGreen),
+            SizedBox(height: 16.h),
+          ]),
+          Padding(padding: EdgeInsets.symmetric(vertical: 4.h), child: Divider(color: borderColor, thickness: 1.5)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('الإجمالي', style: TextStyle(color: darkGreen, fontWeight: FontWeight.w900, fontSize: 20.sp, fontFamily: 'Cairo')),
+              Text(totalLabel, style: TextStyle(color: primaryPurple, fontWeight: FontWeight.w900, fontSize: 22.sp, fontFamily: 'Cairo')),
+            ],
+          ),
         ],
       ),
     );
@@ -338,18 +418,3 @@ class _SummaryItem extends StatelessWidget { // بند واحد فى الفات�
   }
 }
 
-class _TotalRow extends StatelessWidget { // سطر الإجمالى
-  final Color darkGreen, primaryPurple;
-  const _TotalRow({required this.darkGreen, required this.primaryPurple});
-
-  @override // بناء السطر بخط عريض ولون مميز
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text('الإجمالي', style: TextStyle(color: darkGreen, fontWeight: FontWeight.w900, fontSize: 20.sp, fontFamily: 'Cairo')),
-        Text('6,500 ج.م', style: TextStyle(color: primaryPurple, fontWeight: FontWeight.w900, fontSize: 22.sp, fontFamily: 'Cairo')),
-      ],
-    );
-  }
-}

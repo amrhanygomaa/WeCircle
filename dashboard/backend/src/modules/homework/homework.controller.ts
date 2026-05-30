@@ -228,3 +228,30 @@ export const getHomeworkSubmissions = asyncHandler(async (req: Request, res: Res
 
   res.json({ success: true, data: submissions });
 });
+
+/** GET /homework/mobile/student/:studentId — Parent views child's homework */
+export const getMobileStudentHomework = asyncHandler(async (req: Request, res: Response) => {
+  const schoolId = req.schoolId;
+  const studentId = req.params.studentId as string;
+
+  const student = await prisma.student.findFirst({
+    where: { id: studentId, schoolId: schoolId! },
+    select: { classId: true }
+  });
+  if (!student?.classId) {
+    return res.json({ success: true, data: [] });
+  }
+
+  const data = await prisma.homework.findMany({
+    where: { schoolId: schoolId!, classId: student.classId },
+    include: {
+      subject: { select: { name: true } },
+      teacher: { include: { user: { select: { fullName: true } } } },
+      submissions: { where: { studentId }, select: { id: true, submittedAt: true, score: true } },
+    },
+    orderBy: { sentDate: "desc" },
+    take: 30,
+  });
+
+  res.json({ success: true, data });
+});
