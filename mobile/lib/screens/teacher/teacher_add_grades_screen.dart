@@ -11,8 +11,12 @@
 تحويل رصد الدرجات من الورقي للإلكتروني لضمان الدقة والسرعة في إعلان النتايج.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/api_config.dart';
 
 class TeacherAddGradesScreen extends StatefulWidget { // تعريف كلاس شاشة رصد الدرجات كـ StatefulWidget
   const TeacherAddGradesScreen({super.key}); // مشيد الكلاس
@@ -31,28 +35,103 @@ class _TeacherAddGradesScreenState extends State<TeacherAddGradesScreen> { // ك
   static const Color presentColor  = Color(0xFF22C55E); // لون حالة النجاح (أخضر)
 
   // ── State ──────────────────────────────────────────────────────────────────
-  Map<String, dynamic>? selectedClass; // متغير لتخزين الفصل الذي تم اختياره من القائمة المنسدلة
-  final List<Map<String, dynamic>> myClasses = [ // قائمة الفصول التي يدرسها المعلم (بيانات تجريبية)
-    {'id': 'c1', 'name': 'فصل 5-أ', 'subject': 'اللغة العربية'},
-    {'id': 'c2', 'name': 'فصل 5-ب', 'subject': 'اللغة العربية'},
-  ];
+  Map<String, dynamic>? selectedClass;
+  Map<String, dynamic>? selectedExam;
+  List<Map<String, dynamic>> myClasses = [];
+  List<Map<String, dynamic>> myExams = [];
+  List<Map<String, dynamic>> students = [];
+  bool _submitting = false;
 
-  final List<Map<String, dynamic>> students = [ // قائمة الطلاب المتاحين لرصد درجاتهم (بيانات تجريبية)
-    {'name': 'أحمد محمد علي', 'initial': 'أ', 'gradeController': TextEditingController()},
-    {'name': 'سارة عبد الله', 'initial': 'س', 'gradeController': TextEditingController()},
-    {'name': 'ياسين محمود', 'initial': 'ي', 'gradeController': TextEditingController()},
-    {'name': 'ليلى إبراهيم', 'initial': 'ل', 'gradeController': TextEditingController()},
-    {'name': 'عمر خالد', 'initial': 'ع', 'gradeController': TextEditingController()},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+
+      final base = ApiConfig.getBaseUrl();
+      final headers = {'Authorization': 'Bearer $token'};
+
+      final results = await Future.wait([
+        http.get(Uri.parse('$base/teachers/mobile/classes'), headers: headers).timeout(const Duration(seconds: 15)),
+        http.get(Uri.parse('$base/exams/mobile/teacher-classes'), headers: headers).timeout(const Duration(seconds: 15)),
+      ]);
+
+      if (!mounted) return;
+      final classes = (jsonDecode(results[0].body)['data'] as List? ?? []).cast<Map<String, dynamic>>();
+      final exams   = (jsonDecode(results[1].body)['data'] as List? ?? []).cast<Map<String, dynamic>>();
+
+      setState(() {
+        myClasses = classes;
+        myExams   = exams;
+        if (classes.isNotEmpty) { selectedClass = classes.first; _buildStudents(classes.first); }
+        if (exams.isNotEmpty) selectedExam = exams.first;
+      });
+    } catch (_) {}
+  }
+
+  void _buildStudents(Map<String, dynamic> cls) {
+    for (final s in students) { (s['gradeController'] as TextEditingController).dispose(); }
+    final raw = (cls['students'] as List? ?? []).cast<Map<String, dynamic>>();
+    students = raw.map((s) {
+      final name = s['name'] as String? ?? 'طالب';
+      return {
+        'id':              s['id'] ?? '',
+        'name':            name,
+        'initial':         name.isNotEmpty ? name.substring(0, 1) : 'ط',
+        'gradeController': TextEditingController(),
+      };
+    }).toList();
+  }
+
+  Future<void> _saveGrades() async {
+    if (_submitting || selectedExam == null || students.isEmpty) return;
+    setState(() => _submitting = true);
+    bool ok = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      final examId = selectedExam!['id'] as String;
+      final records = students
+          .where((s) => (s['id'] as String).isNotEmpty)
+          .map((s) {
+            final raw = (s['gradeController'] as TextEditingController).text.trim();
+            final score = double.tryParse(raw) ?? 0;
+            return {'studentId': s['id'], 'score': score, 'absent': raw.isEmpty};
+          }).toList();
+
+      final res = await http.post(
+        Uri.parse('${ApiConfig.getBaseUrl()}/exams/mobile/$examId/results'),
+        headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
+        body: jsonEncode({'results': records}),
+      ).timeout(const Duration(seconds: 20));
+      ok = res.statusCode == 200 || res.statusCode == 201;
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(ok ? 'تم حفظ الدرجات بنجاح' : 'تعذّر الحفظ، حاول مرة أخرى', style: const TextStyle(fontFamily: 'Cairo')),
+      backgroundColor: ok ? presentColor : const Color(0xFFEF4444),
+      behavior: SnackBarBehavior.floating,
+    ));
+    if (ok) Navigator.pop(context);
+  }
 
   List<BoxShadow> get _raiseShadow => [ // دالة للحصول على تأثير الظل Neumorphic المرتفع
     const BoxShadow(color: Colors.white, blurRadius: 8, offset: Offset(-4, -4)), // ظل إضاءة علوي
     BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(4, 4)), // ظل عمق سفلي
   ];
 
-  @override // دالة إغلاق المتحكمات عند مغادرة الشاشة لمنع تسريب الذاكرة
+  @override
   void dispose() {
-    for (var s in students) { s['gradeController'].dispose(); } // التخلص من متحكمات إدخال الدرجات لكل طالب
+    for (var s in students) { (s['gradeController'] as TextEditingController).dispose(); }
     super.dispose();
   }
 
@@ -112,7 +191,7 @@ class _TeacherAddGradesScreenState extends State<TeacherAddGradesScreen> { // ك
                   isExpanded: true, // جعل القائمة تأخذ كامل العرض المتاح
                   hint: Text('اختر الفصل...', style: TextStyle(color: textMuted, fontSize: 14.sp, fontFamily: 'Cairo')),
                   items: myClasses.map((c) => DropdownMenuItem(value: c, child: Text(c['name'] as String, style: const TextStyle(fontFamily: 'Cairo')))).toList(),
-                  onChanged: (v) => setState(() => selectedClass = v), // تحديث الفصل المختار وإعادة بناء الواجهة
+                  onChanged: (v) { if (v != null) setState(() { selectedClass = v; _buildStudents(v); }); },
                 ),
               ),
             ),
@@ -174,10 +253,7 @@ class _TeacherAddGradesScreenState extends State<TeacherAddGradesScreen> { // ك
     return Padding(
       padding: EdgeInsets.all(20.r),
       child: GestureDetector(
-        onTap: () { // تنفيذ عملية الحفظ وإظهار رسالة نجاح
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حفظ الدرجات بنجاح', style: TextStyle(fontFamily: 'Cairo')), backgroundColor: presentColor, behavior: SnackBarBehavior.floating));
-          Navigator.pop(context); // العودة للشاشة السابقة
-        },
+        onTap: _submitting ? null : _saveGrades,
         child: Container( // تصميم الزر بتدرج لوني وظل بارز
           height: 56.h,
           decoration: BoxDecoration(
@@ -185,7 +261,7 @@ class _TeacherAddGradesScreenState extends State<TeacherAddGradesScreen> { // ك
             borderRadius: BorderRadius.circular(28.r),
             boxShadow: [BoxShadow(color: primaryPurple.withValues(alpha: 0.35), blurRadius: 20, offset: const Offset(0, 8))],
           ),
-          child: Center(child: Text('حفظ الدرجات', style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo'))), // إزالة const هنا لأن sp تحسب في وقت التشغيل
+          child: Center(child: Text(_submitting ? 'جارٍ الحفظ...' : 'حفظ الدرجات', style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo'))),
         ),
       ),
     );

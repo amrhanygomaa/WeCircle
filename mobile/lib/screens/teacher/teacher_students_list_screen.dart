@@ -30,61 +30,25 @@ class _TeacherStudentsListScreenState extends State<TeacherStudentsListScreen> {
   final TextEditingController _searchController = TextEditingController(); // متحكم حقل البحث عن الطلاب
   List<Map<String, dynamic>> filteredStudents = []; // قائمة الطلاب المفلترة التي تظهر في الواجهة
 
-  final List<Map<String, dynamic>> allStudents = [ // قائمة بيانات الطلاب (بيانات تجريبية)
-    {
-      'id': '1',
-      'name': 'أحمد محمد علي',
-      'status': 'حاضر',
-      'behavior': 'إيجابي',
-      'behaviorColor': AppTheme.emeraldGreen,
-      'initial': 'أ',
-    },
-    {
-      'id': '2',
-      'name': 'سارة عبد الله',
-      'status': 'حاضر',
-      'behavior': 'إيجابي',
-      'behaviorColor': AppTheme.emeraldGreen,
-      'initial': 'س',
-    },
-    {
-      'id': '3',
-      'name': 'ياسين محمود',
-      'status': 'غائب',
-      'behavior': 'محايد',
-      'behaviorColor': AppTheme.textLight,
-      'initial': 'ي',
-    },
-    {
-      'id': '4',
-      'name': 'ليلى إبراهيم',
-      'status': 'متأخر',
-      'behavior': 'سلبي',
-      'behaviorColor': AppTheme.softRose,
-      'initial': 'ل',
-    },
-    {
-      'id': '5',
-      'name': 'عمر خالد',
-      'status': 'حاضر',
-      'behavior': 'إيجابي',
-      'behaviorColor': AppTheme.emeraldGreen,
-      'initial': 'ع',
-    },
-    {
-      'id': '6',
-      'name': 'منى حسن',
-      'status': 'حاضر',
-      'behavior': 'سلبي',
-      'behaviorColor': AppTheme.softRose,
-      'initial': 'م',
-    },
-  ];
+  List<Map<String, dynamic>> allStudents = []; // يُملأ من classData['students'] في initState
 
-  @override // تهيئة الحالة الأولية
+  @override
   void initState() {
     super.initState();
-    filteredStudents = allStudents; // عرض جميع الطلاب في البداية
+    // بناء قائمة الطلاب من بيانات الفصل الممررة (مصدرها /teachers/mobile/classes)
+    final raw = (widget.classData['students'] as List? ?? []).cast<Map<String, dynamic>>();
+    allStudents = raw.map((s) {
+      final name = (s['name'] as String? ?? 'طالب');
+      return {
+        'id':            s['id'] ?? '',
+        'name':          name,
+        'status':        'حاضر',
+        'behavior':      'محايد',
+        'behaviorColor': AppTheme.textLight,
+        'initial':       name.isNotEmpty ? name.substring(0, 1) : 'ط',
+      };
+    }).toList();
+    filteredStudents = List.from(allStudents);
   }
 
   void _filterStudents(String query) { // دالة لتصفية قائمة الطلاب بناءً على نص البحث

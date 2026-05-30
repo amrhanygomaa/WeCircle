@@ -11,8 +11,13 @@
 توفير راحة بال تامة لولي الأمر وهو بيتابع رحلة ابنه من وإلى المدرسة في الوقت الفعلي.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/api_config.dart';
+import '../../core/state/state_manager.dart';
 import '../../widgets/wesal_background.dart';
 
 class BusTrackerScreen extends StatefulWidget { // تعريف كلاس شاشة تتبع الحافلة كـ StatefulWidget
@@ -32,12 +37,38 @@ class _BusTrackerScreenState extends State<BusTrackerScreen> with SingleTickerPr
   static const Color accentOrange  = Color(0xFFF59E0B); // لون برتقالي
   static const Color liveRed       = Color(0xFFEF4444); // لون أحمر للبث المباشر
 
-  late AnimationController _pulseController; // متحكم حركة النبض للمؤشر
+  late AnimationController _pulseController;
+  Map<String, dynamic>? _busData; // بيانات الباص من الـ API
 
-  @override // تهيئة الحالة وبدء الحركة
+  @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(); // تكرار الحركة
+    _pulseController = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat();
+    _loadBusStatus();
+  }
+
+  Future<void> _loadBusStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+
+      final state = AppStateManager();
+      final children = state.children.value;
+      if (children.isEmpty) return;
+      final studentId = children[state.selectedChildIndex.value]['id'] as String? ?? '';
+      if (studentId.isEmpty) return;
+
+      final res = await http.get(
+        Uri.parse('${ApiConfig.getBaseUrl()}/transport/mobile/bus-status?studentId=$studentId'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (res.statusCode == 200 && mounted) {
+        final data = jsonDecode(res.body)['data'];
+        if (data != null) setState(() => _busData = Map<String, dynamic>.from(data as Map));
+      }
+    } catch (_) {}
   }
 
   @override // التخلص من المتحكم عند إغلاق الشاشة
@@ -57,7 +88,7 @@ class _BusTrackerScreenState extends State<BusTrackerScreen> with SingleTickerPr
           children: [
             _CleanMap(pulseController: _pulseController, primaryBlue: primaryBlue, baseColor: baseColor, textDark: textDark), // الخريطة الوهمية (معزولة)
             _FloatingHeader(baseColor: baseColor, textDark: textDark, textMuted: textMuted, liveRed: liveRed), // الترويسة الطافية
-            _BentoSheet(baseColor: baseColor, textDark: textDark, textMuted: textMuted, primaryBlue: primaryBlue, primaryPurple: primaryPurple, accentOrange: accentOrange), // اللوحة السفلية للمعلومات
+            _BentoSheet(busData: _busData, baseColor: baseColor, textDark: textDark, textMuted: textMuted, primaryBlue: primaryBlue, primaryPurple: primaryPurple, accentOrange: accentOrange),
           ],
         ),
       ),
@@ -235,10 +266,12 @@ class _LiveBadge extends StatelessWidget { // ويدجت شارة LIVE
   }
 }
 
-class _BentoSheet extends StatelessWidget { // ويدجت اللوحة السفلية Bento (معزولة)
+class _BentoSheet extends StatelessWidget {
+  final Map<String, dynamic>? busData;
   final Color baseColor, textDark, textMuted, primaryBlue, primaryPurple, accentOrange;
 
   const _BentoSheet({
+    required this.busData,
     required this.baseColor,
     required this.textDark,
     required this.textMuted,
@@ -264,7 +297,7 @@ class _BentoSheet extends StatelessWidget { // ويدجت اللوحة السف�
             children: [
               Container(width: 40.w, height: 4.h, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2.r))), // مقبض السحب
               SizedBox(height: 24.h),
-              _DriverCard(baseColor: baseColor, textDark: textDark, textMuted: textMuted, primaryBlue: primaryBlue, primaryPurple: primaryPurple), // بطاقة السائق
+              _DriverCard(busData: busData, baseColor: baseColor, textDark: textDark, textMuted: textMuted, primaryBlue: primaryBlue, primaryPurple: primaryPurple),
               SizedBox(height: 24.h),
               Row( // إحصائيات الوقت والمسافة
                 children: [
@@ -283,9 +316,10 @@ class _BentoSheet extends StatelessWidget { // ويدجت اللوحة السف�
   }
 }
 
-class _DriverCard extends StatelessWidget { // ويدجت بطاقة السائق (معزولة)
+class _DriverCard extends StatelessWidget {
+  final Map<String, dynamic>? busData;
   final Color baseColor, textDark, textMuted, primaryBlue, primaryPurple;
-  const _DriverCard({required this.baseColor, required this.textDark, required this.textMuted, required this.primaryBlue, required this.primaryPurple});
+  const _DriverCard({required this.busData, required this.baseColor, required this.textDark, required this.textMuted, required this.primaryBlue, required this.primaryPurple});
 
   @override // بناء بطاقة السائق وأزرار التواصل
   Widget build(BuildContext context) {
@@ -306,8 +340,16 @@ class _DriverCard extends StatelessWidget { // ويدجت بطاقة السائ�
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('ك. محمد طه', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16.sp, color: textDark, fontFamily: 'Cairo')),
-                Text('باص رقم #102 • خط جسر السويس', style: TextStyle(color: textMuted, fontSize: 11.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
+                Text(
+                  busData?['driverName'] as String? ?? 'ك. محمد طه',
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16.sp, color: textDark, fontFamily: 'Cairo'),
+                ),
+                Text(
+                  busData != null
+                    ? 'باص رقم #${busData!['busNumber'] ?? '-'} • ${busData!['routeName'] ?? 'خط غير محدد'}'
+                    : 'باص رقم #102 • خط جسر السويس',
+                  style: TextStyle(color: textMuted, fontSize: 11.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
+                ),
               ],
             ),
           ),

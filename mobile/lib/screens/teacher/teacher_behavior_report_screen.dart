@@ -11,8 +11,12 @@
 ضمان التطابق التام في تجربة المستخدم بين ما يرسله المعلم وما يستلمه ولي الأمر.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/api_config.dart';
 import '../../widgets/wesal_background.dart';
 
 class TeacherBehaviorReportScreen extends StatefulWidget {
@@ -36,9 +40,13 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
   static const Color surfaceColor = Color(0xFFF8FAFC);
 
   // ── State ──────────────────────────────────────────────────────────────────
-  int _selectedType = 0; // 0: Daily, 1: Weekly, 2: Monthly
-  String? selectedClass;
-  String? selectedStudent;
+  int _selectedType = 0;
+  String? selectedClass;   // class id
+  String? selectedStudent; // student name (display)
+  String? _selectedStudentId; // student id (for API)
+  bool _submitting = false;
+  // API-loaded classes replace the hardcoded lists below
+  List<Map<String, dynamic>> _apiClasses = [];
   
   List<Map<String, String>> dailyEntries = [
     {'title': 'المشاركة الصفية', 'status': 'إيجابي', 'desc': 'شارك بفعالية في النقاش وأجاب بدقة.'}
@@ -75,6 +83,69 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
   void initState() {
     super.initState();
     selectedStudent = widget.studentName;
+    _loadClasses();
+  }
+
+  Future<void> _loadClasses() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+      final res = await http.get(
+        Uri.parse('${ApiConfig.getBaseUrl()}/teachers/mobile/classes'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 15));
+      if (res.statusCode == 200 && mounted) {
+        final classes = (jsonDecode(res.body)['data'] as List? ?? []).cast<Map<String, dynamic>>();
+        setState(() => _apiClasses = classes);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _submitReport() async {
+    if (selectedStudent == null || selectedClass == null || _selectedStudentId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('يرجى اختيار الطالب أولاً', style: TextStyle(fontFamily: 'Cairo')),
+        backgroundColor: alertColor,
+      ));
+      return;
+    }
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    bool ok = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      final typeLabel = _selectedType == 0 ? 'يومي' : (_selectedType == 1 ? 'أسبوعي' : 'شهري');
+      final content = _selectedType == 0
+          ? dailyEntries
+          : _selectedType == 1
+              ? {'weeklyDays': weeklyDays, 'remedialPlan': remedialPlan}
+              : monthlyWeeks;
+      final res = await http.post(
+        Uri.parse('${ApiConfig.getBaseUrl()}/behavior/mobile'),
+        headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'studentId': _selectedStudentId,
+          'classId':   selectedClass,
+          'type':      'POSITIVE',
+          'traits':    [typeLabel],
+          'notes':     'تقرير $typeLabel',
+          'content':   content,
+        }),
+      ).timeout(const Duration(seconds: 15));
+      ok = res.statusCode == 200 || res.statusCode == 201;
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(ok ? 'تم إرسال التقرير المعتمد بنجاح' : 'تعذّر الإرسال، حاول مرة أخرى',
+          style: const TextStyle(fontFamily: 'Cairo')),
+      backgroundColor: ok ? positiveColor : alertColor,
+    ));
+    if (ok && !widget.isTab) Navigator.pop(context);
   }
 
   @override
@@ -274,15 +345,28 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
   }
 
   Widget _buildStudentPicker() {
-    final List<Map<String, dynamic>> all = [...classesLower, ...classesUpper];
-    final List<String> students = all.firstWhere((c) => c['id'] == selectedClass)['students'];
+    // Use API data when loaded, fall back to hardcoded
+    List<Map<String, dynamic>> studentItems = [];
+    if (_apiClasses.isNotEmpty) {
+      final cls = _apiClasses.firstWhere((c) => c['id'] == selectedClass, orElse: () => {});
+      studentItems = (cls['students'] as List? ?? []).cast<Map<String, dynamic>>();
+    } else {
+      final List<Map<String, dynamic>> all = [...classesLower, ...classesUpper];
+      final cls = all.where((c) => c['id'] == selectedClass).toList();
+      if (cls.isNotEmpty) {
+        final rawList = cls.first['students'] as List<String>? ?? [];
+        studentItems = rawList.map((s) => {'id': '', 'name': s}).toList();
+      }
+    }
     return Wrap(
       spacing: 8.w,
       runSpacing: 8.h,
-      children: students.map((s) {
-        final isSelected = selectedStudent == s;
+      children: studentItems.map((s) {
+        final name = s['name'] as String? ?? s.toString();
+        final id   = s['id']   as String? ?? '';
+        final isSelected = selectedStudent == name;
         return GestureDetector(
-          onTap: () => setState(() => selectedStudent = s),
+          onTap: () => setState(() { selectedStudent = name; _selectedStudentId = id; }),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -291,7 +375,7 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
               borderRadius: BorderRadius.circular(10.r),
               border: Border.all(color: isSelected ? primaryBlue : borderColor),
             ),
-            child: Text(s, style: TextStyle(color: isSelected ? Colors.white : textDark, fontSize: 11.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
+            child: Text(name, style: TextStyle(color: isSelected ? Colors.white : textDark, fontSize: 11.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
           ),
         );
       }).toList(),
@@ -497,15 +581,6 @@ class _TeacherBehaviorReportScreenState extends State<TeacherBehaviorReportScree
         ),
       ),
     );
-  }
-
-  void _submitReport() {
-    if (selectedStudent == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('يرجى اختيار الطالب أولاً', style: TextStyle(fontFamily: 'Cairo')), backgroundColor: alertColor));
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال التقرير المعتمد بنجاح', style: TextStyle(fontFamily: 'Cairo')), backgroundColor: positiveColor));
-    if (!widget.isTab) Navigator.pop(context);
   }
 
   void _showPreview() {

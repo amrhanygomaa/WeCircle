@@ -11,8 +11,12 @@
 تسهيل التواصل الرسمي والسريع بخصوص أي حاجة تهم الطلاب أو المدرسة.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/api_config.dart';
 import '../../widgets/wesal_background.dart';
 
 class TeacherMessagesScreen extends StatefulWidget {
@@ -38,9 +42,11 @@ class _TeacherMessagesScreenState extends State<TeacherMessagesScreen> {
   static const Color textMuted = Color(0xFF64748B); // لون النص الباهت
 
   // ── State ──────────────────────────────────────────────────────────────────
-  String _selectedFilter = 'الكل'; // الفلتر المختار حالياً لتصنيف المحادثات
-  String _searchQuery = ''; // نص البحث الحالي لتصفية الأسماء
-  final List<Map<String, dynamic>> allChats = [
+  String _selectedFilter = 'الكل';
+  String _searchQuery = '';
+
+  // Mock data shown while loading or when API is unavailable
+  final List<Map<String, dynamic>> _mockChats = [
     // قائمة المحادثات (بيانات تجريبية)
     {
       'name': 'والد أحمد محمد',
@@ -73,6 +79,53 @@ class _TeacherMessagesScreenState extends State<TeacherMessagesScreen> {
       'category': 'الإدارة',
     },
   ];
+
+  List<Map<String, dynamic>> _apiChats = [];
+  List<Map<String, dynamic>> get allChats => _apiChats.isNotEmpty ? _apiChats : _mockChats;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConversations();
+  }
+
+  Future<void> _loadConversations() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+
+      final res = await http.get(
+        Uri.parse('${ApiConfig.getBaseUrl()}/conversations/mobile/conversations'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (res.statusCode != 200 || !mounted) return;
+
+      final convs = (jsonDecode(res.body)['data'] as List? ?? []).cast<Map<String, dynamic>>();
+      final colorPalette = [const Color(0xFF3B82F6), const Color(0xFF8B5CF6), const Color(0xFF1E293B), const Color(0xFF10B981)];
+      setState(() {
+        _apiChats = convs.asMap().entries.map((e) {
+          final c = e.value;
+          final name = c['otherParticipant']?['name'] ?? c['participant1Id'] ?? '?';
+          final role = c['otherParticipant']?['type'] ?? 'مستخدم';
+          final lastMsg = c['lastMessage']?['content'] ?? '';
+          final unread = (c['unreadCount'] as num?)?.toInt() ?? 0;
+          return {
+            'id':       c['id'] ?? '',
+            'name':     name,
+            'role':     role == 'PARENT' ? 'ولي أمر' : role == 'TEACHER' ? 'معلم' : 'الإدارة',
+            'avatar':   (name as String).isNotEmpty ? name.substring(0, 1) : '؟',
+            'message':  lastMsg,
+            'time':     '',
+            'unread':   unread,
+            'color':    colorPalette[e.key % colorPalette.length],
+            'category': role == 'PARENT' ? 'أولياء الأمور' : 'الإدارة',
+          };
+        }).toList();
+      });
+    } catch (_) {}
+  }
 
   List<BoxShadow> get _raiseShadow => [
     // دالة للحصول على تأثير الظل Neumorphic المرتفع

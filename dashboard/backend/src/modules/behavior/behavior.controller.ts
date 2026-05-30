@@ -18,6 +18,7 @@ export const createBehaviorReport = asyncHandler(async (req: Request, res: Respo
       traits: z.array(z.string()).min(1),
       notes: z.string().optional(),
       teacherId: z.string().optional(),
+      content: z.any().optional(), // rich editor content (daily/weekly/monthly)
     })
     .parse(req.body);
 
@@ -30,7 +31,8 @@ export const createBehaviorReport = asyncHandler(async (req: Request, res: Respo
       type: payload.type,
       traits: JSON.stringify(payload.traits),
       notes: payload.notes,
-    },
+      content: payload.content ?? undefined,
+    } as any,
     include: {
       student: { include: { father: true, mother: true } },
       teacher: { include: { user: true } },

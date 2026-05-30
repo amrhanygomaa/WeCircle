@@ -11,8 +11,13 @@
 مساعدة ولي الأمر والطالب في تنظيم وقتهم وتجهيز الشنطة والدروس بناءً على الجدول.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/api_config.dart';
+import '../../core/state/state_manager.dart';
 import '../../widgets/wesal_background.dart';
 
 class ScheduleScreen extends StatefulWidget { // تعريف كلاس شاشة الجدول الدراسي كـ StatefulWidget
@@ -30,7 +35,55 @@ class _ScheduleScreenState extends State<ScheduleScreen> { // كلاس حالة 
   static const Color textDark      = Color(0xFF1E293B); // لون النص الداكن
   static const Color textMuted     = Color(0xFF64748B); // لون النص الباهت
 
-  String _selectedDay = 'الأحد'; // اليوم المختار حالياً من الفلتر
+  String _selectedDay = 'الأحد';
+  // Day index → day name mapping (matches backend Timetable.day 0-6 Sun-Sat)
+  static const _dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  // API schedule: day name → list of periods
+  Map<String, List<Map<String, String>>> _apiSchedule = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSchedule();
+  }
+
+  Future<void> _loadSchedule() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+
+      final state = AppStateManager();
+      final children = state.children.value;
+      if (children.isEmpty) return;
+      final studentId = children[state.selectedChildIndex.value]['id'] as String? ?? '';
+      if (studentId.isEmpty) return;
+
+      final res = await http.get(
+        Uri.parse('${ApiConfig.getBaseUrl()}/timetable/mobile/student?studentId=$studentId'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (res.statusCode != 200 || !mounted) return;
+
+      final slots = (jsonDecode(res.body)['data'] as List? ?? []).cast<Map<String, dynamic>>();
+      final Map<String, List<Map<String, String>>> built = {};
+      for (final s in slots) {
+        final dayIdx = (s['day'] as num?)?.toInt() ?? 0;
+        final dayName = _dayNames[dayIdx % _dayNames.length];
+        final start = s['startTime'] as String? ?? '';
+        final end   = s['endTime']   as String? ?? '';
+        final period = {
+          'time':    start.isNotEmpty && end.isNotEmpty ? '$start - $end' : 'ح${s['periodNumber'] ?? ''}',
+          'subject': s['subject']?['name'] as String? ?? '-',
+          'teacher': s['teacher']?['user']?['fullName'] as String? ?? '-',
+          'room':    s['room'] as String? ?? '-',
+        };
+        built.putIfAbsent(dayName, () => []).add(period);
+      }
+      if (mounted && built.isNotEmpty) setState(() => _apiSchedule = built);
+    } catch (_) {}
+  }
 
   @override // بناء واجهة المستخدم الرئيسية
   Widget build(BuildContext context) {
@@ -56,6 +109,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> { // كلاس حالة 
               Expanded( // قائمة عرض حصص اليوم المختار
                 child: _ScheduleListView(
                   selectedDay: _selectedDay,
+                  apiSchedule: _apiSchedule,
                   baseColor: baseColor,
                   textDark: textDark,
                   textMuted: textMuted,
@@ -140,12 +194,26 @@ class _DaySelector extends StatelessWidget { // ويدجت شريط اختيار
 
 class _ScheduleListView extends StatelessWidget { // ويدجت قائمة الحصص (معزول الأداء)
   final String selectedDay;
+  final Map<String, List<Map<String, String>>> apiSchedule;
   final Color baseColor, textDark, textMuted, primaryBlue;
 
-  const _ScheduleListView({required this.selectedDay, required this.baseColor, required this.textDark, required this.textMuted, required this.primaryBlue});
+  const _ScheduleListView({required this.selectedDay, required this.apiSchedule, required this.baseColor, required this.textDark, required this.textMuted, required this.primaryBlue});
 
   @override // بناء القائمة بناءً على بيانات اليوم المختار
   Widget build(BuildContext context) {
+    // Use API data if available, fall back to static mock
+    if (apiSchedule.isNotEmpty) {
+      final dailyClasses = apiSchedule[selectedDay] ?? [];
+      if (dailyClasses.isEmpty) {
+        return Center(child: Text('لا توجد حصص هذا اليوم', style: TextStyle(color: textMuted, fontFamily: 'Cairo', fontSize: 14.sp)));
+      }
+      return ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+        physics: const BouncingScrollPhysics(),
+        itemCount: dailyClasses.length,
+        itemBuilder: (context, index) => _ScheduleCard(item: dailyClasses[index], baseColor: baseColor, textDark: textDark, textMuted: textMuted, primaryBlue: primaryBlue),
+      );
+    }
     final Map<String, List<Map<String, String>>> schedule = { // بيانات الجدول (محاكاة)
       'الأحد': [{'time': '08:00 - 08:45', 'subject': 'اللغة العربية', 'teacher': 'أ/ محمد علي', 'room': 'قاعة 101'}, {'time': '08:45 - 09:30', 'subject': 'الرياضيات', 'teacher': 'أ/ سارة محمود', 'room': 'مختبر ب'}, {'time': '09:30 - 10:00', 'subject': 'فترة راحة', 'teacher': '-', 'room': 'الفناء'}, {'time': '10:00 - 10:45', 'subject': 'العلوم', 'teacher': 'د/ أحمد خالد', 'room': 'مختبر العلوم'}, {'time': '10:45 - 11:30', 'subject': 'اللغة الإنجليزية', 'teacher': 'أ/ جيهان حسن', 'room': 'قاعة 204'}],
       'الاثنين': [{'time': '08:00 - 08:45', 'subject': 'التربية الدينية', 'teacher': 'أ/ حسن إبراهيم', 'room': 'قاعة 105'}, {'time': '08:45 - 09:30', 'subject': 'اللغة العربية', 'teacher': 'أ/ محمد علي', 'room': 'قاعة 101'}, {'time': '09:30 - 10:00', 'subject': 'فترة راحة', 'teacher': '-', 'room': 'الفناء'}, {'time': '10:00 - 10:45', 'subject': 'الرياضيات', 'teacher': 'أ/ سارة محمود', 'room': 'مختبر ب'}, {'time': '10:45 - 11:30', 'subject': 'الدراسات الاجتماعية', 'teacher': 'أ/ نورا يوسف', 'room': 'قاعة 302'}],

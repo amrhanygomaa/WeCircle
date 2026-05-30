@@ -1075,6 +1075,9 @@ model Bus {
   licenseExpiry   DateTime?
   insuranceExpiry DateTime?
   status          BusStatus @default(ACTIVE)
+  lastLat           Float?
+  lastLng           Float?
+  locationUpdatedAt DateTime?
 
   school      School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   driver      Driver?
@@ -1468,6 +1471,7 @@ model BehaviorReport {
   type      BehaviorType
   traits    String // Stored as comma-separated or JSON
   notes     String?
+  content   Json?    // Rich editor content from mobile (daily/weekly/monthly structure)
   createdAt DateTime     @default(now())
 
   school  School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
