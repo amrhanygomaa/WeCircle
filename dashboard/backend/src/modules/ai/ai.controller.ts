@@ -1,4 +1,5 @@
 ﻿import { Request, Response } from "express";
+import { z } from "zod";
 import { BedrockRuntimeClient, ConverseCommand, ToolConfiguration } from "@aws-sdk/client-bedrock-runtime";
 import { env } from "../../config/env";
 
@@ -116,11 +117,9 @@ export const checkAIPasswordStatus = asyncHandler(async (req: Request, res: Resp
 export const setAIPassword = asyncHandler(async (req: Request, res: Response) => {
   try {
     const schoolId = requireSid(req);
-    const { password } = req.body;
-
-    if (!password || password.length < 6) {
-      return res.status(400).json({ success: false, message: "Password must be at least 6 characters." });
-    }
+    const { password } = z.object({
+      password: z.string().min(6, "Password must be at least 6 characters."),
+    }).parse(req.body);
 
     // We store it in SchoolSettings. In a real app, hash this!
     // But since the user wants to "retrieve it from database if forgotten", 
@@ -144,7 +143,7 @@ export const setAIPassword = asyncHandler(async (req: Request, res: Response) =>
 export const verifyAIPassword = asyncHandler(async (req: Request, res: Response) => {
   try {
     const schoolId = requireSid(req);
-    const { password } = req.body;
+    const { password } = z.object({ password: z.string().min(1) }).parse(req.body);
 
     const settings = await prisma.schoolSettings.findUnique({
       where: { schoolId },
@@ -164,7 +163,12 @@ export const verifyAIPassword = asyncHandler(async (req: Request, res: Response)
 export const chatWithAI = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
   const userId = (req as any).user?.id;
-  const { message, history, isRetry, sessionId } = req.body;
+  const { message, history, isRetry, sessionId } = z.object({
+    message:   z.string().min(1).max(4000),
+    history:   z.array(z.object({ role: z.string(), content: z.string() })).optional().default([]),
+    isRetry:   z.boolean().optional().default(false),
+    sessionId: z.string().optional(),
+  }).parse(req.body);
 
   const bedrock = new BedrockRuntimeClient({ region: env.awsRegion || "us-east-1" });
 

@@ -288,11 +288,12 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
 
 /* ── POST /auth/webhook (legacy — kept for backward compat) ── */
 export const handleWebhook = asyncHandler(async (req: Request, res: Response) => {
-  const { email, fullName, schoolId, role } = req.body;
-
-  if (!email || !schoolId) {
-    throw new ValidationError("Email and School ID are required.");
-  }
+  const { email, fullName, schoolId, role } = z.object({
+    email:    z.string().email(),
+    fullName: z.string().min(1).max(200).optional(),
+    schoolId: z.string().min(1),
+    role:     z.string().optional(),
+  }).parse(req.body);
 
   // Ensure school exists
   let school = await prisma.school.findUnique({ where: { code: schoolId as string } });
@@ -311,7 +312,7 @@ export const handleWebhook = asyncHandler(async (req: Request, res: Response) =>
   const user = await prisma.user.upsert({
     where: { email: email as string },
     update: { fullName, schoolId: userRole === Role.SUPER_ADMIN ? null : school.id, role: userRole },
-    create: { email: email as string, fullName, schoolId: userRole === Role.SUPER_ADMIN ? null : school.id, role: userRole }
+    create: { email: email as string, fullName: fullName ?? email, schoolId: userRole === Role.SUPER_ADMIN ? null : school.id, role: userRole }
   });
 
   res.json({ success: true, data: user });

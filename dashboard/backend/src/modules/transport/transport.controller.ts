@@ -148,7 +148,7 @@ export const upsertBus = asyncHandler(async (req: Request, res: Response) => {
 /** POST /api/transport/buses/:id/trip — Start/End a trip */
 export const toggleTrip = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const { action } = req.body; // "START" or "END"
+  const { action } = z.object({ action: z.enum(["START", "END"]) }).parse(req.body);
   const schoolId = requireSid(req);
 
   const bus = await prisma.bus.findFirst({ where: { id: id as string, schoolId: schoolId as string } });

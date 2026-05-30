@@ -376,14 +376,13 @@ export const studentMobileAiChat = asyncHandler(async (req: Request, res: Respon
     throw new ValidationError("Unauthorized: Student context missing.");
   }
 
-  const { message, history } = req.body as {
-    message?: string;
-    history?: { role: string; parts: { text: string }[] }[];
-  };
-
-  if (!message?.trim()) {
-    throw new ValidationError("Message is required.");
-  }
+  const { message, history } = z.object({
+    message: z.string().min(1).max(2000),
+    history: z.array(z.object({
+      role:  z.string(),
+      parts: z.array(z.object({ text: z.string() })),
+    })).optional().default([]),
+  }).parse(req.body);
 
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {

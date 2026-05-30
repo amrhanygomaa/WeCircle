@@ -629,7 +629,10 @@ export const convertToStudent = asyncHandler(async (req: Request, res: Response)
 /** POST /api/admissions/:id/contact — Add contact log */
 export const addContactLog = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const { method, notes } = req.body;
+  const { method, notes } = z.object({
+    method: z.string().min(1).max(50),
+    notes:  z.string().max(1000).optional(),
+  }).parse(req.body);
 
   const contact = await prisma.applicationContact.create({
     data: {

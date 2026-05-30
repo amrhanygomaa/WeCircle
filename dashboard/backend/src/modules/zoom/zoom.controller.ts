@@ -1,4 +1,5 @@
 ﻿import { Request, Response } from "express";
+import { z } from "zod";
 import { prisma } from "../../config/prisma";
 import { asyncHandler } from "../../core/utils/asyncHandler";
 import { ValidationError, NotFoundError } from "../../core/utils/AppError";
@@ -45,7 +46,15 @@ async function getZoomAccessToken(settings: any) {
  */
 export const createZoomMeeting = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const { topic, startTime, duration, agenda, targetType, targetIds, type = 2 } = req.body;
+  const { topic, startTime, duration, agenda, targetType, targetIds, type } = z.object({
+    topic:      z.string().min(1).max(200),
+    startTime:  z.string().min(1),
+    duration:   z.number().int().min(1).max(1440),
+    agenda:     z.string().max(2000).optional(),
+    targetType: z.string().optional(),
+    targetIds:  z.array(z.string()).optional(),
+    type:       z.number().int().default(2),
+  }).parse(req.body);
 
   const settings = await prisma.schoolSettings.findUnique({
     where: { schoolId },

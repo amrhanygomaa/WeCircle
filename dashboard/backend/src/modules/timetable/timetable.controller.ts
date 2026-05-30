@@ -142,8 +142,7 @@ export const deleteTimetableSlot = asyncHandler(async (req: Request, res: Respon
 
 export const autoGenerateTimetable = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const { classId } = req.body;
-  if (!classId) throw new ValidationError("classId is required");
+  const { classId } = z.object({ classId: z.string().uuid() }).parse(req.body);
 
   // 1. Get Settings (Days & Periods)
   const settings = await prisma.schoolSettings.findUnique({ where: { schoolId } });
