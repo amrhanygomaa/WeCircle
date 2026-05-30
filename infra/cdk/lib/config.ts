@@ -2,10 +2,14 @@ import type { Environment } from 'aws-cdk-lib';
 
 export const REGION = 'us-east-1';
 
-// Account is resolved at synthesis time from the CDK bootstrap context.
-// Pass --profile <name> or set AWS_PROFILE / CDK_DEFAULT_ACCOUNT.
+// Production account — PINNED on purpose. WeCircle lives in 035611741710 only.
+// Hard-pinning the account makes CDK refuse to synth/deploy if the active AWS
+// profile points anywhere else (e.g. the wrong 204758922338 account that once
+// leaked into cdk.context.json), instead of silently deploying to the wrong place.
+export const ACCOUNT = '035611741710';
+
 export const WECIRCLE_ENV: Environment = {
-  account: process.env.CDK_DEFAULT_ACCOUNT,
+  account: ACCOUNT,
   region: REGION,
 };
 
