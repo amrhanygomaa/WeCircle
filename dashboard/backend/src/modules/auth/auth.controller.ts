@@ -41,12 +41,17 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 });
 
 /* ── POST /auth/cognito-sync ── */
-// This endpoint verifies a Cognito token directly (no middleware) and returns user data.
-// Used by the frontend after successful Cognito authentication to sync the session.
+// Called by the frontend after successful Cognito sign-in to hydrate the DB session.
+// Security model:
+//   - Token must be cryptographically valid (aws-jwt-verify).
+//   - email_verified must be true in the token — prevents account-takeover via
+//     unverified-email registration against an existing admin address.
+//   - Role is NEVER read from token attributes on auto-create; new users always
+//     receive PARENT and must be elevated by a SUPER_ADMIN through the admin UI.
 export const cognitoSync = asyncHandler(async (req: Request, res: Response) => {
   const { token } = z.object({ token: z.string().min(1, "Token is required") }).parse(req.body);
 
-  // 1. Verify the Cognito token server-side
+  // 1. Verify the Cognito id-token
   const verifier = CognitoJwtVerifier.create({
     userPoolId: env.cognitoUserPoolId || "",
     tokenUse: "id",
@@ -64,12 +69,21 @@ export const cognitoSync = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
+  // 2. Require a verified email — guards against account-takeover via unverified
+  //    registration with an existing admin's email address.
+  if (cognitoPayload.email_verified !== true) {
+    throw new AuthenticationError(
+      "Email address has not been verified. Please check your inbox and verify your email before signing in.",
+      "EMAIL_NOT_VERIFIED"
+    );
+  }
+
   const email = cognitoPayload.email as string;
   if (!email) {
     throw new ValidationError("Token does not contain an email address.");
   }
 
-  // 2. Find the user in the database
+  // 3. Look up existing DB user
   let dbUser = await prisma.user.findUnique({
     where: { email },
     include: {
@@ -79,19 +93,20 @@ export const cognitoSync = asyncHandler(async (req: Request, res: Response) => {
     }
   });
 
-  // 3. If user doesn't exist in DB, auto-create them (they exist in Cognito so they registered)
+  // 4. Auto-create on first sign-in — role is always PARENT regardless of any
+  //    token attributes. Role elevation must go through the admin UI.
   if (!dbUser) {
-    const fullName = (cognitoPayload.name as string) || (cognitoPayload["custom:fullName"] as string) || email.split("@")[0];
-    const role = (cognitoPayload["custom:role"] as string) === "ADMIN" ? Role.ADMIN
-               : (cognitoPayload["custom:role"] as string) === "SUPER_ADMIN" ? Role.SUPER_ADMIN
-               : Role.PARENT;
+    const fullName =
+      (cognitoPayload.name as string) ||
+      (cognitoPayload["custom:fullName"] as string) ||
+      email.split("@")[0];
 
     dbUser = await prisma.user.create({
       data: {
         email,
         fullName,
-        role,
-        schoolId: null
+        role: Role.PARENT,
+        schoolId: null,
       },
       include: {
         school: {
@@ -99,10 +114,10 @@ export const cognitoSync = asyncHandler(async (req: Request, res: Response) => {
         }
       }
     });
-    console.log(`[Cognito Sync] Auto-created user in DB for email: ${email}`);
+    console.log(`[Cognito Sync] Auto-created DB user (PARENT) for: ${email}`);
   }
 
-  // 4. Return user data (same shape as /auth/me)
+  // 5. Return user data
   let schoolCount: number | undefined;
   if (dbUser.role === Role.SUPER_ADMIN) {
     schoolCount = await prisma.school.count();
