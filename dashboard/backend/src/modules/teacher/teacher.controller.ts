@@ -196,7 +196,6 @@ export const createTeacher = asyncHandler(async (req: Request, res: Response) =>
         email: payload.email,
         // Job
         jobTitle: payload.jobTitle,
-        subject: payload.subject,
         stage: payload.stage,
         appointmentDate: payload.appointmentDate ? new Date(payload.appointmentDate) : new Date(),
         contractType: payload.contractType,
@@ -329,7 +328,6 @@ export const updateTeacher = asyncHandler(async (req: Request, res: Response) =>
         address: payload.address,
         email: payload.email,
         jobTitle: payload.jobTitle,
-        subject: payload.subject,
         stage: payload.stage,
         appointmentDate: payload.appointmentDate ? new Date(payload.appointmentDate) : undefined,
         contractType: payload.contractType,
@@ -483,7 +481,7 @@ export const getMobileTeacherDashboard = asyncHandler(async (req: Request, res: 
         photo: teacher.personalPhoto || teacher.photo || null,
         phone: teacher.phone || "",
         email: teacher.email || teacher.user.email || "",
-        jobTitle: teacher.jobTitle || teacher.subject || ""
+        jobTitle: teacher.jobTitle || ""
       },
       stats: {
         totalStudents,

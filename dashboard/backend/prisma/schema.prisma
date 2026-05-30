@@ -13,7 +13,6 @@ datasource db {
 
 enum Role {
   SUPER_ADMIN
-  ADMIN // Legacy — backward compatibility
   SCHOOL_ADMIN
   ADMISSION_OFFICER
   STUDENT_AFFAIRS
@@ -281,6 +280,7 @@ model User {
   activityLogs   ActivityLog[]
   aiChatMessages AiChatMessage[]
   notifications  Notification[]
+  messages       Message[]
 
   @@index([schoolId])
   @@index([email, schoolId])
@@ -682,11 +682,6 @@ model Student {
 
   // Gamification & Progress Persistence
   points   Int @default(0)
-  game1Lvl Int @default(1)
-  game2Lvl Int @default(1)
-  game3Lvl Int @default(1)
-  game4Lvl Int @default(1)
-  game5Lvl Int @default(1)
 
   // Relations
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -757,7 +752,6 @@ model Teacher {
   graduationYear  String?
   graduationGrade String?
   additionalCerts String?
-  subject         String? // Legacy — kept for backward compatibility
   experienceYears Int?
   appointmentDate DateTime?
   contractType    ContractType?
@@ -813,7 +807,7 @@ model TeacherSubject {
 model Parent {
   id       String  @id @default(uuid())
   userId   String  @unique
-  schoolId String?
+  schoolId String
 
   nameAr       String?
   nationalId   String?
@@ -827,7 +821,7 @@ model Parent {
   photo        String?
 
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  school      School?         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school      School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   credentials AppCredential[]
 
   // Relations to students
@@ -1130,7 +1124,6 @@ model Driver {
   // Documents (URLs)
   idCopyFront    String?
   idCopyBack     String?
-  idCopy         String? // Keeping for backward compatibility
   licenseCopy    String?
   criminalRecord String?
   medicalCert    String?
@@ -1324,8 +1317,7 @@ model Message {
   createdAt      DateTime  @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  // senderId is a polymorphic entity ID (User.id, Parent.id, or Teacher.id depending on role).
-  // A typed FK is deferred to Phase 3 when chat is consolidated under User identity.
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([conversationId])
   @@index([senderId])

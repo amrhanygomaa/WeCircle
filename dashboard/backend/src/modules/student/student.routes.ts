@@ -1,4 +1,4 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { 
   getStudents, 
   createStudent, 
@@ -24,9 +24,9 @@ router.post("/mobile/ai-chat", requireMobileAuth, studentMobileAiChat);
 
 // Dashboard administrative routes
 router.get("/", requireAuth, tenantScope, getStudents);
-router.post("/", requireAuth, tenantScope, roleGuard([Role.ADMIN, Role.SCHOOL_ADMIN, Role.SUPER_ADMIN]), createStudent);
+router.post("/", requireAuth, tenantScope, roleGuard([Role.SCHOOL_ADMIN, Role.SUPER_ADMIN]), createStudent);
 router.get("/:id", requireAuth, tenantScope, getStudentById);
-router.put("/:id", requireAuth, tenantScope, roleGuard([Role.ADMIN, Role.SCHOOL_ADMIN, Role.SUPER_ADMIN]), updateStudent);
-router.delete("/:id", requireAuth, tenantScope, roleGuard([Role.ADMIN, Role.SCHOOL_ADMIN, Role.SUPER_ADMIN]), deleteStudent);
+router.put("/:id", requireAuth, tenantScope, roleGuard([Role.SCHOOL_ADMIN, Role.SUPER_ADMIN]), updateStudent);
+router.delete("/:id", requireAuth, tenantScope, roleGuard([Role.SCHOOL_ADMIN, Role.SUPER_ADMIN]), deleteStudent);
 
 export default router;

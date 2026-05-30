@@ -300,30 +300,23 @@ export const getMobileStudentGameState = asyncHandler(async (req: Request, res: 
 
   const student = await prisma.student.findUnique({
     where: { id: studentId },
-    select: {
-      points: true,
-      game1Lvl: true,
-      game2Lvl: true,
-      game3Lvl: true,
-      game4Lvl: true,
-      game5Lvl: true,
-      photo: true
-    }
+    select: { id: true, points: true, photo: true }
   });
 
   if (!student) {
     throw new ValidationError("Student record not found.");
   }
 
+  const gameProgress = await prisma.studentGameProgress.findMany({
+    where: { studentId: student.id },
+    select: { gameId: true, level: true, points: true }
+  });
+
   res.json({
     success: true,
     data: {
       points: student.points,
-      game1Lvl: student.game1Lvl,
-      game2Lvl: student.game2Lvl,
-      game3Lvl: student.game3Lvl,
-      game4Lvl: student.game4Lvl,
-      game5Lvl: student.game5Lvl,
+      gameProgress,
       photo: student.photo
     }
   });
@@ -339,36 +332,26 @@ export const updateMobileStudentGameState = asyncHandler(async (req: Request, re
 
   const payload = z.object({
     points: z.number().int().min(0).optional(),
-    game1Lvl: z.number().int().min(1).optional(),
-    game2Lvl: z.number().int().min(1).optional(),
-    game3Lvl: z.number().int().min(1).optional(),
-    game4Lvl: z.number().int().min(1).optional(),
-    game5Lvl: z.number().int().min(1).optional(),
-    photo: z.string().optional().nullable()
+    gameId: z.number().int().min(1).max(5).optional(),
+    level:  z.number().int().min(1).optional(),
+    photo:  z.string().optional().nullable()
   }).parse(req.body);
+
+  // Update game progress row if gameId provided
+  if (payload.gameId !== undefined && payload.level !== undefined) {
+    const student = await prisma.student.findUnique({ where: { id: studentId }, select: { schoolId: true } });
+    if (!student) throw new ValidationError("Student not found.");
+    await prisma.studentGameProgress.upsert({
+      where: { studentId_gameId: { studentId, gameId: payload.gameId } },
+      update: { level: payload.level },
+      create: { studentId, gameId: payload.gameId, level: payload.level, schoolId: student.schoolId }
+    });
+  }
 
   const student = await prisma.student.update({
     where: { id: studentId },
-    data: {
-      points: payload.points,
-      game1Lvl: payload.game1Lvl,
-      game2Lvl: payload.game2Lvl,
-      game3Lvl: payload.game3Lvl,
-      game4Lvl: payload.game4Lvl,
-      game5Lvl: payload.game5Lvl,
-      photo: payload.photo
-    },
-    select: {
-      id: true,
-      schoolId: true,
-      points: true,
-      game1Lvl: true,
-      game2Lvl: true,
-      game3Lvl: true,
-      game4Lvl: true,
-      game5Lvl: true,
-      photo: true
-    }
+    data: { points: payload.points, photo: payload.photo },
+    select: { id: true, schoolId: true, points: true, photo: true }
   });
 
   // Emit real-time WebSocket events to school members to sync points instantly!

@@ -1,4 +1,4 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { getAnnouncements, createAnnouncement, deleteAnnouncement } from "./announcement.controller";
 import { requireAuth } from "../../core/http/middlewares/auth";
 import { tenantScope } from "../../core/http/middlewares/tenantScope";
@@ -8,7 +8,7 @@ import { Role } from "@prisma/client";
 const router = Router();
 
 router.get("/", requireAuth, tenantScope, getAnnouncements);
-router.post("/", requireAuth, tenantScope, roleGuard([Role.ADMIN, Role.SUPER_ADMIN, Role.TEACHER]), createAnnouncement);
-router.delete("/:id", requireAuth, tenantScope, roleGuard([Role.ADMIN, Role.SUPER_ADMIN]), deleteAnnouncement);
+router.post("/", requireAuth, tenantScope, roleGuard([Role.SUPER_ADMIN, Role.TEACHER]), createAnnouncement);
+router.delete("/:id", requireAuth, tenantScope, roleGuard([Role.SUPER_ADMIN]), deleteAnnouncement);
 
 export default router;

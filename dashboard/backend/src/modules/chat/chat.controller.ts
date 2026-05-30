@@ -56,7 +56,7 @@ async function resolveParticipantInfo(entityId: string): Promise<ParticipantInfo
   if (parent) return { name: parent.user.fullName, type: "PARENT", photo: parent.photo ?? null, userId: parent.userId };
   if (teacher) return { name: teacher.user.fullName, type: "TEACHER", photo: teacher.photo ?? null, userId: teacher.userId };
   if (user) {
-    const isAdmin = user.role === "SCHOOL_ADMIN" || user.role === "ADMIN";
+    const isAdmin = user.role === "SCHOOL_ADMIN" || user.role === "SUPER_ADMIN";
     return {
       name: isAdmin ? ((user.school?.name) ?? user.fullName) : user.fullName,
       type: user.role,

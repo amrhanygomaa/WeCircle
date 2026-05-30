@@ -1,4 +1,4 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { 
   getTeachers, 
   createTeacher, 
@@ -42,13 +42,13 @@ router.post("/mobile/social/unlink", requireMobileAuth, unlinkTeacherSocialAccou
 
 // Web dashboard teacher endpoints
 router.get("/", requireAuth, tenantScope, getTeachers);
-router.post("/", requireAuth, tenantScope, roleGuard([Role.ADMIN, Role.SUPER_ADMIN]), createTeacher);
-router.put("/:id", requireAuth, tenantScope, roleGuard([Role.ADMIN, Role.SUPER_ADMIN]), updateTeacher);
-router.delete("/:id", requireAuth, tenantScope, roleGuard([Role.ADMIN, Role.SUPER_ADMIN]), deleteTeacher);
+router.post("/", requireAuth, tenantScope, roleGuard([Role.SUPER_ADMIN]), createTeacher);
+router.put("/:id", requireAuth, tenantScope, roleGuard([Role.SUPER_ADMIN]), updateTeacher);
+router.delete("/:id", requireAuth, tenantScope, roleGuard([Role.SUPER_ADMIN]), deleteTeacher);
 
 // Teacher assignment (class ↔ subject) management
 router.get("/:id/assignments", requireAuth, tenantScope, getTeacherAssignments);
-router.post("/:id/assignments", requireAuth, tenantScope, roleGuard([Role.ADMIN, Role.SUPER_ADMIN]), assignTeacher);
-router.delete("/:id/assignments/:assignmentId", requireAuth, tenantScope, roleGuard([Role.ADMIN, Role.SUPER_ADMIN]), unassignTeacher);
+router.post("/:id/assignments", requireAuth, tenantScope, roleGuard([Role.SUPER_ADMIN]), assignTeacher);
+router.delete("/:id/assignments/:assignmentId", requireAuth, tenantScope, roleGuard([Role.SUPER_ADMIN]), unassignTeacher);
 
 export default router;

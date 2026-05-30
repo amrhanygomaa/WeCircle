@@ -81,7 +81,6 @@ export const createDriver = asyncHandler(async (req: Request, res: Response) => 
     workingHours: z.string().optional().nullable(),
     assignedRoute: z.string().optional().nullable(),
     // Documents
-    idCopy: z.string().optional(),
     idCopyFront: z.string().optional(),
     idCopyBack: z.string().optional(),
     licenseCopy: z.string().optional(),
@@ -144,7 +143,6 @@ export const createDriver = asyncHandler(async (req: Request, res: Response) => 
         salary: payload.salary,
         workingHours: payload.workingHours,
         assignedRoute: payload.assignedRoute,
-        idCopy: payload.idCopy,
         idCopyFront: payload.idCopyFront,
         idCopyBack: payload.idCopyBack,
         licenseCopy: payload.licenseCopy,
@@ -216,7 +214,6 @@ export const updateDriver = asyncHandler(async (req: Request, res: Response) => 
     criminalRecord: z.string().optional().nullable(),
     medicalCert: z.string().optional().nullable(),
     militaryCert: z.string().optional().nullable(),
-    idCopy: z.string().optional().nullable(),
     status: z.string().optional(),
   }).parse(req.body);
 

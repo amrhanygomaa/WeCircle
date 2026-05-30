@@ -149,7 +149,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
-  // Create User + Parent in a transaction
+  // Create User only — Parent profile is created by the school admin when onboarding.
   const result = await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
@@ -159,17 +159,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
         schoolId: null
       }
     });
-
-    const parent = await tx.parent.create({
-      data: {
-        userId: user.id,
-        phone,
-        email,
-        schoolId: null
-      }
-    });
-
-    return { user, parent };
+    return { user };
   });
 
   res.status(201).json({
@@ -315,7 +305,7 @@ export const handleWebhook = asyncHandler(async (req: Request, res: Response) =>
   // Determine role
   const userRole = (email as string).toLowerCase() === env.superAdminEmail.toLowerCase()
     ? Role.SUPER_ADMIN
-    : (role as Role) || Role.ADMIN;
+    : (role as Role) || Role.SCHOOL_ADMIN;
 
   // Upsert user
   const user = await prisma.user.upsert({
@@ -372,11 +362,6 @@ export const mobileLogin = asyncHandler(async (req: Request, res: Response) => {
           studentCode: true,
           rollNumber: true,
           points: true,
-          game1Lvl: true,
-          game2Lvl: true,
-          game3Lvl: true,
-          game4Lvl: true,
-          game5Lvl: true,
           photo: true
         }
       },
@@ -536,11 +521,6 @@ export const mobileLogin = asyncHandler(async (req: Request, res: Response) => {
         parentId: credential.parentId,
         studentId: credential.studentId,
         points: credential.student?.points ?? 0,
-        game1Lvl: credential.student?.game1Lvl ?? 1,
-        game2Lvl: credential.student?.game2Lvl ?? 1,
-        game3Lvl: credential.student?.game3Lvl ?? 1,
-        game4Lvl: credential.student?.game4Lvl ?? 1,
-        game5Lvl: credential.student?.game5Lvl ?? 1,
         teacherId: credential.teacherId,
         driverId: credential.driverId,
         supervisorId: credential.supervisorId,

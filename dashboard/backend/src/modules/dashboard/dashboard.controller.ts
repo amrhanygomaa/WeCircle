@@ -280,7 +280,7 @@ export const getOverview = asyncHandler(async (req: Request, res: Response) => {
       bestTeacher: bestTeacher ? {
         id: bestTeacher.id,
         name: bestTeacher.nameAr || bestTeacher.user.fullName,
-        subject: bestTeacher.jobTitle || bestTeacher.subject || "Teacher",
+        subject: bestTeacher.jobTitle || "Teacher",
         photo: bestTeacher.photo || bestTeacher.personalPhoto || null
       } : null,
       starStudent: starStudent ? {
