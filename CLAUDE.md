@@ -16,7 +16,7 @@ began (and band-aid-deployed) a Supabase → AWS migration. The verified current
 | Mobile auth    | Firebase                       | **Custom backend-signed JWT** (`AppCredential` + device session store). |
 | Mobile data    | Firebase/Firestore is "the DB" | **REST to the Express backend.** Firestore is used **only for chat.**   |
 | Frontend build | Next.js                        | **Next.js 16 App Router** — but Vite/react-router deps still linger.    |
-| Hosting        | (future) AWS                   | **Already on AWS, ad-hoc:** single EC2 + pm2, S3 static frontend.       |
+| Hosting        | (future) AWS                   | **Already on AWS, ad-hoc:** single EC2 + pm2 (backend **and** Next.js server), behind nginx + Certbot TLS for both `api.` and dashboard domains. |
 | IaC            | infra/ (Terraform/CDK?)        | **No real IaC.** Ad-hoc shell/JSON + one Cognito Lambda.                |
 
 Supabase removal is recorded in git (`31e2cc1`). Residual Supabase strings remain in env examples,

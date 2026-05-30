@@ -29,4 +29,8 @@ export const env = {
   redisUrl: process.env.REDIS_URL || null,
   // Optional — shared secret for the internal EventBridge cron endpoint.
   cronSecret: process.env.CRON_SECRET || null,
+  // When true (default on a single instance), the overdue-invoice checker runs in-process
+  // on an hourly interval. Set DISABLE_INPROCESS_CRON=true once an external scheduler
+  // (EventBridge → /api/internal/cron/check-overdue) takes over, to avoid double-running.
+  inProcessCron: process.env.DISABLE_INPROCESS_CRON !== "true",
 };

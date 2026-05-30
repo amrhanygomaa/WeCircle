@@ -168,9 +168,13 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
   Prisma model + async `sessionStore.ts`. Migration applied in production.
 - **R9 — Duplicated chat systems** ✅ **FIXED (Phase 3)** — Firestore removed from mobile app; all chat
   goes through Postgres `Conversation`/`Message` via the consolidated `modules/chat/` backend.
-- **R10 — In-process cron.** ✅ **CODE DONE (Phase 4)** — `startOverdueChecker()` removed from
-  `server.ts`; replaced by `/api/internal/cron/check-overdue` endpoint + `CRON_SECRET` guard.
-  `WeCircleScheduler` CDK stack written. Not activated on EC2 (acceptable for graduation project).
+- **R10 — Overdue-invoice cron.** ✅ **FIXED & RUNNING (session 5).** Audit found the cron was
+  *not actually running* in production: `startOverdueChecker()` had been removed from `server.ts`
+  (Phase 4) in favour of the `/api/internal/cron/check-overdue` endpoint, but nothing triggered it
+  (EventBridge never deployed, and `CRON_SECRET` unset → endpoint 401s). Re-enabled the in-process
+  hourly checker in `server.ts`, gated by `env.inProcessCron` (`DISABLE_INPROCESS_CRON=true` turns
+  it off once an external scheduler takes over). The endpoint + `WeCircleScheduler` CDK stack remain
+  for the future EventBridge path. Correct for a single-instance deployment.
 
 ### 🟡 Medium (cleanliness / migration debt)
 - **R11 — ~22 `fix_*.js` band-aid codemods** ✅ **FIXED (2026-05-30)** — all 23 scripts deleted after
@@ -223,9 +227,14 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
     `driver_dashboard` → `/transport/driver/dashboard`; `student_chatbot_screen` → Gemini
     `/students/mobile/ai-chat`; `homework_screen` → `/homework/mobile/student/:id`;
     `fees_screen` → `/invoices/mobile/student/:id`; results + achievements screens.
-  - **Still hardcoded — endpoint EXISTS, wiring pending (3):** `teacher_behavior_report_screen`
-    (`/behavior/mobile`), `teacher_daily_report_screen` (`/daily-reports/mobile`),
-    `parent/behavior_report_screen` (`/behavior/mobile/parent`).
+  - **Wired in session 5 (1):** `teacher_daily_report_screen` → `/daily-reports/mobile` (added a
+    class picker from `/teachers/mobile/classes`; maps interaction/attention/participation/summary;
+    `flutter analyze` clean).
+  - **Deferred — backend model mismatch (2):** `teacher_behavior_report_screen` and
+    `parent/behavior_report_screen` are elaborate static templates (rich daily/weekly/monthly
+    editors + a 1944-line PDF generator) whose data far exceeds the backend `BehaviorReport`
+    model (`type` + `traits[]` + `notes`). Faithful wiring needs a backend schema extension or a
+    UI redesign — **not** a quick connect. Left as presentation screens for now.
   - **Still hardcoded — needs new endpoint (≈7):** `teacher_messages_screen`,
     `teacher_add_grades_screen`, `teacher_students_list_screen`, `parent/bus_tracker_screen` (GPS),
     `parent/schedule_screen` (timetable), `parent/activities_screen`, `parent/tips_screen` (content).

@@ -11,8 +11,12 @@
 توثيق سير العملية التعليمية يوم بيوم وإطلاع الإدارة وأولياء الأمور على المستجدات.
 */
 
+import 'dart:convert';
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/api_config.dart';
 import '../../widgets/wesal_background.dart';
 
 class TeacherDailyReportScreen extends StatefulWidget { // تعريف كلاس شاشة التقرير اليومي كـ StatefulWidget
@@ -36,6 +40,83 @@ class _TeacherDailyReportScreenState extends State<TeacherDailyReportScreen> { /
   double participationLevel = 3; // مستوى المشاركة الحالي (من 1 إلى 5)
   String? interactionRating; // تقييم التفاعل العام المختار
   final TextEditingController summaryController = TextEditingController(); // متحكم حقل ملخص اليوم
+
+  List<Map<String, dynamic>> _classes = []; // فصول المعلم المحمّلة من الـ API
+  String? _classId; // الفصل المختار حالياً
+  bool _submitting = false; // حالة الإرسال الجاري
+
+  @override
+  void initState() {
+    super.initState();
+    _loadClasses();
+  }
+
+  // تحميل فصول المعلم من الـ backend لاختيار الفصل
+  Future<void> _loadClasses() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      if (token.isEmpty) return;
+      final res = await http.get(
+        Uri.parse('${ApiConfig.getBaseUrl()}/teachers/mobile/classes'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 15));
+      if (res.statusCode != 200 || !mounted) return;
+      final classes =
+          (jsonDecode(res.body)['data'] as List? ?? []).cast<Map<String, dynamic>>();
+      if (classes.isEmpty) return;
+      setState(() {
+        _classes = classes;
+        _classId = classes.first['id'] as String?;
+      });
+    } catch (_) {}
+  }
+
+  // إرسال التقرير اليومي الحقيقي للـ backend
+  Future<void> _submit() async {
+    if (_submitting) return;
+    if (_classId == null) {
+      _toast('يرجى اختيار الفصل أولاً', const Color(0xFFEF4444));
+      return;
+    }
+    if (interactionRating == null || summaryController.text.trim().isEmpty) {
+      _toast('يرجى اختيار التفاعل وكتابة ملخص اليوم', const Color(0xFFF59E0B));
+      return;
+    }
+    setState(() => _submitting = true);
+    bool ok = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('mobile_token') ?? '';
+      final res = await http.post(
+        Uri.parse('${ApiConfig.getBaseUrl()}/daily-reports/mobile'),
+        headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'classId': _classId,
+          'interactionLevel': interactionRating,
+          'attentionPercent': ((attentionLevel / 5) * 100).round(),
+          'participationPercent': ((participationLevel / 5) * 100).round(),
+          'summary': summaryController.text.trim(),
+        }),
+      ).timeout(const Duration(seconds: 15));
+      ok = res.statusCode == 200 || res.statusCode == 201;
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+    if (!mounted) return;
+    _toast(ok ? 'تم إرسال التقرير بنجاح' : 'تعذّر إرسال التقرير، حاول مرة أخرى',
+        ok ? presentColor : const Color(0xFFEF4444));
+    if (ok) Navigator.pop(context);
+  }
+
+  void _toast(String msg, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg, style: const TextStyle(fontFamily: 'Cairo')),
+      backgroundColor: color,
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
 
   final List<Map<String, dynamic>> interactionOptions = [ // خيارات تقييم التفاعل المتاحة
     {'label': 'ممتاز', 'icon': Icons.sentiment_very_satisfied_rounded, 'color': const Color(0xFF22C55E)},
@@ -67,6 +148,10 @@ class _TeacherDailyReportScreenState extends State<TeacherDailyReportScreen> { /
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        _buildSectionTitle('الفصل'), // عنوان قسم اختيار الفصل
+                        _buildClassPicker(), // اختيار الفصل المحمّل من الـ API
+                        SizedBox(height: 24.h), // مسافة رأسية
+
                         _buildSectionTitle('مستوى التفاعل العام'), // عنوان قسم التفاعل
                         _buildInteractionRating(), // بناء أزرار تقييم التفاعل
                         SizedBox(height: 24.h), // مسافة رأسية
@@ -132,6 +217,46 @@ class _TeacherDailyReportScreenState extends State<TeacherDailyReportScreen> { /
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h, right: 4.w),
       child: Text(title, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: textDark, fontFamily: 'Cairo')),
+    );
+  }
+
+  Widget _buildClassPicker() { // دالة بناء شريط اختيار الفصل أفقياً
+    if (_classes.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(color: baseColor, borderRadius: BorderRadius.circular(20.r), boxShadow: _raiseShadow),
+        child: Text('لا توجد فصول متاحة', style: TextStyle(fontSize: 12.sp, color: textMuted, fontFamily: 'Cairo')),
+      );
+    }
+    return SizedBox(
+      height: 48.h,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _classes.length,
+        itemBuilder: (context, index) {
+          final c = _classes[index];
+          final active = _classId == c['id'];
+          return GestureDetector(
+            onTap: () => setState(() => _classId = c['id'] as String?),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: EdgeInsets.only(left: 10.w),
+              padding: EdgeInsets.symmetric(horizontal: 18.w),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: active ? primaryBlue : baseColor,
+                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: active
+                    ? [BoxShadow(color: primaryBlue.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))]
+                    : _raiseShadow,
+              ),
+              child: Text('${c['name'] ?? ''}',
+                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: active ? Colors.white : textDark, fontFamily: 'Cairo')),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -222,10 +347,7 @@ class _TeacherDailyReportScreenState extends State<TeacherDailyReportScreen> { /
     return Padding(
       padding: EdgeInsets.all(20.r),
       child: GestureDetector(
-        onTap: () { // تنفيذ عملية الإرسال وإظهار رسالة تأكيد
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال التقرير بنجاح', style: TextStyle(fontFamily: 'Cairo')), backgroundColor: presentColor, behavior: SnackBarBehavior.floating));
-          Navigator.pop(context); // العودة للشاشة السابقة
-        },
+        onTap: _submitting ? null : _submit, // إرسال التقرير الحقيقي للـ backend
         child: Container(
           height: 56.h,
           decoration: BoxDecoration(
@@ -233,7 +355,7 @@ class _TeacherDailyReportScreenState extends State<TeacherDailyReportScreen> { /
             borderRadius: BorderRadius.circular(28.r),
             boxShadow: [BoxShadow(color: primaryPurple.withValues(alpha: 0.35), blurRadius: 20, offset: const Offset(0, 8))],
           ),
-          child: Center(child: Text('إرسال التقرير', style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo'))), // إزالة const هنا
+          child: Center(child: Text(_submitting ? 'جارٍ الإرسال...' : 'إرسال التقرير', style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo'))),
         ),
       ),
     );

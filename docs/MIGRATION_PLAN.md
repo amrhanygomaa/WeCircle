@@ -21,8 +21,8 @@ until signed off.**
 | 1 | Resolve ambiguities (single DB, single FE build tool, single auth) | ✅ Done (2026-05-29) |
 | 2 | Schema redesign (Prisma migrations) | ✅ Done (2026-05-29) |
 | 3 | Logic & structure refactor (layered arch, Zod, error handling, mobile alignment) | ✅ Done (2026-05-30) |
-| 4 | AWS + IaC (Terraform/CDK) | ⏸ Target below — **needs sign-off before provisioning** |
-| 5 | Cutover (migrate data, switch endpoints, decommission Supabase) | ⏳ Pending |
+| 4 | AWS + IaC (Terraform/CDK) | ✅ CDK code complete (6 stacks) — **intentionally not provisioned** (graduation/free-tier). Production = EC2 + pm2 (backend + Next.js) behind nginx + Certbot, verified live 2026-05-30. |
+| 5 | Cutover (migrate data, switch endpoints, decommission Supabase) | ⏸ Deferred — not needed for graduation (no Supabase data; staying on EC2). |
 
 ---
 
