@@ -326,7 +326,7 @@ export class ComputeStack extends cdk.Stack {
           },
         },
       ),
-      description: 'Assumed by GitHub Actions via OIDC — ECR push + ECS rolling deploy',
+      description: 'Assumed by GitHub Actions via OIDC - ECR push + ECS rolling deploy',
     });
 
     // ECR: GetAuthorizationToken must be on * (not resource-specific)

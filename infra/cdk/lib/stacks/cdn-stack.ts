@@ -72,7 +72,7 @@ export class CdnStack extends cdk.Stack {
         },
       ],
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100, // US + Europe only — cheapest
-      comment: 'WeCircle frontend — Next.js static export',
+      comment: 'WeCircle frontend - Next.js static export',
     });
 
     // ── Outputs ───────────────────────────────────────────────────────────

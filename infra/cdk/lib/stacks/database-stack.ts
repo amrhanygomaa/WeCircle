@@ -77,7 +77,7 @@ export class DatabaseStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'DbEndpoint', {
       value: this.instance.dbInstanceEndpointAddress,
       description:
-        'RDS writer endpoint — build DATABASE_URL from this + the rds-credentials secret',
+        'RDS writer endpoint - build DATABASE_URL from this + the rds-credentials secret',
     });
     new cdk.CfnOutput(this, 'DbSecretArn', {
       value: this.instance.secret!.secretArn,

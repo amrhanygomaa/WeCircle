@@ -30,7 +30,7 @@ export class CacheStack extends cdk.Stack {
 
     // Subnet group — isolated subnets, no internet route.
     const subnetGroup = new elasticache.CfnSubnetGroup(this, 'SubnetGroup', {
-      description: 'WeCircle ElastiCache Redis — isolated subnets',
+      description: 'WeCircle ElastiCache Redis - isolated subnets',
       cacheSubnetGroupName: 'wecircle-redis-subnet-group',
       subnetIds: props.vpc.isolatedSubnets.map(s => s.subnetId),
     });

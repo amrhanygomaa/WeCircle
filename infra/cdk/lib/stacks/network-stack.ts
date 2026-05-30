@@ -55,7 +55,7 @@ export class NetworkStack extends cdk.Stack {
     // ALB: accepts HTTP + HTTPS from the public internet.
     this.albSg = new ec2.SecurityGroup(this, 'AlbSg', {
       vpc: this.vpc,
-      description: 'WeCircle ALB — internet-facing',
+      description: 'WeCircle ALB - internet-facing',
       allowAllOutbound: true,
     });
     this.albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80),  'HTTP');
