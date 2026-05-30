@@ -1,4 +1,4 @@
-﻿import { Request, Response } from "express";
+import { Request, Response } from "express";
 import { z } from "zod";
 import { BedrockRuntimeClient, ConverseCommand, ToolConfiguration } from "@aws-sdk/client-bedrock-runtime";
 import { env } from "../../config/env";
@@ -11,7 +11,7 @@ import { getIO } from "../../config/websocket";
 export const getAIChatHistory = asyncHandler(async (req: Request, res: Response) => {
   try {
     const schoolId = requireSid(req);
-    const userId = (req as any).user?.id;
+    const userId = req.user?.id;
     const { sessionId } = req.query;
 
     if (!userId) {
@@ -44,7 +44,7 @@ export const getAIChatHistory = asyncHandler(async (req: Request, res: Response)
 export const getAIChatSessions = asyncHandler(async (req: Request, res: Response) => {
   try {
     const schoolId = requireSid(req);
-    const userId = (req as any).user?.id;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not identified." });
@@ -71,7 +71,7 @@ export const getAIChatSessions = asyncHandler(async (req: Request, res: Response
 export const deleteAIChatSession = asyncHandler(async (req: Request, res: Response) => {
   try {
     const schoolId = requireSid(req);
-    const userId = (req as any).user?.id;
+    const userId = req.user?.id;
     const { sessionId } = req.params;
 
     if (!userId) {
@@ -162,7 +162,7 @@ export const verifyAIPassword = asyncHandler(async (req: Request, res: Response)
 
 export const chatWithAI = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const userId = (req as any).user?.id;
+  const userId = req.user?.id;
   const { message, history, isRetry, sessionId } = z.object({
     message:   z.string().min(1).max(4000),
     history:   z.array(z.object({ role: z.string(), content: z.string() })).optional().default([]),

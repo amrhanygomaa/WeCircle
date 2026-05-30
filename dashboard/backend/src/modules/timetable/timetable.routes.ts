@@ -1,4 +1,4 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { getTimetable, upsertTimetableSlot, deleteTimetableSlot, autoGenerateTimetable } from "./timetable.controller";
 import { requireAuth } from "../../core/http/middlewares/auth";
 import { requireMobileAuth } from "../../core/http/middlewares/mobileAuth";
@@ -9,7 +9,7 @@ const router = Router();
 
 // Mobile teacher schedule — teacher sees their own timetable
 router.get("/mobile/my-schedule", requireMobileAuth, async (req, res) => {
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId;
   const schoolId = req.schoolId;
   if (!teacherId) return res.status(401).json({ success: false, message: "Unauthorized" });
 

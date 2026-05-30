@@ -1,4 +1,4 @@
-﻿import { Request, Response } from "express";
+import { Request, Response } from "express";
 import axios from "axios";
 import { BedrockRuntimeClient, ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
 import { env } from "../../config/env";
@@ -292,7 +292,7 @@ export const deleteStudent = asyncHandler(async (req: Request, res: Response) =>
 
 /* ── GET /api/students/mobile/game-state ── */
 export const getMobileStudentGameState = asyncHandler(async (req: Request, res: Response) => {
-  const studentId = (req as any).studentId;
+  const studentId = req.studentId;
 
   if (!studentId) {
     throw new ValidationError("Unauthorized: Student context missing.");
@@ -324,7 +324,7 @@ export const getMobileStudentGameState = asyncHandler(async (req: Request, res: 
 
 /* ── POST /api/students/mobile/game-state ── */
 export const updateMobileStudentGameState = asyncHandler(async (req: Request, res: Response) => {
-  const studentId = (req as any).studentId;
+  const studentId = req.studentId;
 
   if (!studentId) {
     throw new ValidationError("Unauthorized: Student context missing.");
@@ -369,7 +369,7 @@ export const updateMobileStudentGameState = asyncHandler(async (req: Request, re
 
 /* ── POST /api/students/mobile/ai-chat ── */
 export const studentMobileAiChat = asyncHandler(async (req: Request, res: Response) => {
-  const studentId = (req as any).studentId as string | undefined;
+  const studentId = req.studentId as string | undefined;
   const schoolId = req.schoolId;
 
   if (!studentId) {

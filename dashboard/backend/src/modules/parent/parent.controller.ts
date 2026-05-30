@@ -1,4 +1,4 @@
-﻿import type { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../../config/prisma";
 import { asyncHandler } from "../../core/utils/asyncHandler";
@@ -108,7 +108,7 @@ export const attachParentToStudent = asyncHandler(async (req: Request, res: Resp
 
 /* ── GET /parents/mobile/dashboard ── */
 export const getMobileParentDashboard = asyncHandler(async (req: Request, res: Response) => {
-  const parentId = (req as any).parentId;
+  const parentId = req.parentId;
   if (!parentId) {
     throw new ValidationError("Unauthorized: Parent session not found.");
   }
@@ -522,7 +522,7 @@ export const getMobileParentDashboard = asyncHandler(async (req: Request, res: R
 
 /* ── PUT /parents/mobile/profile ── */
 export const updateMobileParentProfile = asyncHandler(async (req: Request, res: Response) => {
-  const parentId = (req as any).parentId;
+  const parentId = req.parentId;
   if (!parentId) {
     throw new ValidationError("Unauthorized: Parent session not found.");
   }
@@ -552,8 +552,8 @@ export const updateMobileParentProfile = asyncHandler(async (req: Request, res: 
 
 /* ── GET /parents/mobile/devices ── */
 export const getMobileParentDevices = asyncHandler(async (req: Request, res: Response) => {
-  const parentId = (req as any).parentId;
-  const currentToken = (req as any).token;
+  const parentId = req.parentId;
+  const currentToken = req.token;
   if (!parentId) {
     throw new ValidationError("Unauthorized: Parent session not found.");
   }
@@ -575,7 +575,7 @@ export const getMobileParentDevices = asyncHandler(async (req: Request, res: Res
 
 /* ── POST /parents/mobile/devices/logout ── */
 export const logoutMobileParentDevice = asyncHandler(async (req: Request, res: Response) => {
-  const parentId = (req as any).parentId;
+  const parentId = req.parentId;
   if (!parentId) {
     throw new ValidationError("Unauthorized: Parent session not found.");
   }
@@ -596,8 +596,8 @@ export const logoutMobileParentDevice = asyncHandler(async (req: Request, res: R
 
 /* ── POST /parents/mobile/devices/logout-all ── */
 export const logoutAllOtherMobileDevices = asyncHandler(async (req: Request, res: Response) => {
-  const parentId = (req as any).parentId;
-  const currentToken = (req as any).token;
+  const parentId = req.parentId;
+  const currentToken = req.token;
   if (!parentId) {
     throw new ValidationError("Unauthorized: Parent session not found.");
   }
@@ -613,7 +613,7 @@ export const logoutAllOtherMobileDevices = asyncHandler(async (req: Request, res
 /* ── POST /parents/mobile/change-password ── */
 export const changeMobileParentPassword = asyncHandler(async (req: Request, res: Response) => {
   const credentialId = req.userId; // The AppCredential ID attached by requireMobileAuth
-  const parentId = (req as any).parentId;
+  const parentId = req.parentId;
   if (!credentialId || !parentId) {
     throw new ValidationError("Unauthorized: Session not found.");
   }

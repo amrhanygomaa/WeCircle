@@ -1,4 +1,4 @@
-﻿import { Request, Response } from "express";
+import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../../config/prisma";
 import { asyncHandler } from "../../core/utils/asyncHandler";
@@ -8,7 +8,7 @@ import { createNotification } from "../notification/notification.controller";
 
 export const createBehaviorReport = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId;
 
   const payload = z
     .object({
@@ -24,7 +24,7 @@ export const createBehaviorReport = asyncHandler(async (req: Request, res: Respo
   const report = await prisma.behaviorReport.create({
     data: {
       schoolId,
-      teacherId: teacherId || payload.teacherId, // Allow admin override if needed, but normally from token
+      teacherId: (teacherId || payload.teacherId)!, // resolved from mobile token or admin body param
       studentId: payload.studentId,
       classId: payload.classId,
       type: payload.type,
@@ -108,7 +108,7 @@ export const getBehaviorReports = asyncHandler(async (req: Request, res: Respons
 // Get behavior reports for teacher only
 export const getTeacherBehaviorReports = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId;
 
   if (!teacherId) {
     return res.status(403).json({ success: false, message: "Teacher ID required" });
@@ -137,7 +137,7 @@ export const getTeacherBehaviorReports = asyncHandler(async (req: Request, res: 
 // Get behavior reports for parent's children only
 export const getParentBehaviorReports = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const parentId = (req as any).parentId;
+  const parentId = req.parentId;
 
   if (!parentId) {
     return res.status(403).json({ success: false, message: "Parent ID required" });

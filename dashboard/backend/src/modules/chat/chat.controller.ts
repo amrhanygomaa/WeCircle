@@ -71,7 +71,7 @@ async function resolveParticipantInfo(entityId: string): Promise<ParticipantInfo
 
 export const listConversations = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const userId = (req as any).userId as string;
+  const userId = req.userId as string;
   const role = req.user?.role;
 
   const entityId = await resolveEntityId(userId, role);
@@ -101,7 +101,7 @@ export const listConversations = asyncHandler(async (req: Request, res: Response
 export const getMessages = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
   const conversationId = req.params.id as string;
-  const userId = (req as any).userId as string;
+  const userId = req.userId as string;
   const role = req.user?.role;
 
   const entityId = await resolveEntityId(userId, role);
@@ -127,7 +127,7 @@ export const getMessages = asyncHandler(async (req: Request, res: Response) => {
 
 export const findOrCreateConversation = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const userId = (req as any).userId as string;
+  const userId = req.userId as string;
   const role = req.user?.role;
 
   const { recipientId } = z.object({ recipientId: z.string().min(1) }).parse(req.body);
@@ -157,7 +157,7 @@ export const findOrCreateConversation = asyncHandler(async (req: Request, res: R
 
 export const sendMessage = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const userId = (req as any).userId as string;
+  const userId = req.userId as string;
   const role = req.user?.role;
 
   const paramConvId = req.params.id as string | undefined;
@@ -229,7 +229,7 @@ export const sendMessage = asyncHandler(async (req: Request, res: Response) => {
 
 export const getContacts = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const userId = (req as any).userId as string;
+  const userId = req.userId as string;
   const role = req.user?.role;
   const query = (req.query.q as string) ?? "";
 
@@ -250,7 +250,7 @@ export const getContacts = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (role === "PARENT") {
-    const parentId = (req as any).parentId;
+    const parentId = req.parentId;
     if (parentId) {
       const students = await prisma.student.findMany({
         where: { OR: [{ fatherId: parentId }, { motherId: parentId }, { guardianId: parentId }] },
@@ -276,7 +276,7 @@ export const getContacts = asyncHandler(async (req: Request, res: Response) => {
       contacts.push(...Array.from(teachersMap.values()));
     }
   } else if (role === "TEACHER") {
-    const teacherId = (req as any).teacherId;
+    const teacherId = req.teacherId;
     if (teacherId) {
       const teacher = await prisma.teacher.findUnique({
         where: { id: teacherId },

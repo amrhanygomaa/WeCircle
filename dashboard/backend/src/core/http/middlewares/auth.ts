@@ -35,11 +35,11 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
         if (decoded.schoolId) req.schoolId = decoded.schoolId;
         
         // Attach role-specific IDs
-        if (decoded.teacherId) (req as any).teacherId = decoded.teacherId;
-        if (decoded.parentId) (req as any).parentId = decoded.parentId;
-        if (decoded.studentId) (req as any).studentId = decoded.studentId;
-        if (decoded.driverId) (req as any).driverId = decoded.driverId;
-        if (decoded.supervisorId) (req as any).supervisorId = decoded.supervisorId;
+        if (decoded.teacherId) req.teacherId = decoded.teacherId;
+        if (decoded.parentId) req.parentId = decoded.parentId;
+        if (decoded.studentId) req.studentId = decoded.studentId;
+        if (decoded.driverId) req.driverId = decoded.driverId;
+        if (decoded.supervisorId) req.supervisorId = decoded.supervisorId;
         
         next();
         return;
@@ -93,11 +93,11 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     }
 
     // Attach role-specific IDs from database relations
-    if (dbUser.teacher) (req as any).teacherId = dbUser.teacher.id;
-    if (dbUser.parent) (req as any).parentId = dbUser.parent.id;
-    if (dbUser.student) (req as any).studentId = dbUser.student.id;
-    if (dbUser.driver) (req as any).driverId = dbUser.driver.id;
-    if (dbUser.supervisor) (req as any).supervisorId = dbUser.supervisor.id;
+    if (dbUser.teacher) req.teacherId = dbUser.teacher.id;
+    if (dbUser.parent) req.parentId = dbUser.parent.id;
+    if (dbUser.student) req.studentId = dbUser.student.id;
+    if (dbUser.driver) req.driverId = dbUser.driver.id;
+    if (dbUser.supervisor) req.supervisorId = dbUser.supervisor.id;
 
     next();
   } catch (err) {

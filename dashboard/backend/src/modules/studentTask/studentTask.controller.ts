@@ -1,4 +1,4 @@
-﻿import { Request, Response } from "express";
+import { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../../config/prisma";
 import { asyncHandler } from "../../core/utils/asyncHandler";
@@ -9,7 +9,7 @@ import { NotFoundError } from "../../core/utils/AppError";
 
 export const createStudentTask = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId!;
 
   const payload = z
     .object({
@@ -105,7 +105,7 @@ export const getStudentTasks = asyncHandler(async (req: Request, res: Response) 
 
 export const deleteStudentTask = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId;
   const id = req.params.id as string;
 
   // Verify task belongs to school and teacher
@@ -130,7 +130,7 @@ export const deleteStudentTask = asyncHandler(async (req: Request, res: Response
 
 export const markTaskCompleted = asyncHandler(async (req: Request, res: Response) => {
   const schoolId = requireSid(req);
-  const teacherId = (req as any).teacherId; // Ensure only teachers can mark complete
+  const teacherId = req.teacherId; // Ensure only teachers can mark complete
   const id = req.params.id as string;
   const { studentId } = z.object({ studentId: z.string().min(1) }).parse(req.body);
 

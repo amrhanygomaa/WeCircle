@@ -52,11 +52,11 @@ export async function requireMobileAuth(
     };
     req.userId = decoded.id;
     req.schoolId = decoded.schoolId;
-    (req as any).parentId  = decoded.parentId;
-    (req as any).studentId = decoded.studentId;
-    (req as any).teacherId = decoded.teacherId;
-    (req as any).driverId  = decoded.driverId;
-    (req as any).token     = token;
+    req.parentId  = decoded.parentId  ?? undefined;
+    req.studentId = decoded.studentId ?? undefined;
+    req.teacherId = decoded.teacherId ?? undefined;
+    req.driverId  = decoded.driverId  ?? undefined;
+    req.token     = token;
 
     next();
   } catch (err) {

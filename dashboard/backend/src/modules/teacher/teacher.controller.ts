@@ -1,4 +1,4 @@
-﻿import { Request, Response } from "express";
+import { Request, Response } from "express";
 import { prisma } from "../../config/prisma";
 import { Role } from "@prisma/client";
 import { z } from "zod";
@@ -374,7 +374,7 @@ export const deleteTeacher = asyncHandler(async (req: Request, res: Response) =>
 });
 
 export const getMobileTeacherDashboard = asyncHandler(async (req: Request, res: Response) => {
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId;
   const schoolId = req.schoolId;
 
   if (!teacherId) {
@@ -579,7 +579,7 @@ export const unassignTeacher = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const getMobileTeacherClasses = asyncHandler(async (req: Request, res: Response) => {
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId;
   const schoolId = req.schoolId;
 
   if (!teacherId) {
@@ -635,7 +635,7 @@ export const getMobileTeacherClasses = asyncHandler(async (req: Request, res: Re
 
 /* ── GET /teachers/mobile/reports ── */
 export const getMobileTeacherReports = asyncHandler(async (req: Request, res: Response) => {
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId;
   const schoolId = req.schoolId;
 
   if (!teacherId) {
@@ -691,7 +691,7 @@ export const getMobileTeacherReports = asyncHandler(async (req: Request, res: Re
 
 /* ── PUT /teachers/mobile/profile ── */
 export const updateMobileTeacherProfile = asyncHandler(async (req: Request, res: Response) => {
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId;
   if (!teacherId) {
     throw new ValidationError("Unauthorized: Teacher session not found.");
   }
@@ -727,7 +727,7 @@ export const updateMobileTeacherProfile = asyncHandler(async (req: Request, res:
 /* ── POST /teachers/mobile/change-password ── */
 export const changeMobileTeacherPassword = asyncHandler(async (req: Request, res: Response) => {
   const credentialId = req.userId;
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId;
   if (!credentialId || !teacherId) {
     throw new ValidationError("Unauthorized: Session not found.");
   }
@@ -763,8 +763,8 @@ export const changeMobileTeacherPassword = asyncHandler(async (req: Request, res
 
 /* ── GET /teachers/mobile/devices ── */
 export const getMobileTeacherDevices = asyncHandler(async (req: Request, res: Response) => {
-  const teacherId = (req as any).teacherId;
-  const currentToken = (req as any).token;
+  const teacherId = req.teacherId;
+  const currentToken = req.token;
   if (!teacherId) {
     throw new ValidationError("Unauthorized: Teacher session not found.");
   }
@@ -786,7 +786,7 @@ export const getMobileTeacherDevices = asyncHandler(async (req: Request, res: Re
 
 /* ── POST /teachers/mobile/devices/logout ── */
 export const logoutMobileTeacherDevice = asyncHandler(async (req: Request, res: Response) => {
-  const teacherId = (req as any).teacherId;
+  const teacherId = req.teacherId;
   if (!teacherId) {
     throw new ValidationError("Unauthorized: Teacher session not found.");
   }
@@ -807,8 +807,8 @@ export const logoutMobileTeacherDevice = asyncHandler(async (req: Request, res: 
 
 /* ── POST /teachers/mobile/devices/logout-all ── */
 export const logoutAllOtherTeacherDevices = asyncHandler(async (req: Request, res: Response) => {
-  const teacherId = (req as any).teacherId;
-  const currentToken = (req as any).token;
+  const teacherId = req.teacherId;
+  const currentToken = req.token;
   if (!teacherId) {
     throw new ValidationError("Unauthorized: Teacher session not found.");
   }
