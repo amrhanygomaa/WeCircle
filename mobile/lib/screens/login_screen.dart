@@ -106,9 +106,16 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
         return;
       }
 
-      final data = body['data'] as Map<String, dynamic>;
-      final token = data['token'] as String;
-      final user = data['user'] as Map<String, dynamic>;
+      final data = body['data'] as Map<String, dynamic>?;
+      final token = data?['token'] as String?;
+      if (data == null || token == null || token.isEmpty) {
+        setState(() {
+          _idError = 'استجابة غير متوقعة من الخادم. حاول مرة أخرى.';
+          _isLoading = false;
+        });
+        return;
+      }
+      final user = (data['user'] as Map<String, dynamic>?) ?? {};
       final role = ((user['role'] as String?) ?? 'parent').toLowerCase();
 
       // Pick the role-specific entity ID used by chat and other authenticated calls.
