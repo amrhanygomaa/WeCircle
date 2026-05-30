@@ -363,7 +363,8 @@ export const mobileLogin = asyncHandler(async (req: Request, res: Response) => {
           studentCode: true,
           rollNumber: true,
           points: true,
-          photo: true
+          photo: true,
+          grade: { select: { order: true } }
         }
       },
       teacher: {
@@ -522,6 +523,7 @@ export const mobileLogin = asyncHandler(async (req: Request, res: Response) => {
         parentId: credential.parentId,
         studentId: credential.studentId,
         points: credential.student?.points ?? 0,
+        gradeOrder: credential.student?.grade?.order ?? null,
         teacherId: credential.teacherId,
         driverId: credential.driverId,
         supervisorId: credential.supervisorId,

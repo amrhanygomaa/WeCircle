@@ -39,8 +39,6 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
 
   String? _idError; // متغير لتخزين خطأ حقل الهوية
   String? _passError; // متغير لتخزين خطأ حقل كلمة المرور
-  String _role = 'parent'; // الدور الافتراضي للمستخدم
-  String _gradeRange = '1-3'; // الفئة العمرية/الصفية للطالب
 
   final FocusNode _idFocus = FocusNode(); // عقدة التركيز لحقل الهوية
   final FocusNode _passFocus = FocusNode(); // عقدة التركيز لحقل كلمة المرور
@@ -138,6 +136,10 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
           entityId = (user['id'] as String?) ?? '';
       }
 
+      // Determine student grade range automatically from API (gradeOrder: 1-6).
+      final gradeOrder = (user['gradeOrder'] as num?)?.toInt() ?? 1;
+      final gradeRange = gradeOrder >= 4 ? '4-6' : '1-3';
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('mobile_token', token);
       await prefs.setString('mobile_entity_id', entityId);
@@ -155,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
           Navigator.pushReplacementNamed(context, '/parent_dashboard');
           break;
         case 'student':
-          AppStateManager().selectedGradeLevel.value = _gradeRange;
+          AppStateManager().selectedGradeLevel.value = gradeRange;
           Navigator.pushReplacementNamed(context, '/student_avatar_selection');
           break;
         case 'teacher':
@@ -179,16 +181,6 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
         _idError = 'خطأ في الاتصال بالخادم';
         _isLoading = false;
       });
-    }
-  }
-
-  String _getRoleName(String role) { // دالة لتحويل كود الدور إلى نص عربي
-    switch(role) {
-      case 'parent': return 'ولي الأمر';
-      case 'student': return 'طالب';
-      case 'teacher': return 'معلم';
-      case 'driver': return 'سائق';
-      default: return 'ولي الأمر';
     }
   }
 
@@ -250,9 +242,7 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Align(alignment: Alignment.centerLeft, child: _buildRoleSelectorPill()), // اختيار نوع الحساب
-                          const SizedBox(height: 32),
-                          
+                          const SizedBox(height: 8),
                           // حقل رقم الهوية
                           ValueListenableBuilder<bool>( // تحديث إطار الحقل فقط عند التركيز دون إعادة بناء الشاشة بالكامل
                             valueListenable: _isIdFocused,
@@ -291,11 +281,6 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
                             },
                           ).animate().fade(delay: 300.ms).slideY(begin: 0.1, end: 0),
                           
-                          if (_role == 'student') ...[
-                            const SizedBox(height: 24),
-                            _buildGradeSelector(),
-                          ],
-
                           const SizedBox(height: 16),
                           
                           // تذكرني ونسيت كلمة المرور
@@ -338,54 +323,6 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildRoleSelectorPill() { // بناء زر اختيار نوع الحساب
-    return PopupMenuButton<String>(
-      onSelected: (val) => setState(() => _role = val),
-      color: baseColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 8, offset: const Offset(0, 50),
-      child: Container( // شكل الزر المنبثق
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: baseColor, borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(4, 4)),
-            const BoxShadow(color: Colors.white, blurRadius: 8, offset: Offset(-4, -4)),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.person_outline_rounded, size: 20, color: primaryBlue),
-            const SizedBox(width: 10),
-            Text(_getRoleName(_role), style: const TextStyle(fontSize: 14, color: textDark, fontWeight: FontWeight.w700, fontFamily: _fontFamily)),
-            const SizedBox(width: 10),
-            const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: textMuted),
-          ],
-        ),
-      ),
-      itemBuilder: (ctx) => [
-        _buildPopupItem('parent', 'ولي الأمر', Icons.family_restroom_rounded),
-        _buildPopupItem('student', 'طالب', Icons.school_rounded),
-        _buildPopupItem('teacher', 'معلم', Icons.cast_for_education_rounded),
-        _buildPopupItem('driver', 'سائق', Icons.directions_bus_rounded),
-      ],
-    );
-  }
-
-  PopupMenuItem<String> _buildPopupItem(String value, String text, IconData icon) { // بناء عنصر في قائمة اختيار الدور
-    return PopupMenuItem(
-      value: value,
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: primaryPurple),
-          const SizedBox(width: 10),
-          Text(text, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textDark, fontFamily: _fontFamily)),
-        ],
       ),
     );
   }
@@ -477,61 +414,4 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
     );
   }
 
-  Widget _buildGradeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'اختر المرحلة الدراسية:',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: textDark,
-            fontFamily: _fontFamily,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(child: _buildGradeOption('1-3', 'الأول - الثالث')),
-            const SizedBox(width: 12),
-            Expanded(child: _buildGradeOption('4-6', 'الرابع - السادس')),
-          ],
-        ),
-      ],
-    ).animate().fade().slideY(begin: 0.2, end: 0);
-  }
-
-  Widget _buildGradeOption(String range, String label) {
-    bool isSelected = _gradeRange == range;
-    return GestureDetector(
-      onTap: () => setState(() => _gradeRange = range),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? primaryBlue : Colors.transparent,
-            width: 2,
-          ),
-          boxShadow: isSelected
-              ? [BoxShadow(color: primaryBlue.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))]
-              : [],
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-              color: isSelected ? primaryBlue : textMuted,
-              fontFamily: _fontFamily,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
