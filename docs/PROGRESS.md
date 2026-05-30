@@ -1,6 +1,6 @@
 # WeCircle — Progress Log
 
-Last updated: **2026-05-30**. Update at the end of every session. Re-verify against code at the start.
+Last updated: **2026-05-30** (session 2). Update at the end of every session. Re-verify against code at the start.
 
 ---
 
@@ -25,6 +25,36 @@ Last updated: **2026-05-30**. Update at the end of every session. Re-verify agai
 - **Mobile data:** REST to the Express backend. Firestore used **only for chat**.
 - **Frontend:** Next.js 16 App Router (Vite/react-router deps are dead leftovers).
 - **Hosting:** already on AWS, ad-hoc — single EC2 + pm2 (backend & frontend) + S3 static + Cognito.
+
+---
+
+## ✅ Done (Phase 4 — IaC + CI hardening, 2026-05-30)
+
+All CDK infrastructure code written and synthesises cleanly. **Not deployed to AWS** — graduation
+project decision: staying on free tier; EC2 + PM2 remains production. The CDK code lives in
+`infra/cdk/` as an architectural showcase (6 stacks, ~700 lines TypeScript).
+
+1. **CDK bootstrap** — `CDKToolkit` stack bootstrapped on account `035611741710 / us-east-1`.
+   Account pinned in `infra/cdk/lib/config.ts` to prevent accidental deploy to wrong account.
+   `infra/cdk/cdk.json` sets `"profile": "wecircle"` so CDK always uses the correct credentials.
+2. **WeCircleNetwork** (Stack 1) — VPC, 3-tier subnets, NAT, 4 security groups. *(Created then
+   destroyed — NAT Gateway costs ~$32/month; unnecessary for graduation project.)*
+3. **WeCircleDatabase** (Stack 2) — RDS Postgres 16, Multi-AZ, Secrets Manager. *(Not deployed —
+   free tier limitation: backup retention > 0 days requires account upgrade.)*
+4. **WeCircleCompute** (Stack 3) — ECS Fargate, ALB, ECR, OIDC GitHub deploy role. *(Not deployed.)*
+5. **WeCircleCache** (Stack 4) — ElastiCache Redis 7, Socket.IO adapter. *(Not deployed.)*
+6. **WeCircleCdn** (Stack 5) — CloudFront + S3 for Next.js static export. *(Not deployed.)*
+7. **WeCircleScheduler** (Stack 6) — EventBridge + Lambda for hourly overdue-invoice cron. *(Not deployed.)*
+8. **CI restructured** — `deploy.yml` split into 3 jobs: `validate` (typecheck gate) +
+   `deploy-backend-ec2` (every push) + `deploy-frontend-cdn` (manual, OIDC) + `deploy-ecs` (manual).
+9. **Redis adapter wired** — `websocket.ts` applies `@socket.io/redis-adapter` when `REDIS_URL` is set;
+   gracefully falls back to in-process without it. (R7 — code done, activation deferred.)
+10. **EventBridge cron endpoint** — `/api/internal/cron/check-overdue` added; `CRON_SECRET` guards it.
+    `startOverdueChecker()` removed from `server.ts`. (R10 — code done, EC2 still uses pm2 restart to
+    retrigger; EventBridge activation deferred.)
+11. **Mobile login wired** — `login_screen.dart` calls `/auth/mobile/login`; saves `mobile_token`,
+    `mobile_entity_id`, `mobile_role`, `mobile_user_id` to SharedPreferences. (R16 partial)
+12. **Body limit tightened** — `express.json({ limit: "50mb" })` → `1mb`. (R18 ✅)
 
 ---
 
@@ -90,13 +120,16 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
 - **R6 — Half-done backend refactor.** ✅ **FIXED (Phase 3)** — all 35 legacy flat controllers migrated
   to `modules/<domain>/`. Services layer is still thin (only `notification.service.ts`) — next step
   is extracting business logic out of controllers into service files.
-- **R7 — Socket.IO won't scale.** No Redis adapter; in-process state. Breaks on >1 instance / ECS.
+- **R7 — Socket.IO won't scale.** ✅ **CODE DONE (Phase 4)** — Redis adapter wired in `websocket.ts`;
+  activates automatically when `REDIS_URL` env var is set. Not activated on EC2 (no Redis instance).
+  Acceptable for graduation project (single instance).
 - **R8 — Device session store is a JSON file** ✅ **FIXED (Phase 3)** — replaced with `DeviceSession`
   Prisma model + async `sessionStore.ts`. Migration applied in production.
 - **R9 — Duplicated chat systems** ✅ **FIXED (Phase 3)** — Firestore removed from mobile app; all chat
   goes through Postgres `Conversation`/`Message` via the consolidated `modules/chat/` backend.
-- **R10 — In-process cron** (`startOverdueChecker`) runs per-instance → duplicate work when scaled.
-  Move to EventBridge Scheduler.
+- **R10 — In-process cron.** ✅ **CODE DONE (Phase 4)** — `startOverdueChecker()` removed from
+  `server.ts`; replaced by `/api/internal/cron/check-overdue` endpoint + `CRON_SECRET` guard.
+  `WeCircleScheduler` CDK stack written. Not activated on EC2 (acceptable for graduation project).
 
 ### 🟡 Medium (cleanliness / migration debt)
 - **R11 — ~22 `fix_*.js` band-aid codemods** ✅ **FIXED (2026-05-30)** — all 23 scripts deleted after
@@ -110,8 +143,9 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
   `ecs-task-definition.json`, `infra/README.md` all updated to Cognito/JWT stack; Supabase vars purged.
 - **R15 — Name drift** ✅ **FIXED (2026-05-30)** — "EduControl" → "WeCircle" in `server.ts`,
   `ai.controller.ts`, `admission.controller.ts`, `zoom.controller.ts`.
-- **R16 — CI/CD weaknesses:** `deploy.yml` SCPs a zip and `sed`/`echo`s secrets into `.env` on the
-  box; no OIDC; no tests/typecheck/lint gate before deploy.
+- **R16 — CI/CD weaknesses.** ✅ **IMPROVED (Phase 4)** — `deploy.yml` now has a `validate` job
+  (typecheck gate) before deploy. OIDC role created in CDK (`WeCircleCompute.DeployRole`) for future
+  use; EC2 path still uses SSH + long-lived keys (acceptable for graduation project).
 
 ### 🟢 Low (polish)
 - **R17 — 23 Flutter `withOpacity` deprecation lints.** ✅ **FIXED (Phase 3A)** — replaced with `.withValues(alpha:)`.
