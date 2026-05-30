@@ -1,6 +1,29 @@
 # WeCircle — Progress Log
 
-Last updated: **2026-05-30** (session 5). Update at the end of every session. Re-verify against code at the start.
+Last updated: **2026-05-30** (session 6). Update at the end of every session. Re-verify against code at the start.
+
+---
+
+## ✅ Done (session 6 — DB backup hardening + Push notifications, 2026-05-30)
+
+1. **DB backup to S3 — live.** Daily `pg_dump` → S3 via cron on EC2 (`infra/aws/setup-db-backup.sh`,
+   `/usr/local/bin/wecircle-db-backup.sh`, 02:00 UTC, keeps 30, STANDARD_IA). Fixes along the way:
+   installed `cronie` on AL2023; stripped Prisma `?schema=public` from `DATABASE_URL` for `pg_dump`;
+   added inline IAM policy **`WeCircle-S3-Backup`** (`s3:PutObject/GetObject/DeleteObject/ListBucket`)
+   to `WeCircle-EC2-Role` — first upload confirmed in `s3://wecircle-storage-1779996505705/db-backups/`.
+2. **Push notifications (FCM) — coded end-to-end, Android.** Graceful no-op until configured.
+   - Backend: `DeviceToken` model + migration `20260530000009`; `services/push.service.ts`
+     (firebase-admin, lazy-init, auto-prunes invalid tokens); `POST`/`DELETE
+     /notifications/mobile/device-token`; push fired from `createNotification`,
+     `sendManualNotification`, and `NotificationService.sendAbsenceAlert`. Env:
+     `FIREBASE_SERVICE_ACCOUNT` / `FIREBASE_SERVICE_ACCOUNT_PATH`.
+   - Mobile: `firebase_core` + `firebase_messaging`; `lib/services/push_service.dart`
+     (init in `main.dart`, register on login, unregister on logout). Gradle `google-services`
+     plugin auto-applies **only** when `android/app/google-services.json` is present, so the build
+     never breaks pre-config.
+   - **Activation (external, no code):** create a free Firebase project → drop `google-services.json`
+     in `mobile/android/app/` → set `FIREBASE_SERVICE_ACCOUNT` on EC2. See
+     `infra/aws/PUSH_NOTIFICATIONS_SETUP.md`. iOS coded but needs Apple Developer account (APNs).
 
 ---
 

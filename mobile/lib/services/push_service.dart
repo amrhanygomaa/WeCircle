@@ -10,6 +10,7 @@ import 'dart:io' show Platform;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:wesal/firebase_options.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,7 +35,7 @@ class PushService {
   /// isn't configured. If a session token already exists, registers the device.
   static Future<void> init() async {
     try {
-      await Firebase.initializeApp();
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
       FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
