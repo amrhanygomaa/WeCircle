@@ -1,41 +1,33 @@
-# ╔══════════════════════════════════════════════════════════════╗
-# ║          WeCircle Backend — Production Dockerfile           ║
-# ╚══════════════════════════════════════════════════════════════╝
-
-# ── Stage 1: Build ──────────────────────────────────────────────
-FROM node:20-alpine AS builder
-
+# ── Stage 1: build (all deps, TypeScript compile, Prisma generate) ──────────
+FROM node:24-alpine AS builder
 WORKDIR /app
 
-# Install dependencies first (layer cache optimization)
-COPY package.json package-lock.json ./
-RUN npm ci --only=production=false
+COPY package*.json ./
+RUN npm ci
 
-# Copy source and compile TypeScript
 COPY . .
-RUN npm run build
+# prisma generate must run while the prisma CLI (dev dep) is available.
+RUN npx prisma generate && npm run build
 
-# ── Stage 2: Production ─────────────────────────────────────────
-FROM node:20-alpine AS production
-
+# ── Stage 2: lean production image ──────────────────────────────────────────
+FROM node:24-alpine AS runner
 WORKDIR /app
 
-# Security: run as non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser  -S nodejs -u 1001
+# Run as non-root for security.
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 
-# Only copy compiled output + prod dependencies
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
-# Generate Prisma client in production image
-RUN npx prisma generate
+# Copy the generated Prisma client (native binaries + JS) from the build stage.
+# The prisma CLI is not available here, so we can't re-run prisma generate.
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 USER nodejs
-
 EXPOSE 5001
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
