@@ -79,3 +79,16 @@ jobs:
             pm2 delete backend 2>/dev/null || true
             pm2 start dist/server.js --name backend
             pm2 save
+
+            # --- Frontend (Next.js server on the same EC2 box, served on :3000) ---
+            cd /opt/wecircle/dashboard/frontend
+            npm ci
+            NEXT_PUBLIC_API_URL=https://api.wecircle.helpers-tech.com/api \
+            NEXT_PUBLIC_AWS_REGION=us-east-1 \
+            NEXT_PUBLIC_COGNITO_USER_POOL_ID=${{ secrets.COGNITO_USER_POOL_ID }} \
+            NEXT_PUBLIC_COGNITO_CLIENT_ID=${{ secrets.COGNITO_CLIENT_ID }} \
+            npm run build
+
+            pm2 delete frontend 2>/dev/null || true
+            pm2 start npm --name frontend -- start
+            pm2 save

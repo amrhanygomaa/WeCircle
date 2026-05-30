@@ -1,6 +1,32 @@
 # WeCircle — Progress Log
 
-Last updated: **2026-05-30** (session 4). Update at the end of every session. Re-verify against code at the start.
+Last updated: **2026-05-30** (session 5). Update at the end of every session. Re-verify against code at the start.
+
+---
+
+## 🔎 Verification audit (session 5 — 2026-05-30)
+
+Re-inspected the code against every claim below. **Verified facts:**
+
+- **CI green** — last 4 `Production Deployment` runs = `success`. Backend auto-deploys to EC2 on
+  every push to `main`; `prisma migrate deploy` runs as part of each deploy.
+- **Builds pass** — CI `validate` gate runs backend `npm run build` (tsc strict) **and** frontend
+  `next build`; both pass. Mobile builds locally (`flutter analyze` → 0 errors).
+- **Dashboard pages: source-complete & wired** — all 36 App Router pages audited; the 34
+  `dashboard/*` pages issue real API calls (305 call-sites across 34 files via
+  `apiClient`/`useQuery`/`fetch`). **None are static placeholders.** They compile; runtime
+  correctness against the live DB was **not** independently re-tested this session.
+- **Migrations** — 8 migration dirs present; all applied to production (`init` resolved-applied,
+  `000002`–`000007` deployed). `_prisma_migrations` clean (no FAILED rows).
+- **AWS live footprint (verified in code + deploy scripts):** EC2 + pm2 (backend), Cognito
+  id-token verify (`auth.ts`) + auto-confirm Lambda, S3 presigned uploads (`storage.controller.ts`,
+  IAM-role creds), SSM Parameter Store for secrets (`ec2-userdata.sh`).
+
+**Gap found & fixed this session — frontend deployment automation.** `deploy.yml` previously
+deployed the **backend only**; after static-export removal in session 4 the frontend needs
+`next start` (server mode) and nothing built/started it. **Fixed:** the `deploy-backend-ec2` job
+now also builds the frontend and runs it via pm2 on the same EC2 box (see R19). One assumption
+still to confirm on the box: a reverse proxy must route the dashboard domain → `localhost:3000`.
 
 ---
 
@@ -59,8 +85,10 @@ project decision: staying on free tier; EC2 + PM2 remains production. The CDK co
 5. **WeCircleCache** (Stack 4) — ElastiCache Redis 7, Socket.IO adapter. *(Not deployed.)*
 6. **WeCircleCdn** (Stack 5) — CloudFront + S3 for Next.js static export. *(Not deployed.)*
 7. **WeCircleScheduler** (Stack 6) — EventBridge + Lambda for hourly overdue-invoice cron. *(Not deployed.)*
-8. **CI restructured** — `deploy.yml` split into 3 jobs: `validate` (typecheck gate) +
-   `deploy-backend-ec2` (every push) + `deploy-frontend-cdn` (manual, OIDC) + `deploy-ecs` (manual).
+8. **CI restructured** — `deploy.yml` now has **2 jobs**: `validate` (typecheck gate: builds both
+   backend and frontend) → `deploy-backend-ec2` (SSH deploy + `prisma migrate deploy`, and — since
+   session 5 — also builds + pm2-starts the frontend on the same box). The CDN/ECS deploy jobs were
+   removed (R16).
 9. **Redis adapter wired** — `websocket.ts` applies `@socket.io/redis-adapter` when `REDIS_URL` is set;
    gracefully falls back to in-process without it. (R7 — code done, activation deferred.)
 10. **EventBridge cron endpoint** — `/api/internal/cron/check-overdue` added; `CRON_SECRET` guards it.
@@ -167,12 +195,29 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
 ---
 
 ## 📌 Known unknowns / open items
+- **R19 — Frontend deployment.** ✅ **FIXED (session 5)** — `deploy.yml`'s `deploy-backend-ec2`
+  job now also builds the frontend (with `NEXT_PUBLIC_*` injected from secrets) and runs it via
+  `pm2 start npm --name frontend -- start` on the same EC2 box. **Assumption to verify on the box:**
+  `next start` listens on **:3000**; production must have a reverse proxy (nginx/ALB) routing the
+  dashboard domain → `localhost:3000`. If the old setup served static files from S3, that S3
+  origin is now stale and the proxy/DNS should point at the EC2 Next.js server instead. Confirm
+  on first deploy after this change.
 - **R12 — build artifact blobs in git history** (~40 MB). Files are untracked/gitignored since
   Phase 1, but the blobs remain in old commits. Removal requires `git filter-repo` + force-push —
   executed in session 4 (see commits). Clone size reduced.
-- **Flutter screens partial audit** — functional screens (parent/teacher/driver dashboards) still
-  contain some hardcoded sample data. Game screens (student1-3 / student4-6) are intentionally
-  static. See session 4 audit results in PROGRESS.md.
+- **Flutter screens — partial API wiring (session 4 audit, 26 functional screens).**
+  - **Wired to real API (8):** `api_service.fetchChildren` → `/parents/mobile/dashboard`;
+    `teacher_dashboard`, `teacher_attendance_screen` → `/teachers/mobile/*` + `/attendance/mobile/bulk`;
+    `driver_dashboard` → `/transport/driver/dashboard`; `student_chatbot_screen` → Gemini
+    `/students/mobile/ai-chat`; `homework_screen` → `/homework/mobile/student/:id`;
+    `fees_screen` → `/invoices/mobile/student/:id`; results + achievements screens.
+  - **Still hardcoded — endpoint EXISTS, wiring pending (3):** `teacher_behavior_report_screen`
+    (`/behavior/mobile`), `teacher_daily_report_screen` (`/daily-reports/mobile`),
+    `parent/behavior_report_screen` (`/behavior/mobile/parent`).
+  - **Still hardcoded — needs new endpoint (≈7):** `teacher_messages_screen`,
+    `teacher_add_grades_screen`, `teacher_students_list_screen`, `parent/bus_tracker_screen` (GPS),
+    `parent/schedule_screen` (timetable), `parent/activities_screen`, `parent/tips_screen` (content).
+  - Game screens (student1-3 / student4-6) are intentionally static.
 - **Phase 4 provisioning** — RDS, ECS, ALB, CloudFront, Cognito, S3, ElastiCache, EventBridge.
   Decision: **not provisioned** — graduation project stays on EC2 + PM2 (free tier). CDK code
   in `infra/cdk/` serves as architectural showcase only.
