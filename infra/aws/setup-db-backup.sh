@@ -28,7 +28,8 @@ APP_DIR="/opt/wecircle"
 ENV_FILE="$APP_DIR/dashboard/backend/.env"
 
 BUCKET=$(grep -oP 'AWS_S3_BUCKET_NAME=\K\S+' "$ENV_FILE")
-DB_URL=$(grep -oP 'DATABASE_URL=\K\S+' "$ENV_FILE")
+# Strip Prisma-only query params (e.g. ?schema=public) that pg_dump doesn't understand
+DB_URL=$(grep -oP "DATABASE_URL=['\"]?\K[^'\"[:space:]]+" "$ENV_FILE" | sed 's/?.*$//')
 DATE=$(date -u +%Y%m%d-%H%M)
 DUMP_FILE="/tmp/wecircle-$DATE.dump"
 
