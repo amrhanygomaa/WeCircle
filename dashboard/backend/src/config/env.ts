@@ -24,4 +24,9 @@ export const env = {
   cognitoClientId: requireEnv("COGNITO_CLIENT_ID"),
   awsRegion: requireEnv("AWS_REGION", "us-east-1"),
   awsS3BucketName: requireEnv("AWS_S3_BUCKET_NAME", "local"),
+  // Optional — when set, the Socket.IO Redis adapter is enabled.
+  // Injected by ECS task definition after WeCircleCache is deployed.
+  redisUrl: process.env.REDIS_URL || null,
+  // Optional — shared secret for the internal EventBridge cron endpoint.
+  cronSecret: process.env.CRON_SECRET || null,
 };

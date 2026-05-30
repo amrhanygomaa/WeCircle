@@ -1,4 +1,6 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
+import { env } from "../config/env";
+import { checkOverdueInvoices } from "../cron/checkOverdueInvoices";
 
 import studentRoutes       from "../modules/student/student.routes";
 import teacherRoutes       from "../modules/teacher/teacher.routes";
@@ -41,6 +43,18 @@ const router = Router();
 
 router.get("/health", (_req, res) => {
   res.json({ success: true, message: "API is healthy" });
+});
+
+// Internal endpoint triggered by the EventBridge Scheduler Lambda (R10).
+// Not behind requireAuth — protected only by the X-Cron-Secret header.
+router.post("/internal/cron/check-overdue", async (req: Request, res: Response) => {
+  const secret = req.headers["x-cron-secret"];
+  if (!env.cronSecret || secret !== env.cronSecret) {
+    res.status(401).json({ success: false, message: "Unauthorized" });
+    return;
+  }
+  await checkOverdueInvoices();
+  res.json({ success: true, message: "Overdue check complete" });
 });
 
 router.use("/auth",            authRoutes);

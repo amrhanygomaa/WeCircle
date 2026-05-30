@@ -6,7 +6,6 @@ import { createServer } from "http";
 import { env } from "./config/env";
 import { errorHandler } from "./core/http/middlewares/errorHandler";
 import { initWebSocket } from "./config/websocket";
-import { startOverdueChecker } from "./cron/checkOverdueInvoices";
 import routes from "./routes";
 
 const app = express();
@@ -39,7 +38,4 @@ httpServer.listen(env.port, () => {
   // eslint-disable-next-line no-console
   console.log(`Server running on http://localhost:${env.port}`);
   console.log(`WebSocket ready on ws://localhost:${env.port}`);
-
-  // Start automatic overdue invoice checker
-  startOverdueChecker();
 });

@@ -46,6 +46,7 @@ interface ComputeStackProps extends cdk.StackProps {
 export class ComputeStack extends cdk.Stack {
   readonly cluster: ecs.Cluster;
   readonly backendEcr: ecr.Repository;
+  readonly alb: elbv2.ApplicationLoadBalancer;
 
   constructor(scope: Construct, id: string, props: ComputeStackProps) {
     super(scope, id, props);
@@ -68,7 +69,7 @@ export class ComputeStack extends cdk.Stack {
     this.cluster = new ecs.Cluster(this, 'Cluster', {
       clusterName: 'wecircle-cluster',
       vpc: props.vpc,
-      containerInsights: true,
+      containerInsightsV2: ecs.ContainerInsights.ENABLED,
     });
 
     // ── CloudWatch log group ──────────────────────────────────────────────
@@ -184,6 +185,13 @@ export class ComputeStack extends cdk.Stack {
         NODE_ENV: 'production',
         PORT:     '5001',
         AWS_REGION: this.region,
+        // Activated after WeCircleCache is deployed:
+        //   1. Set cacheDeployed: true in cdk.json context.
+        //   2. cdk deploy WeCircleCompute  (reads /wecircle/REDIS_URL from SSM).
+        // Backend falls back to in-memory Socket.IO when this env var is absent.
+        ...(this.node.tryGetContext('cacheDeployed') === true && {
+          REDIS_URL: ssm.StringParameter.valueForStringParameter(this, '/wecircle/REDIS_URL'),
+        }),
       },
       secrets: {
         DATABASE_URL:          ecs.Secret.fromSecretsManager(secretDbUrl),
@@ -206,7 +214,7 @@ export class ComputeStack extends cdk.Stack {
     });
 
     // ── Application Load Balancer ─────────────────────────────────────────
-    const alb = new elbv2.ApplicationLoadBalancer(this, 'Alb', {
+    this.alb = new elbv2.ApplicationLoadBalancer(this, 'Alb', {
       loadBalancerName: 'wecircle-backend-alb',
       vpc: props.vpc,
       internetFacing: true,
@@ -240,14 +248,14 @@ export class ComputeStack extends cdk.Stack {
     const certArn = this.node.tryGetContext('certificateArn') as string | undefined;
 
     if (certArn) {
-      alb.addListener('HttpsListener', {
+      this.alb.addListener('HttpsListener', {
         port: 443,
         protocol: elbv2.ApplicationProtocol.HTTPS,
         certificates: [elbv2.ListenerCertificate.fromArn(certArn)],
         defaultTargetGroups: [targetGroup],
         sslPolicy: elbv2.SslPolicy.TLS13_RES,
       });
-      alb.addListener('HttpListener', {
+      this.alb.addListener('HttpListener', {
         port: 80,
         defaultAction: elbv2.ListenerAction.redirect({
           protocol: 'HTTPS',
@@ -257,7 +265,7 @@ export class ComputeStack extends cdk.Stack {
       });
     } else {
       // HTTP-only — suitable for initial validation before cert is issued.
-      alb.addListener('HttpListener', {
+      this.alb.addListener('HttpListener', {
         port: 80,
         defaultTargetGroups: [targetGroup],
       });
@@ -365,7 +373,7 @@ export class ComputeStack extends cdk.Stack {
 
     // ── Stack outputs ─────────────────────────────────────────────────────
     new cdk.CfnOutput(this, 'AlbDnsName', {
-      value: alb.loadBalancerDnsName,
+      value: this.alb.loadBalancerDnsName,
       description: 'Point api.wecircle.helpers-tech.com CNAME here after validation',
     });
     new cdk.CfnOutput(this, 'BackendEcrUri', {

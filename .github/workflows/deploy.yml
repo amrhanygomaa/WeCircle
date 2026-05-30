@@ -63,44 +63,36 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Build Frontend
+      - name: Build Frontend (static export)
         run: |
           cd dashboard/frontend
           npm ci
           npm run build
-          zip -r ../../frontend_build.zip .next public package.json package-lock.json next.config.mjs
         env:
           NEXT_PUBLIC_API_URL: https://api.wecircle.helpers-tech.com/api
           NEXT_PUBLIC_AWS_REGION: us-east-1
           NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
           NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
 
-      - name: Configure SSH Key
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Deploy Frontend to S3 + invalidate CloudFront
         run: |
-          mkdir -p ~/.ssh/
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Deploy Frontend to EC2
-        run: |
-          scp -i ~/.ssh/id_rsa frontend_build.zip ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/frontend_build.zip
-          ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} 'bash -s' << 'ENDSSH'
-          cd /home/ec2-user/wecircle-frontend
-          unzip -o /home/ec2-user/frontend_build.zip
-          npm install --production --ignore-scripts
-
-          # Delete ONLY frontend processes (loop to catch duplicates)
-          while pm2 delete frontend 2>/dev/null; do echo "deleted a frontend process"; done
-          # Kill anything still holding port 3000
-          fuser -k 3000/tcp 2>/dev/null || true
-          sleep 2
-
-          # Start fresh single frontend instance
-          pm2 start npm --name frontend -- start
-          pm2 save
-          pm2 list
-          ENDSSH
+          aws s3 sync dashboard/frontend/out/ s3://${{ secrets.FRONTEND_S3_BUCKET }} \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "*.html"
+          aws s3 sync dashboard/frontend/out/ s3://${{ secrets.FRONTEND_S3_BUCKET }} \
+            --delete \
+            --cache-control "no-cache" \
+            --include "*.html"
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
 
 
       - name: Deploy Backend to EC2

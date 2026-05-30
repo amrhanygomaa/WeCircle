@@ -3,6 +3,23 @@ import { Server, Socket } from "socket.io";
 import { env } from "./env";
 import { prisma } from "./prisma";
 
+// Redis adapter is loaded conditionally — only when REDIS_URL is set.
+// This keeps the local dev setup (no Redis required) and production (Redis) in sync.
+async function applyRedisAdapter(io: Server): Promise<void> {
+  if (!env.redisUrl) return;
+  try {
+    const { createClient } = await import("ioredis") as any;
+    const { createAdapter } = await import("@socket.io/redis-adapter") as any;
+    const pubClient = createClient(env.redisUrl, { lazyConnect: true, tls: env.redisUrl.startsWith("rediss://") ? {} : undefined });
+    const subClient = pubClient.duplicate();
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    io.adapter(createAdapter(pubClient, subClient));
+    console.log("[WS] Redis adapter active — multi-instance Socket.IO enabled");
+  } catch (err) {
+    console.error("[WS] Redis adapter failed to connect, falling back to in-memory:", err);
+  }
+}
+
 let io: Server;
 
 /**
@@ -20,6 +37,9 @@ export function initWebSocket(httpServer: HttpServer): Server {
     },
     transports: ["websocket", "polling"]
   });
+
+  // Apply the Redis pub/sub adapter asynchronously so startup is never blocked.
+  applyRedisAdapter(io);
 
   io.on("connection", (socket: Socket) => {
     const schoolId = socket.handshake.query.schoolId as string | undefined;
