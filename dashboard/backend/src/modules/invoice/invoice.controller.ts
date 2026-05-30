@@ -1,10 +1,15 @@
 ﻿import { Request, Response } from "express";
-import { FeeType, PaymentMethod, InvoiceStatus } from "@prisma/client";
+import { FeeType, PaymentMethod } from "@prisma/client";
 import { prisma } from "../../config/prisma";
 import { z } from "zod";
 import { asyncHandler } from "../../core/utils/asyncHandler";
 import { ValidationError, NotFoundError } from "../../core/utils/AppError";
 import { requireSid } from "../../core/utils/tenant";
+import {
+  recordPayment,
+  applyInvoiceDiscount,
+  setStudentAndParentCredentials,
+} from "./invoice.service";
 
 /** GET /api/invoices — List all invoices for the school */
 export const getInvoices = asyncHandler(async (req: Request, res: Response) => {
@@ -141,84 +146,8 @@ export const payInvoice = asyncHandler(async (req: Request, res: Response) => {
     notes: z.string().optional(),
   }).parse(req.body);
 
-  const invoice = await prisma.invoice.findFirst({
-    where: { id: id as string, schoolId: schoolId as string }
-  });
-
-  if (!invoice) throw new NotFoundError("Invoice not found");
-
-  // Create payment record
-  const payment = await prisma.payment.create({
-    data: {
-      schoolId: schoolId as string,
-      studentId: invoice.studentId,
-      invoiceId: invoice.id,
-      amount,
-      feeType: invoice.feeType,
-      paymentMethod: method ?? PaymentMethod.CASH,
-      status: "PAID",
-      notes,
-      paidAt: new Date(),
-    }
-  });
-
-  // Calculate total paid
-  const allPayments = await prisma.payment.findMany({ where: { invoiceId: invoice.id, status: "PAID" } });
-  const totalPaid = allPayments.reduce((acc, curr) => acc + Number(curr.amount), 0);
-
-  const originalTotal = Number(invoice.totalAmount);
-  const discount = Number(invoice.discount);
-  const netRequired = originalTotal - discount;
-  const newRemaining = Math.max(0, netRequired - totalPaid);
-
-  // Update invoice status
-  let newStatus: InvoiceStatus = "UNPAID";
-  if (totalPaid >= netRequired && netRequired > 0) newStatus = "PAID";
-  else if (totalPaid > 0) newStatus = "PARTIAL";
-  else if (netRequired === 0) newStatus = "PAID";
-
-  await prisma.invoice.update({
-    where: { id: invoice.id },
-    data: {
-      status: newStatus,
-      paid: totalPaid,
-      remaining: newRemaining,
-    }
-  });
-
-  // Auto re-enable credentials when invoice is fully paid
-  if (newStatus === "PAID") {
-    const fullInvoice = await prisma.invoice.findFirst({
-      where: { id: invoice.id },
-      include: { student: { include: { father: true, mother: true, guardian: true } } }
-    });
-
-    if (fullInvoice) {
-      // Re-enable student credentials
-      await prisma.appCredential.updateMany({
-        where: { studentId: fullInvoice.studentId },
-        data: { isActive: true }
-      });
-
-      // Re-enable parent credentials
-      const parentIds = [
-        fullInvoice.student.father?.id,
-        fullInvoice.student.mother?.id,
-        fullInvoice.student.guardian?.id
-      ].filter(Boolean) as string[];
-
-      if (parentIds.length > 0) {
-        await prisma.appCredential.updateMany({
-          where: { parentId: { in: parentIds } },
-          data: { isActive: true }
-        });
-      }
-
-      console.log(`[AUTO] Credentials re-enabled for student ${fullInvoice.studentId} after full payment.`);
-    }
-  }
-
-  res.json({ success: true, payment, invoiceStatus: newStatus });
+  const result = await recordPayment(id, schoolId, amount, method, notes);
+  res.json({ success: true, ...result });
 });
 
 /** DELETE /api/invoices/:id — Delete an invoice */
@@ -244,44 +173,11 @@ export const applyDiscount = asyncHandler(async (req: Request, res: Response) =>
   const id = req.params.id as string;
   const schoolId = requireSid(req);
   const { discountAmount, discountPercentage } = z.object({
-    discountAmount: z.coerce.number().min(0).optional(),
+    discountAmount:    z.coerce.number().min(0).optional(),
     discountPercentage: z.coerce.number().min(0).max(100).optional(),
   }).parse(req.body);
 
-  const invoice = await prisma.invoice.findFirst({
-    where: { id: id as string, schoolId: schoolId as string }
-  });
-
-  if (!invoice) throw new NotFoundError("Invoice not found");
-
-  let finalDiscount = Number(invoice.discount);
-  
-  if (discountPercentage !== undefined) {
-    finalDiscount = (Number(invoice.totalAmount) * discountPercentage) / 100;
-  } else if (discountAmount !== undefined) {
-    finalDiscount = discountAmount;
-  }
-
-  const totalPaid = Number(invoice.paid);
-  const originalTotal = Number(invoice.totalAmount);
-  const newRemaining = Math.max(0, originalTotal - finalDiscount - totalPaid);
-  
-  let newStatus: InvoiceStatus = "UNPAID";
-  const netRequired = originalTotal - finalDiscount;
-  
-  if (totalPaid >= netRequired && netRequired > 0) newStatus = "PAID";
-  else if (totalPaid > 0) newStatus = "PARTIAL";
-  else if (netRequired === 0) newStatus = "PAID"; // Fully discounted
-
-  const updated = await prisma.invoice.update({
-    where: { id: invoice.id },
-    data: {
-      discount: finalDiscount,
-      remaining: newRemaining,
-      status: newStatus
-    }
-  });
-
+  const updated = await applyInvoiceDiscount(id, schoolId, discountAmount, discountPercentage);
   res.json({ success: true, data: updated });
 });
 
@@ -300,33 +196,12 @@ export const toggleInvoiceAccess = asyncHandler(async (req: Request, res: Respon
 
   if (!invoice) throw new NotFoundError("Invoice not found");
 
-  // Update Student Credentials
-  const studentResult = await prisma.appCredential.updateMany({
-    where: { studentId: invoice.studentId },
-    data: { isActive }
-  });
+  const { studentCount, parentCount } = await setStudentAndParentCredentials(invoice.studentId, isActive);
 
-  // Update Parent Credentials (all linked types)
-  const parentIds = [
-    invoice.student.father?.id,
-    invoice.student.mother?.id,
-    invoice.student.guardian?.id
-  ].filter(Boolean) as string[];
-
-  let parentResult = { count: 0 };
-  if (parentIds.length > 0) {
-    parentResult = await prisma.appCredential.updateMany({
-      where: { parentId: { in: parentIds } },
-      data: { isActive }
-    });
-  }
-
-  console.log(`Updated Access: ${isActive}. Students: ${studentResult.count}, Parents: ${parentResult.count}`);
-
-  res.json({ 
-    success: true, 
-    message: `Account access ${isActive ? 'enabled' : 'disabled'} for student and linked parents.`,
-    updatedCount: studentResult.count + parentResult.count
+  res.json({
+    success: true,
+    message: `Account access ${isActive ? "enabled" : "disabled"} for student and linked parents.`,
+    updatedCount: studentCount + parentCount,
   });
 });
 
