@@ -71,6 +71,7 @@ jobs:
 
             echo 'UPDATE "Notification" SET "recipientId" = NULL WHERE "recipientId" IS NOT NULL AND "recipientId" NOT IN (SELECT id FROM "User");' | npx prisma db execute --stdin
             npx prisma migrate resolve --applied "20260529000000_init" 2>&1 || true
+            npx prisma migrate resolve --rolled-back "20260530000003_drop_admin_enum" 2>&1 || true
             npx prisma migrate deploy
 
             npm run build

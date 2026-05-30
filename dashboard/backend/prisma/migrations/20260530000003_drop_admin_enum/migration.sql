@@ -22,8 +22,14 @@ CREATE TYPE "Role" AS ENUM (
   'PARENT'
 );
 
--- Step 3: Migrate the column to the new enum type
+-- Step 3: Drop the column DEFAULT before changing type (Postgres can't auto-cast it)
+ALTER TABLE "User" ALTER COLUMN "role" DROP DEFAULT;
+
+-- Step 4: Migrate the column to the new enum type
 ALTER TABLE "User" ALTER COLUMN "role" TYPE "Role" USING "role"::text::"Role";
 
--- Step 4: Drop the old enum
+-- Step 5: Restore the DEFAULT using the new enum type
+ALTER TABLE "User" ALTER COLUMN "role" SET DEFAULT 'STUDENT'::"Role";
+
+-- Step 6: Drop the old enum
 DROP TYPE "Role_old";
