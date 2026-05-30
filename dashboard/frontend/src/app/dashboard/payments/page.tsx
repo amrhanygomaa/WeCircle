@@ -110,7 +110,7 @@ export default function PaymentsPage() {
     { label: isAr ? "إجمالي التحصيل" : "Total Collected", value: `EGP ${ov?.totalRevenue?.toLocaleString() ?? "0"}`, icon: CheckCircle, accent: "#10b981" },
     { label: isAr ? "رسوم معلقة" : "Pending Fees", value: `EGP ${ov?.pendingFeesAmount?.toLocaleString() ?? "0"}`, icon: Clock, accent: "#f59e0b" },
     { label: isAr ? "فواتير صادرة" : "Invoices Issued", value: ov?.pendingFeesCount ?? "0", icon: FileText, accent: "#3b82f6" },
-    { label: isAr ? "نسبة التحصيل" : "Collection Rate", value: "84%", icon: ArrowUpRight, accent: "#8b5cf6" }
+    { label: isAr ? "نسبة التحصيل" : "Collection Rate", value: (() => { const total = (ov?.totalRevenue ?? 0) + (ov?.pendingFeesAmount ?? 0); return total > 0 ? `${Math.round((ov!.totalRevenue / total) * 100)}%` : "0%"; })(), icon: ArrowUpRight, accent: "#8b5cf6" }
   ];
 
   const handleExport = () => {
