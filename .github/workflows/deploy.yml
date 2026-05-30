@@ -13,7 +13,7 @@ on:
         required: true
         default: 'ec2'
         type: choice
-        options: [ec2, ecs, both]
+        options: [ec2, ecs, cdn, both]
 
 jobs:
   validate:
@@ -47,21 +47,65 @@ jobs:
           NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
           NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
 
-  # ── EC2 deploy (current production path — remove after Phase 5 cutover) ────
-  deploy:
-    name: Build & Deploy to EC2
+  # ── EC2 backend deploy (current production — runs on every push to main) ───
+  # Remove this job after Phase 5 ECS cutover.
+  deploy-backend-ec2:
+    name: Deploy Backend to EC2
     runs-on: ubuntu-latest
     needs: validate
-    # Run on every push to main OR when deploy_target is ec2/both.
     if: github.event_name == 'push' || inputs.deploy_target == 'ec2' || inputs.deploy_target == 'both'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Deploy Backend to EC2
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          node-version: '20'
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /opt/wecircle
+            sudo chown -R ec2-user:ec2-user /opt/wecircle
+            git pull origin main
+
+            cd dashboard/backend
+
+            # Inject secrets from GitHub into server .env
+            sed -i '/^JWT_SECRET=/d' .env 2>/dev/null || true
+            sed -i '/^COGNITO_USER_POOL_ID=/d' .env 2>/dev/null || true
+            sed -i '/^COGNITO_CLIENT_ID=/d' .env 2>/dev/null || true
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+            echo "COGNITO_USER_POOL_ID=${{ secrets.COGNITO_USER_POOL_ID }}" >> .env
+            echo "COGNITO_CLIENT_ID=${{ secrets.COGNITO_CLIENT_ID }}" >> .env
+
+            npm ci --only=production=false
+            npx prisma generate
+
+            echo 'UPDATE "Notification" SET "recipientId" = NULL WHERE "recipientId" IS NOT NULL AND "recipientId" NOT IN (SELECT id FROM "User");' | npx prisma db execute --stdin
+            npx prisma migrate resolve --applied "20260529000000_init" 2>&1 || true
+            npx prisma migrate deploy
+
+            npm run build
+
+            pm2 delete backend 2>/dev/null || true
+            pm2 start dist/server.js --name backend
+            pm2 save
+
+  # ── CDN frontend deploy (S3 + CloudFront — manual only until CDK stacks live) ─
+  # Requires: AWS_ROLE_ARN, FRONTEND_S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID
+  # These come from CDK outputs after running cdk deploy WeCircleCompute/WeCircleCdn.
+  # After Phase 5 cutover, change the if-condition to also trigger on 'push'.
+  deploy-frontend-cdn:
+    name: Deploy Frontend to CDN
+    runs-on: ubuntu-latest
+    needs: validate
+    if: inputs.deploy_target == 'cdn' || inputs.deploy_target == 'both'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Build Frontend (static export)
         run: |
@@ -80,12 +124,14 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Deploy Frontend to S3 + invalidate CloudFront
+      - name: Sync to S3 + invalidate CloudFront
         run: |
+          # Long-lived assets (JS/CSS with content hashes) — immutable cache
           aws s3 sync dashboard/frontend/out/ s3://${{ secrets.FRONTEND_S3_BUCKET }} \
             --delete \
             --cache-control "public, max-age=31536000, immutable" \
             --exclude "*.html"
+          # HTML pages — no cache so users always get the latest routing
           aws s3 sync dashboard/frontend/out/ s3://${{ secrets.FRONTEND_S3_BUCKET }} \
             --delete \
             --cache-control "no-cache" \
@@ -93,47 +139,6 @@ jobs:
           aws cloudfront create-invalidation \
             --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
-
-
-      - name: Deploy Backend to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /opt/wecircle
-            sudo chown -R ec2-user:ec2-user /opt/wecircle
-            git pull origin main
-            
-            cd dashboard/backend
-            
-            # Securely inject Cognito pool IDs and JWT secrets from GitHub secrets into server .env
-            sed -i '/^JWT_SECRET=/d' .env 2>/dev/null || true
-            sed -i '/^COGNITO_USER_POOL_ID=/d' .env 2>/dev/null || true
-            sed -i '/^COGNITO_CLIENT_ID=/d' .env 2>/dev/null || true
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-            echo "COGNITO_USER_POOL_ID=${{ secrets.COGNITO_USER_POOL_ID }}" >> .env
-            echo "COGNITO_CLIENT_ID=${{ secrets.COGNITO_CLIENT_ID }}" >> .env
-            
-            npm ci --only=production=false
-            npx prisma generate
-
-            # Pre-migration: NULL out Notification.recipientId rows that point to deleted Users.
-            # Prevents the FK constraint addition in phase2_additions from failing on dirty data.
-            echo 'UPDATE "Notification" SET "recipientId" = NULL WHERE "recipientId" IS NOT NULL AND "recipientId" NOT IN (SELECT id FROM "User");' | npx prisma db execute --stdin
-
-            # Baseline the init migration on first deploy (no-op if already recorded).
-            npx prisma migrate resolve --applied "20260529000000_init" 2>&1 || true
-
-            # Apply all pending incremental migrations (idempotent).
-            npx prisma migrate deploy
-
-            npm run build
-
-            pm2 delete backend 2>/dev/null || true
-            pm2 start dist/server.js --name backend
-            pm2 save
 
   # ── ECS deploy (Phase 4+ path — becomes the only deploy after Phase 5 cutover) ──
   # Prerequisites before first run:
