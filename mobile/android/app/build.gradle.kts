@@ -42,3 +42,11 @@ android {
 flutter {
     source = "../.."
 }
+
+// Enable FCM push only when Firebase is configured. The Google Services plugin
+// requires android/app/google-services.json — applying it unconditionally would
+// break the build before Firebase is set up. Drop the file in to activate push.
+// See infra/aws/PUSH_NOTIFICATIONS_SETUP.md.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}

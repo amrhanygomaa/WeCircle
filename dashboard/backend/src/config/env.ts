@@ -37,4 +37,10 @@ export const env = {
   // Default: Amazon Nova 2 Lite — multimodal reasoning model geared towards agentic workflows
   // (Text-to-Text, supports tool use), on-demand in us-east-1. Released 2025-12-02.
   bedrockModelId: process.env.BEDROCK_MODEL_ID || "amazon.nova-2-lite-v1:0",
+  // Optional — Firebase service-account JSON (stringified) for FCM push notifications.
+  // When unset, the push service is a graceful no-op (DB + WebSocket notifications still work).
+  // Provide the full service-account key JSON as a single-line string, or a path via
+  // FIREBASE_SERVICE_ACCOUNT_PATH. See infra/aws/PUSH_NOTIFICATIONS_SETUP.md.
+  firebaseServiceAccount: process.env.FIREBASE_SERVICE_ACCOUNT || null,
+  firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || null,
 };

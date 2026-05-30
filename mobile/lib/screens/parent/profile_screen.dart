@@ -14,6 +14,7 @@
 import 'package:flutter/material.dart'; // استيراد مكتبة فلاتر الأساسية للواجهات
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // استيراد مكتبة التحكم في أحجام الشاشة
 import 'package:wesal/core/state/state_manager.dart'; // استيراد مدير الحالة
+import 'package:wesal/services/push_service.dart';
 import '../../widgets/wesal_background.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -502,7 +503,12 @@ class _LogoutButton extends StatelessWidget {
         border: Border.all(color: Colors.redAccent.withValues(alpha: 0.1)),
       ),
       child: ListTile(
-        onTap: () => Navigator.pushReplacementNamed(context, '/login'),
+        onTap: () async {
+          // Stop receiving pushes on this device before leaving the session.
+          await PushService.unregister();
+          if (!context.mounted) return;
+          Navigator.pushReplacementNamed(context, '/login');
+        },
         leading: Icon(
           Icons.logout_rounded,
           color: Colors.redAccent,

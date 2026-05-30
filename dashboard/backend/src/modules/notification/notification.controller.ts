@@ -6,6 +6,7 @@ import { asyncHandler } from "../../core/utils/asyncHandler";
 import { ForbiddenError } from "../../core/utils/AppError";
 import { requireSid } from "../../core/utils/tenant";
 import { getIO } from "../../config/websocket";
+import { sendPushToUser } from "../../services/push.service";
 
 async function getRealUserId(req: Request): Promise<string | null> {
   const role = req.user?.role;
@@ -120,6 +121,12 @@ export const sendManualNotification = asyncHandler(async (req: Request, res: Res
   const io = getIO();
   if (hasRecipient) {
     io.to(`user:${payload.recipientId}`).emit("notification:new", notification);
+    // Fire-and-forget push (no-op if push disabled or recipient has no devices)
+    void sendPushToUser(payload.recipientId, {
+      title: notification.title,
+      body: notification.message,
+      data: { type: String(notification.type), notificationId: notification.id },
+    });
   } else {
     io.to(`school:${schoolId}`).emit("notification:system", notification);
   }
@@ -147,6 +154,64 @@ export const deleteNotification = asyncHandler(async (req: Request, res: Respons
   res.json({ success: true });
 });
 
+/**
+ * Resolve a mobile AppCredential.id (req.user.id) to the underlying User.id.
+ * Mobile users (student/teacher/parent/driver/supervisor) each link to a User
+ * via their entity. Notifications + device tokens key off User.id.
+ */
+async function resolveMobileUserId(appCredentialId: string): Promise<string | null> {
+  const cred = await prisma.appCredential.findUnique({
+    where: { id: appCredentialId },
+    include: { teacher: true, parent: true, student: true, driver: true, supervisor: true },
+  });
+  if (!cred) return null;
+  return (
+    cred.teacher?.userId ??
+    cred.parent?.userId ??
+    cred.student?.userId ??
+    cred.driver?.userId ??
+    cred.supervisor?.userId ??
+    null
+  );
+}
+
+// POST /notifications/mobile/device-token  — register/refresh this device's FCM token
+export const registerDeviceToken = asyncHandler(async (req: Request, res: Response) => {
+  const appCredentialId = req.user?.id;
+  const schoolId = req.schoolId ?? null;
+  if (!appCredentialId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { token, platform } = z
+    .object({
+      token: z.string().min(10),
+      platform: z.enum(["android", "ios"]).optional(),
+    })
+    .parse(req.body);
+
+  const userId = await resolveMobileUserId(appCredentialId);
+  if (!userId) {
+    return res.status(404).json({ success: false, message: "User not found for this account" });
+  }
+
+  // Upsert by unique token: re-register moves the token to the current user/device.
+  await prisma.deviceToken.upsert({
+    where: { token },
+    create: { token, userId, schoolId, platform: platform ?? "android" },
+    update: { userId, schoolId, platform: platform ?? "android", lastUsedAt: new Date() },
+  });
+
+  res.json({ success: true });
+});
+
+// DELETE /notifications/mobile/device-token  — unregister on logout
+export const unregisterDeviceToken = asyncHandler(async (req: Request, res: Response) => {
+  const { token } = z.object({ token: z.string().min(10) }).parse(req.body);
+  await prisma.deviceToken.deleteMany({ where: { token } });
+  res.json({ success: true });
+});
+
 export async function createNotification(params: {
   schoolId: string;
   recipientId: string | null | undefined;
@@ -169,6 +234,11 @@ export async function createNotification(params: {
   const io = getIO();
   if (params.recipientId) {
     io.to(`user:${params.recipientId}`).emit("notification:new", notification);
+    void sendPushToUser(params.recipientId, {
+      title: notification.title,
+      body: notification.message,
+      data: { type: String(notification.type), notificationId: notification.id },
+    });
   } else {
     io.to(`school:${params.schoolId}`).emit("notification:system", notification);
   }

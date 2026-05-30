@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:wesal/core/theme/app_theme.dart';
 import 'package:wesal/core/state/state_manager.dart';
+import 'package:wesal/services/push_service.dart';
 import 'package:wesal/screens/splash_screen.dart';
 import 'package:wesal/screens/login_screen.dart';
 import 'package:wesal/screens/onboarding_screen.dart';
@@ -65,6 +66,9 @@ void main() async {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
+
+  // Push notifications (FCM). No-op until Firebase is configured — never blocks startup.
+  await PushService.init();
 
   runApp(const WesalApp());
 }

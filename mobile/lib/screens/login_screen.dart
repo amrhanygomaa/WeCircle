@@ -20,6 +20,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wesal/core/config/api_config.dart';
 import 'package:wesal/core/state/state_manager.dart';
+import 'package:wesal/services/push_service.dart';
 
 class LoginScreen extends StatefulWidget { // تعريف كلاس شاشة تسجيل الدخول
   const LoginScreen({super.key}); // مشيد الكلاس
@@ -142,6 +143,9 @@ class _LoginScreenState extends State<LoginScreen> { // كلاس حالة شاش
       await prefs.setString('mobile_entity_id', entityId);
       await prefs.setString('mobile_role', role);
       await prefs.setString('mobile_user_id', (user['id'] as String?) ?? '');
+
+      // Register this device for push notifications (no-op if Firebase not configured).
+      await PushService.registerToken();
 
       if (!mounted) return;
       setState(() => _isLoading = false);

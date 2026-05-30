@@ -1,6 +1,7 @@
 import { prisma } from "../config/prisma";
 import { getIO } from "../config/websocket";
 import { NotificationType, NotificationChannel } from "@prisma/client";
+import { sendPushToUser } from "./push.service";
 
 export class NotificationService {
   /**
@@ -39,10 +40,19 @@ export class NotificationService {
     // Also notify the school admins/dashboard
     io.to(`school:${schoolId}`).emit("notification:system", notification);
 
-    // 3. Placeholder for SMS/WhatsApp
+    // 3. Push notification (FCM) — no-op if push disabled or recipient has no devices
+    if (recipientUserId) {
+      void sendPushToUser(recipientUserId, {
+        title,
+        body: message,
+        data: { type: "ABSENCE", notificationId: notification.id },
+      });
+    }
+
+    // 4. Placeholder for SMS/WhatsApp
     // TODO: Integrate with external SMS/WhatsApp gateway if settings.smsEnabled is true
-    console.log(`[NotificationService] Absence alert queued for ${studentName} via System/WebSocket`);
-    
+    console.log(`[NotificationService] Absence alert queued for ${studentName} via System/WebSocket/Push`);
+
     return notification;
   }
 }

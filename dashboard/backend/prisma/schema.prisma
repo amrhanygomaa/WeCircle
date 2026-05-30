@@ -281,6 +281,7 @@ model User {
   aiChatMessages AiChatMessage[]
   notifications  Notification[]
   messages       Message[]
+  deviceTokens   DeviceToken[]
 
   @@index([schoolId])
   @@index([email, schoolId])
@@ -1215,6 +1216,24 @@ model Notification {
 
   @@index([schoolId])
   @@index([recipientId])
+}
+
+// Push notification registration tokens (FCM). One row per device per user.
+// Registered from the mobile app after login; pruned when FCM reports the token invalid.
+model DeviceToken {
+  id         String   @id @default(uuid())
+  userId     String // resolved User.id (mobile users authenticate via AppCredential)
+  token      String   @unique // FCM registration token
+  platform   String   @default("android") // android | ios
+  schoolId   String?
+  lastUsedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([schoolId])
 }
 
 // ============================================================
