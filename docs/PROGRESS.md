@@ -1,6 +1,6 @@
 # WeCircle — Progress Log
 
-Last updated: **2026-05-30** (session 2). Update at the end of every session. Re-verify against code at the start.
+Last updated: **2026-05-30** (session 3). Update at the end of every session. Re-verify against code at the start.
 
 ---
 
@@ -108,18 +108,17 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
 - **R1 — Auth backdoor.** ✅ **FIXED (Phase 1)** — endpoint removed.
 - **R2 — Hardcoded fallback JWT secret.** ✅ **FIXED (Phase 1)** — `requireEnv` strict, no fallback.
 - **R3 — `aws_config.txt` committed.** ✅ **FIXED (Phase 1)** — untracked + gitignored; `ALLOWED_ORIGINS` env var.
-- **R4 — `/auth/cognito-sync`** ✅ **FIXED (2026-05-30)** — two vulnerabilities closed:
-  (a) `auto-confirm` Lambda no longer sets `autoVerifyEmail=true`; real Cognito email verification
-  now enforced. **Action required: redeploy the Lambda from `infra/lambda/auto-confirm/index.mjs`
-  before Phase 5 cutover** — the code is fixed but the running Lambda on AWS still has the old logic.
+- **R4 — `/auth/cognito-sync`** ✅ **FULLY FIXED (2026-05-30)** — two vulnerabilities closed:
+  (a) `auto-confirm` Lambda deployed to AWS as `WeCircle-AutoConfirm` and attached to Cognito
+  pre-signup trigger. No longer sets `autoVerifyEmail=true`.
   (b) `cognitoSync` now rejects tokens with `email_verified !== true` and always creates new users
   as PARENT — `custom:role` attribute in token is no longer trusted for elevated roles.
 
 ### 🟠 High (stability / architecture)
 - **R5 — No DB migrations.** ✅ **FIXED (Phase 2)** — `prisma/migrations/` established with baseline + Phase 2 additions.
-- **R6 — Half-done backend refactor.** ✅ **FIXED (Phase 3)** — all 35 legacy flat controllers migrated
-  to `modules/<domain>/`. Services layer is still thin (only `notification.service.ts`) — next step
-  is extracting business logic out of controllers into service files.
+- **R6 — Half-done backend refactor.** ✅ **FIXED (Phase 3+session 3)** — all 35 legacy flat controllers
+  migrated to `modules/<domain>/`. `invoice.service.ts` added (payment calc, discount logic,
+  credential toggling). Express `Request` interface fully typed — eliminated all `(req as any)` casts.
 - **R7 — Socket.IO won't scale.** ✅ **CODE DONE (Phase 4)** — Redis adapter wired in `websocket.ts`;
   activates automatically when `REDIS_URL` env var is set. Not activated on EC2 (no Redis instance).
   Acceptable for graduation project (single instance).
@@ -143,9 +142,9 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
   `ecs-task-definition.json`, `infra/README.md` all updated to Cognito/JWT stack; Supabase vars purged.
 - **R15 — Name drift** ✅ **FIXED (2026-05-30)** — "EduControl" → "WeCircle" in `server.ts`,
   `ai.controller.ts`, `admission.controller.ts`, `zoom.controller.ts`.
-- **R16 — CI/CD weaknesses.** ✅ **IMPROVED (Phase 4)** — `deploy.yml` now has a `validate` job
-  (typecheck gate) before deploy. OIDC role created in CDK (`WeCircleCompute.DeployRole`) for future
-  use; EC2 path still uses SSH + long-lived keys (acceptable for graduation project).
+- **R16 — CI/CD weaknesses.** ✅ **FIXED (Phase 4 + session 3)** — `deploy.yml` simplified to
+  EC2-only (CDN/ECS jobs removed — no missing-secret warnings). `validate` typecheck gate runs
+  before every deploy. OIDC CDK role exists for future use.
 
 ### 🟢 Low (polish)
 - **R17 — 23 Flutter `withOpacity` deprecation lints.** ✅ **FIXED (Phase 3A)** — replaced with `.withValues(alpha:)`.

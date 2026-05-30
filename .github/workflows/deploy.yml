@@ -4,16 +4,6 @@ on:
   push:
     branches:
       - main
-  # Manual trigger — used to deploy to ECS (Phase 4+) before Phase 5 cutover.
-  # After cutover: remove workflow_dispatch and the EC2 deploy job; keep ECS only.
-  workflow_dispatch:
-    inputs:
-      deploy_target:
-        description: 'Deploy target'
-        required: true
-        default: 'ec2'
-        type: choice
-        options: [ec2, ecs, cdn, both]
 
 jobs:
   validate:
@@ -47,13 +37,10 @@ jobs:
           NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
           NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
 
-  # ── EC2 backend deploy (current production — runs on every push to main) ───
-  # Remove this job after Phase 5 ECS cutover.
   deploy-backend-ec2:
     name: Deploy Backend to EC2
     runs-on: ubuntu-latest
     needs: validate
-    if: github.event_name == 'push' || inputs.deploy_target == 'ec2' || inputs.deploy_target == 'both'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -91,98 +78,3 @@ jobs:
             pm2 delete backend 2>/dev/null || true
             pm2 start dist/server.js --name backend
             pm2 save
-
-  # ── CDN frontend deploy (S3 + CloudFront — manual only until CDK stacks live) ─
-  # Requires: AWS_ROLE_ARN, FRONTEND_S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID
-  # These come from CDK outputs after running cdk deploy WeCircleCompute/WeCircleCdn.
-  # After Phase 5 cutover, change the if-condition to also trigger on 'push'.
-  deploy-frontend-cdn:
-    name: Deploy Frontend to CDN
-    runs-on: ubuntu-latest
-    needs: validate
-    if: inputs.deploy_target == 'cdn' || inputs.deploy_target == 'both'
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Frontend (static export)
-        run: |
-          cd dashboard/frontend
-          npm ci
-          npm run build
-        env:
-          NEXT_PUBLIC_API_URL: https://api.wecircle.helpers-tech.com/api
-          NEXT_PUBLIC_AWS_REGION: us-east-1
-          NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
-          NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Sync to S3 + invalidate CloudFront
-        run: |
-          # Long-lived assets (JS/CSS with content hashes) — immutable cache
-          aws s3 sync dashboard/frontend/out/ s3://${{ secrets.FRONTEND_S3_BUCKET }} \
-            --delete \
-            --cache-control "public, max-age=31536000, immutable" \
-            --exclude "*.html"
-          # HTML pages — no cache so users always get the latest routing
-          aws s3 sync dashboard/frontend/out/ s3://${{ secrets.FRONTEND_S3_BUCKET }} \
-            --delete \
-            --cache-control "no-cache" \
-            --include "*.html"
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
-
-  # ── ECS deploy (Phase 4+ path — becomes the only deploy after Phase 5 cutover) ──
-  # Prerequisites before first run:
-  #   1. Deploy CDK stacks: cdk deploy --all (from infra/cdk/)
-  #   2. Add AWS_ROLE_ARN secret to GitHub (value from CDK output DeployRoleArn)
-  #   3. Ensure the GitHub OIDC provider exists in your AWS account (see compute-stack.ts)
-  #   4. Remove the long-lived AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY secrets from GitHub
-  deploy-ecs:
-    name: Build & Deploy to ECS
-    runs-on: ubuntu-latest
-    needs: validate
-    if: inputs.deploy_target == 'ecs' || inputs.deploy_target == 'both'
-    permissions:
-      id-token: write   # Required for OIDC token generation
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (OIDC — no long-lived keys)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Login to Amazon ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build and push backend image
-        env:
-          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build \
-            -t $ECR_REGISTRY/wecircle-backend:$IMAGE_TAG \
-            -t $ECR_REGISTRY/wecircle-backend:latest \
-            ./dashboard/backend
-          docker push $ECR_REGISTRY/wecircle-backend:$IMAGE_TAG
-          docker push $ECR_REGISTRY/wecircle-backend:latest
-
-      - name: Force ECS rolling deployment
-        run: |
-          aws ecs update-service \
-            --cluster wecircle-cluster \
-            --service wecircle-backend \
-            --force-new-deployment \
-            --region us-east-1
