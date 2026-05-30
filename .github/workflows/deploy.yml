@@ -54,7 +54,11 @@ jobs:
           script: |
             cd /opt/wecircle
             sudo chown -R ec2-user:ec2-user /opt/wecircle
-            git pull origin main
+            # Force the box to match origin/main exactly. `git pull` fails on divergent
+            # branches (e.g. after a history rewrite) and silently leaves the box on stale
+            # code; fetch + hard reset is deterministic. .env etc. are gitignored, untouched.
+            git fetch origin main
+            git reset --hard origin/main
 
             cd dashboard/backend
 

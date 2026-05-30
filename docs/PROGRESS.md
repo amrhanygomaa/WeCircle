@@ -195,19 +195,25 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
 ---
 
 ## 📌 Known unknowns / open items
-- **R19 — Frontend deployment.** ✅ **FIXED (session 5)** — `deploy.yml`'s `deploy-backend-ec2`
-  job now also builds the frontend (with `NEXT_PUBLIC_*` injected from secrets) and runs it via
-  `pm2 start npm --name frontend -- start` on the same EC2 box (`next start` on **:3000**).
-  - **Reverse proxy still pending on the box.** The dashboard domain (`wecircle.helpers-tech.com`)
-    needs an nginx proxy → `127.0.0.1:3000` + TLS. Two helper scripts added to `infra/aws/`:
-    - `diagnose-proxy.sh` — read-only; reports what owns :80/:443, whether nginx exists, DNS, etc.
-    - `setup-frontend-proxy.sh` — idempotent; installs nginx (if missing), writes a **dedicated**
-      dashboard server block (never touches an existing API block), and runs certbot. **Aborts if
-      anything other than nginx owns :443**, and **skips certbot if DNS doesn't resolve to the box**
-      (leaving a working HTTP proxy + instructions). Run on the box:
-      `sudo ADMIN_EMAIL=you@helpers-tech.com bash /opt/wecircle/infra/aws/setup-frontend-proxy.sh`.
-  - Open question for the operator: how `api.wecircle.helpers-tech.com` currently terminates TLS
-    (existing nginx / CloudFront / ALB) — run `diagnose-proxy.sh` to confirm before/if needed.
+- **R19 — Frontend deployment.** ✅ **DONE & VERIFIED LIVE (session 5).** `deploy.yml`'s
+  `deploy-backend-ec2` job now also builds the frontend (`NEXT_PUBLIC_*` from secrets) and runs it
+  via `pm2 start npm --name frontend -- start` (`next start` on **:3000**).
+  - **Verified on the box (`diagnose-proxy.sh`, 2026-05-30):** nginx is active and was **already**
+    configured (manually, pre-session) as a reverse proxy with Certbot TLS for **both** domains:
+    `api.wecircle.helpers-tech.com` → `:5001` and `wecircle.helpers-tech.com` → `:3000`. Both DNS
+    A-records point at the box (52.90.177.139). pm2 runs `backend` + `frontend` online.
+  - **End-to-end confirmed from outside:** `https://wecircle.helpers-tech.com` → **200** (Next.js);
+    `https://api.wecircle.helpers-tech.com/api` → 404 (expected — no route on bare `/api`; helmet
+    headers confirm the backend answers behind the proxy).
+  - `infra/aws/setup-frontend-proxy.sh` is therefore **NOT needed** (proxy already exists & covers
+    both domains); kept only as a reference/disaster-recovery script. `diagnose-proxy.sh` is the
+    read-only health check.
+- **R20 — Deploy was building stale code (found & fixed, session 5).** The box's git had diverged
+  from origin after the session-4 history rewrite (`git filter-repo`), so `git pull origin main` in
+  `deploy.yml` failed on every deploy and the box kept building old code (`0326a9b`). Fixed two ways:
+  (a) `git reset --hard origin/main` on the box to re-sync; (b) `deploy.yml` now uses
+  `git fetch origin main && git reset --hard origin/main` instead of `git pull`, so the box always
+  matches the pushed commit deterministically (survives future history rewrites).
 - **R12 — build artifact blobs in git history** (~40 MB). Files are untracked/gitignored since
   Phase 1, but the blobs remain in old commits. Removal requires `git filter-repo` + force-push —
   executed in session 4 (see commits). Clone size reduced.
