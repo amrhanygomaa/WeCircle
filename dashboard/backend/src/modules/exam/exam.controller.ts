@@ -315,7 +315,8 @@ export const getStudentResults = asyncHandler(async (req: Request, res: Response
     schoolId = mobileSchoolId;
   }
 
-  const { studentId, subjectId, gradeId, classId } = req.query;
+  const studentId = (req.params.studentId as string) || (req.query.studentId as string);
+  const { subjectId, gradeId, classId } = req.query;
 
   if (!studentId) {
     return res.status(400).json({ success: false, message: "studentId is required" });
