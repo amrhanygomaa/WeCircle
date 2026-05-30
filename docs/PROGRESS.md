@@ -197,11 +197,17 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
 ## 📌 Known unknowns / open items
 - **R19 — Frontend deployment.** ✅ **FIXED (session 5)** — `deploy.yml`'s `deploy-backend-ec2`
   job now also builds the frontend (with `NEXT_PUBLIC_*` injected from secrets) and runs it via
-  `pm2 start npm --name frontend -- start` on the same EC2 box. **Assumption to verify on the box:**
-  `next start` listens on **:3000**; production must have a reverse proxy (nginx/ALB) routing the
-  dashboard domain → `localhost:3000`. If the old setup served static files from S3, that S3
-  origin is now stale and the proxy/DNS should point at the EC2 Next.js server instead. Confirm
-  on first deploy after this change.
+  `pm2 start npm --name frontend -- start` on the same EC2 box (`next start` on **:3000**).
+  - **Reverse proxy still pending on the box.** The dashboard domain (`wecircle.helpers-tech.com`)
+    needs an nginx proxy → `127.0.0.1:3000` + TLS. Two helper scripts added to `infra/aws/`:
+    - `diagnose-proxy.sh` — read-only; reports what owns :80/:443, whether nginx exists, DNS, etc.
+    - `setup-frontend-proxy.sh` — idempotent; installs nginx (if missing), writes a **dedicated**
+      dashboard server block (never touches an existing API block), and runs certbot. **Aborts if
+      anything other than nginx owns :443**, and **skips certbot if DNS doesn't resolve to the box**
+      (leaving a working HTTP proxy + instructions). Run on the box:
+      `sudo ADMIN_EMAIL=you@helpers-tech.com bash /opt/wecircle/infra/aws/setup-frontend-proxy.sh`.
+  - Open question for the operator: how `api.wecircle.helpers-tech.com` currently terminates TLS
+    (existing nginx / CloudFront / ALB) — run `diagnose-proxy.sh` to confirm before/if needed.
 - **R12 — build artifact blobs in git history** (~40 MB). Files are untracked/gitignored since
   Phase 1, but the blobs remain in old commits. Removal requires `git filter-repo` + force-push —
   executed in session 4 (see commits). Clone size reduced.
