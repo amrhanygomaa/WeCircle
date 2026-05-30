@@ -7,6 +7,7 @@ import { env } from "./config/env";
 import { errorHandler } from "./core/http/middlewares/errorHandler";
 import { initWebSocket } from "./config/websocket";
 import { startOverdueChecker } from "./cron/checkOverdueInvoices";
+import { isPushEnabled } from "./services/push.service";
 import routes from "./routes";
 
 const app = express();
@@ -42,4 +43,5 @@ httpServer.listen(env.port, () => {
   // Single-instance overdue-invoice checker (hourly). Disable via DISABLE_INPROCESS_CRON=true
   // when an external scheduler (EventBridge → /api/internal/cron/check-overdue) takes over.
   if (env.inProcessCron) startOverdueChecker();
+  isPushEnabled(); // eager-init: logs whether FCM push is enabled or disabled at startup
 });
