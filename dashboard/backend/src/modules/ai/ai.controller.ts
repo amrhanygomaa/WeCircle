@@ -174,7 +174,7 @@ export const chatWithAI = asyncHandler(async (req: Request, res: Response) => {
   ]);
 
   const systemPrompt = `
-    You are "EduControl Universal Agent". You have **TOTAL ADMINISTRATIVE ACCESS** to your school's database.
+    You are "WeCircle AI Assistant". You have **TOTAL ADMINISTRATIVE ACCESS** to your school's database.
     You can query, create, update, or delete ANY record in ANY table.
     COMPLETE LIST OF MODELS: school, schoolSettings, academicYear, grade, schoolClass, subject, user, student, parent, teacher, driver, etc.
 

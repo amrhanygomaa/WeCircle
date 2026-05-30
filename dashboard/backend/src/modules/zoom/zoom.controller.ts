@@ -65,7 +65,7 @@ export const createZoomMeeting = asyncHandler(async (req: Request, res: Response
         type: type, // 2 for scheduled
         start_time: startTime, // ISO format
         duration: duration || 40,
-        agenda: agenda || "EduControl Generated Meeting",
+        agenda: agenda || "WeCircle Generated Meeting",
         settings: {
           host_video: true,
           participant_video: true,

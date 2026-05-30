@@ -59,23 +59,15 @@ aws ecs create-cluster --cluster-name wecircle-cluster
 # Store each secret individually
 aws secretsmanager create-secret \
   --name wecircle/DATABASE_URL \
-  --secret-string "your_database_url"
+  --secret-string "postgresql://user:pass@your-rds-host:5432/wecircle"
 
 aws secretsmanager create-secret \
-  --name wecircle/SUPABASE_URL \
-  --secret-string "https://your-project.supabase.co"
+  --name wecircle/JWT_SECRET \
+  --secret-string "$(openssl rand -base64 48)"
 
 aws secretsmanager create-secret \
-  --name wecircle/SUPABASE_ANON_KEY \
-  --secret-string "your_anon_key"
-
-aws secretsmanager create-secret \
-  --name wecircle/SUPABASE_SERVICE_ROLE_KEY \
-  --secret-string "your_service_role_key"
-
-aws secretsmanager create-secret \
-  --name wecircle/SUPABASE_JWT_SECRET \
-  --secret-string "your_jwt_secret"
+  --name wecircle/GOOGLE_AI_API_KEY \
+  --secret-string "your_gemini_api_key"
 
 # Store non-sensitive config in Parameter Store
 aws ssm put-parameter \
@@ -87,16 +79,33 @@ aws ssm put-parameter \
   --name /wecircle/SUPER_ADMIN_EMAIL \
   --value "admin@your-domain.com" \
   --type String
+
+aws ssm put-parameter \
+  --name /wecircle/COGNITO_USER_POOL_ID \
+  --value "us-east-1_XXXXXXXXX" \
+  --type String
+
+aws ssm put-parameter \
+  --name /wecircle/COGNITO_CLIENT_ID \
+  --value "your_cognito_client_id" \
+  --type String
+
+aws ssm put-parameter \
+  --name /wecircle/AWS_S3_BUCKET_NAME \
+  --value "wecircle-storage-XXXXXXXXXXXX" \
+  --type String
 ```
 
 ### Step 4: Add GitHub Secrets
 Go to `Settings > Secrets and variables > Actions` in your GitHub repo:
 ```
-AWS_ACCESS_KEY_ID        ← IAM user access key
+AWS_ACCESS_KEY_ID        ← IAM user access key (or use OIDC — see Phase 4)
 AWS_SECRET_ACCESS_KEY    ← IAM user secret key
-VITE_SUPABASE_URL        ← Supabase project URL
-VITE_SUPABASE_ANON_KEY   ← Supabase anon key
-BACKEND_API_URL          ← https://api.your-domain.com
+EC2_HOST                 ← Production EC2 IP / hostname
+EC2_SSH_KEY              ← Private key for ec2-user
+JWT_SECRET               ← Same value stored in Secrets Manager
+COGNITO_USER_POOL_ID     ← Cognito pool ID
+COGNITO_CLIENT_ID        ← Cognito app client ID
 ```
 
 ### Step 5: Deploy via GitHub Actions

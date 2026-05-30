@@ -11,8 +11,8 @@ env:
     FRONTEND_REPO_NAME: "wecircle-frontend"
   parameter-store:
     FRONTEND_URL: "/wecircle/FRONTEND_URL"
-    SUPABASE_URL: "/wecircle/SUPABASE_URL"
-    SUPABASE_ANON_KEY: "/wecircle/SUPABASE_ANON_KEY"
+    COGNITO_USER_POOL_ID: "/wecircle/COGNITO_USER_POOL_ID"
+    COGNITO_CLIENT_ID: "/wecircle/COGNITO_CLIENT_ID"
 
 phases:
   pre_build:
@@ -32,10 +32,11 @@ phases:
       - docker tag $BACKEND_REPO_NAME:$IMAGE_TAG $ECR_URI/$BACKEND_REPO_NAME:latest
 
       - echo "Building Frontend image..."
-      - docker build 
-          --build-arg NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL
-          --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+      - docker build
           --build-arg NEXT_PUBLIC_API_URL=$FRONTEND_URL/api
+          --build-arg NEXT_PUBLIC_AWS_REGION=us-east-1
+          --build-arg NEXT_PUBLIC_COGNITO_USER_POOL_ID=$COGNITO_USER_POOL_ID
+          --build-arg NEXT_PUBLIC_COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID
           -t $FRONTEND_REPO_NAME:$IMAGE_TAG ./dashboard/frontend
       - docker tag $FRONTEND_REPO_NAME:$IMAGE_TAG $ECR_URI/$FRONTEND_REPO_NAME:$IMAGE_TAG
       - docker tag $FRONTEND_REPO_NAME:$IMAGE_TAG $ECR_URI/$FRONTEND_REPO_NAME:latest

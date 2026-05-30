@@ -360,7 +360,7 @@ export const convertToStudent = asyncHandler(async (req: Request, res: Response)
           if (!isNaN(lastSerial)) nextSerial = lastSerial + 1;
         }
         const studentCode = `22${String(nextSerial).padStart(4, "0")}`;
-        const tempEmail = `${schoolCode}-${studentCode}@EduControl.com`;
+        const tempEmail = `${schoolCode}-${studentCode}@wecircle.app`;
 
         const studentCount = await tx.student.count({ where: { schoolId: schoolId as string } });
 

@@ -96,8 +96,10 @@ All 5 workstreams complete; deployed to production via CI on 2026-05-30.
 ### 🟡 Medium (cleanliness / migration debt)
 - **R11 — ~22 `fix_*.js` band-aid codemods** ✅ **FIXED (2026-05-30)** — all 23 scripts deleted after
   confirming effects are baked in. `forgot-password` i18n keys restored as a side-fix.
-- **R12 — Committed build artifacts:** `frontend_build.zip` (17 MB), `dashboard/frontend/frontend.zip`
-  (8 MB), `infra/lambda/auto-confirm/auto-confirm.zip`. Remove from git; add to `.gitignore`.
+- **R12 — Committed build artifacts:** ✅ **Tracking clean (2026-05-30)** — files untracked and gitignored
+  since Phase 1; local copies deleted. ~40 MB of blob objects remain in old commits (history rewrite
+  via `git filter-repo` + force-push would remove them but needs explicit sign-off — CLAUDE.md prohibits
+  rewriting shared history without approval).
 - **R13 — Vite/react-router leftovers** in the frontend (`vite`, `@vitejs/plugin-react`,
   `react-router-dom`, `src/core/routing/*`, `vite.svg`). Dead since the Next conversion.
 - **R14 — Stale config drift:** infra `README.md` still diagrams "Supabase (DB/Auth)" and references

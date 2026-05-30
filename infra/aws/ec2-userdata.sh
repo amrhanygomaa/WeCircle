@@ -11,8 +11,8 @@ date
 # Update system
 dnf update -y
 
-# Install Node.js 20 LTS
-curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+# Install Node.js 24 LTS
+curl -fsSL https://rpm.nodesource.com/setup_24.x | bash -
 dnf install -y nodejs git
 
 # Install PM2 for process management
@@ -47,12 +47,15 @@ cat > .env <<EOF
 NODE_ENV=production
 PORT=5001
 DATABASE_URL=$(get_param /wecircle/DATABASE_URL)
-SUPABASE_URL=$(get_param /wecircle/SUPABASE_URL)
-SUPABASE_ANON_KEY=$(get_param /wecircle/SUPABASE_ANON_KEY)
-SUPABASE_SERVICE_ROLE_KEY=$(get_param /wecircle/SUPABASE_SERVICE_ROLE_KEY)
-SUPABASE_JWT_SECRET=$(get_param /wecircle/SUPABASE_JWT_SECRET)
+JWT_SECRET=$(get_param /wecircle/JWT_SECRET)
 FRONTEND_URL=$(get_param /wecircle/FRONTEND_URL)
+ALLOWED_ORIGINS=$(get_param /wecircle/FRONTEND_URL)
 SUPER_ADMIN_EMAIL=$(get_param /wecircle/SUPER_ADMIN_EMAIL)
+AWS_REGION=us-east-1
+AWS_S3_BUCKET_NAME=$(get_param /wecircle/AWS_S3_BUCKET_NAME)
+COGNITO_USER_POOL_ID=$(get_param /wecircle/COGNITO_USER_POOL_ID)
+COGNITO_CLIENT_ID=$(get_param /wecircle/COGNITO_CLIENT_ID)
+GOOGLE_AI_API_KEY=$(get_param /wecircle/GOOGLE_AI_API_KEY)
 EOF
 
 # Generate Prisma client

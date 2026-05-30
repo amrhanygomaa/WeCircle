@@ -25,7 +25,7 @@ app.use("/api", routes);
 
 app.get("/", (_req, res) => {
   res.json({ 
-    message: "EduControl API is running", 
+    message: "WeCircle API is running", 
     version: "2.0.0",
     docs: "/api/health",
     features: ["multi-tenant", "websocket", "real-time"]

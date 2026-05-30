@@ -22,13 +22,14 @@
         { "name": "PORT",          "value": "5001" }
       ],
       "secrets": [
-        { "name": "DATABASE_URL",                "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:wecircle/DATABASE_URL" },
-        { "name": "SUPABASE_URL",                "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:wecircle/SUPABASE_URL" },
-        { "name": "SUPABASE_ANON_KEY",           "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:wecircle/SUPABASE_ANON_KEY" },
-        { "name": "SUPABASE_SERVICE_ROLE_KEY",   "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:wecircle/SUPABASE_SERVICE_ROLE_KEY" },
-        { "name": "SUPABASE_JWT_SECRET",         "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:wecircle/SUPABASE_JWT_SECRET" },
-        { "name": "FRONTEND_URL",                "valueFrom": "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/wecircle/FRONTEND_URL" },
-        { "name": "SUPER_ADMIN_EMAIL",           "valueFrom": "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/wecircle/SUPER_ADMIN_EMAIL" }
+        { "name": "DATABASE_URL",            "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:wecircle/DATABASE_URL" },
+        { "name": "JWT_SECRET",              "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:wecircle/JWT_SECRET" },
+        { "name": "COGNITO_USER_POOL_ID",    "valueFrom": "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/wecircle/COGNITO_USER_POOL_ID" },
+        { "name": "COGNITO_CLIENT_ID",       "valueFrom": "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/wecircle/COGNITO_CLIENT_ID" },
+        { "name": "AWS_S3_BUCKET_NAME",      "valueFrom": "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/wecircle/AWS_S3_BUCKET_NAME" },
+        { "name": "GOOGLE_AI_API_KEY",       "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:wecircle/GOOGLE_AI_API_KEY" },
+        { "name": "FRONTEND_URL",            "valueFrom": "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/wecircle/FRONTEND_URL" },
+        { "name": "SUPER_ADMIN_EMAIL",       "valueFrom": "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/wecircle/SUPER_ADMIN_EMAIL" }
       ],
       "logConfiguration": {
         "logDriver": "awslogs",
